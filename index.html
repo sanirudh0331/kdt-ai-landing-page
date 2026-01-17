@@ -490,7 +490,7 @@
         </div>
     </section>
 
-    <!-- Investor Sentiment Section -->
+    <!-- INVESTOR SENTIMENT SECTION - HIDDEN (uncomment to re-enable)
     <section class="pb-8 sm:pb-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
             <div class="mb-6">
@@ -498,7 +498,6 @@
                 <p class="text-sm text-dark-500 dark:text-dark-400">Biotech KOL chatter and market mood</p>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Twitter KOL Feed -->
                 <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden">
                     <div class="px-4 py-3 border-b border-dark-200 dark:border-dark-800 flex items-center gap-2">
                         <svg class="w-5 h-5 text-[#1DA1F2]" fill="currentColor" viewBox="0 0 24 24">
@@ -507,33 +506,15 @@
                         <h3 class="font-semibold text-sm">Biotech KOL Feed</h3>
                     </div>
                     <div class="twitter-timeline-container p-4" id="twitter-feed">
-                        <!-- Option A: Link to private list (requires login) -->
                         <div class="flex flex-col items-center justify-center h-full py-8">
                             <svg class="w-12 h-12 text-[#1DA1F2] mb-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                             </svg>
                             <p class="text-sm text-dark-500 dark:text-dark-400 mb-4 text-center">Biotech KOL feed<br><span class="text-xs">(Private list - requires X login)</span></p>
-                            <a href="https://x.com/i/lists/2012593946535362865"
-                               target="_blank"
-                               rel="noopener"
-                               class="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white text-sm font-medium rounded-full transition-colors">
-                                Open KOL Feed →
-                            </a>
+                            <a href="https://x.com/i/lists/2012593946535362865" target="_blank" rel="noopener" class="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white text-sm font-medium rounded-full transition-colors">Open KOL Feed →</a>
                         </div>
-
-                        <!-- Option B: Public search embed (uncomment to use instead)
-                        <a class="twitter-timeline"
-                           data-height="420"
-                           data-theme="dark"
-                           data-chrome="noheader nofooter transparent"
-                           href="https://twitter.com/search?q=(biotech OR %24XBI OR %24MRNA OR pharma) (FDA OR catalyst OR PDUFA OR data)&f=live">
-                           Biotech Twitter Feed
-                        </a>
-                        -->
                     </div>
                 </div>
-
-                <!-- StockTwits Sentiment -->
                 <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden">
                     <div class="px-4 py-3 border-b border-dark-200 dark:border-dark-800 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -545,27 +526,14 @@
                         <span id="sentiment-refresh-time" class="text-xs text-dark-400">Loading...</span>
                     </div>
                     <div class="p-3 max-h-[420px] overflow-y-auto">
-                        <div id="sentiment-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                            <!-- Loading skeletons -->
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
-                        </div>
+                        <div id="sentiment-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
                         <p class="text-xs text-dark-400 mt-3 text-center" id="sentiment-footer">Loading sentiment data...</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    END INVESTOR SENTIMENT SECTION -->
 
     <!-- FDA Calendar Widget -->
     <section class="pb-8 sm:pb-12">
@@ -973,7 +941,7 @@
             tickerWrapper.classList.toggle('ticker-paused');
         }, { passive: true });
 
-        // StockTwits Sentiment - Comprehensive Biotech List
+        /* STOCKTWITS SENTIMENT - DISABLED (uncomment to re-enable)
         const SENTIMENT_TICKERS = [
             // === ETFs ===
             'XBI',    // SPDR S&P Biotech ETF
@@ -1286,18 +1254,11 @@
         }
 
         // Load sentiment on page load
-        fetchStockTwitsSentiment();
+        // fetchStockTwitsSentiment();
 
         // Refresh sentiment every 5 minutes
-        setInterval(fetchStockTwitsSentiment, 5 * 60 * 1000);
-
-        // Twitter widget script (loads async)
-        (function() {
-            const twitterScript = document.createElement('script');
-            twitterScript.src = 'https://platform.twitter.com/widgets.js';
-            twitterScript.async = true;
-            document.body.appendChild(twitterScript);
-        })();
+        // setInterval(fetchStockTwitsSentiment, 5 * 60 * 1000);
+        END STOCKTWITS SENTIMENT */
     </script>
 
     <!-- Cloudflare Web Analytics -->
