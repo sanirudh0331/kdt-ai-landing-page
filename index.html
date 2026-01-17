@@ -251,6 +251,31 @@
         .ticker-paused .ticker-content {
             animation-play-state: paused;
         }
+
+        /* Typewriter effect */
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid;
+            border-image: linear-gradient(to bottom, #6366f1, #a855f7) 1;
+            width: 0;
+            animation: typewriter 2s steps(20) 0.5s forwards, blink 0.7s step-end infinite;
+        }
+        .typewriter.done {
+            border-right: none;
+            animation: none;
+            width: auto;
+        }
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        .typewriter-container {
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-50 min-h-screen antialiased">
@@ -289,7 +314,37 @@
             // Check if already authenticated
             if (sessionStorage.getItem('kdt-auth') === 'true') {
                 gate.style.display = 'none';
+                // Skip animation if already logged in (not fresh login)
+                if (sessionStorage.getItem('kdt-just-logged-in') !== 'true') {
+                    skipTypewriterAnimation();
+                } else {
+                    startTypewriterAnimation();
+                    sessionStorage.removeItem('kdt-just-logged-in');
+                }
                 return;
+            }
+
+            function startTypewriterAnimation() {
+                const heroText = document.getElementById('hero-text');
+                const heroSubtitle = document.getElementById('hero-subtitle');
+                if (heroText) {
+                    heroText.classList.add('typewriter');
+                    // Show subtitle after typewriter finishes
+                    setTimeout(() => {
+                        heroText.classList.add('done');
+                        if (heroSubtitle) heroSubtitle.style.opacity = '1';
+                    }, 2800);
+                }
+            }
+
+            function skipTypewriterAnimation() {
+                const heroText = document.getElementById('hero-text');
+                const heroSubtitle = document.getElementById('hero-subtitle');
+                if (heroText) {
+                    heroText.classList.remove('typewriter');
+                    heroText.classList.add('done');
+                }
+                if (heroSubtitle) heroSubtitle.style.opacity = '1';
             }
 
             form.addEventListener('submit', (e) => {
@@ -299,7 +354,10 @@
 
                 if (username === 'kdtai' && password === 'kdtftw') {
                     sessionStorage.setItem('kdt-auth', 'true');
+                    sessionStorage.setItem('kdt-just-logged-in', 'true');
                     gate.style.display = 'none';
+                    // Trigger typewriter animation
+                    startTypewriterAnimation();
                 } else {
                     errorMsg.classList.remove('hidden');
                     document.getElementById('login-password').value = '';
@@ -339,9 +397,11 @@
         <div class="particles" id="particles"></div>
         <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10">
             <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
-                Welcome to <span class="hero-gradient">KdT AI</span>
+                <span class="typewriter-container">
+                    <span id="hero-text" class="typewriter">Welcome to <span class="hero-gradient">KdT AI</span></span>
+                </span>
             </h1>
-            <p class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto">
+            <p id="hero-subtitle" class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto opacity-0 transition-opacity duration-500">
                 Your AI toolkit for venture
             </p>
         </div>
@@ -487,6 +547,56 @@
                     <div id="tradingview-chart" style="height: 100%;"></div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Clinical Trials Section -->
+    <section class="pb-8 sm:pb-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Clinical Trials Tracker</h2>
+                    <p class="text-sm text-dark-500 dark:text-dark-400">Recent Phase 2/3 trials and results from ClinicalTrials.gov</p>
+                </div>
+                <a href="https://clinicaltrials.gov/search?aggFilters=phase:2%203,status:rec%20act%20not&viewType=Table" target="_blank" rel="noopener"
+                   class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    View All Trials →
+                </a>
+            </div>
+            <!-- Filter tabs -->
+            <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                <button class="trials-tab active px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-500 text-white" data-filter="recent">
+                    Recently Posted
+                </button>
+                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="results">
+                    Results Available
+                </button>
+                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase3">
+                    Phase 3
+                </button>
+            </div>
+            <div id="trials-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Loading skeletons -->
+                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                    <div class="h-3 w-16 skeleton rounded mb-2"></div>
+                    <div class="h-4 w-full skeleton rounded mb-2"></div>
+                    <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
+                    <div class="h-3 w-24 skeleton rounded"></div>
+                </div>
+                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                    <div class="h-3 w-16 skeleton rounded mb-2"></div>
+                    <div class="h-4 w-full skeleton rounded mb-2"></div>
+                    <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
+                    <div class="h-3 w-24 skeleton rounded"></div>
+                </div>
+                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hidden sm:block">
+                    <div class="h-3 w-16 skeleton rounded mb-2"></div>
+                    <div class="h-4 w-full skeleton rounded mb-2"></div>
+                    <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
+                    <div class="h-3 w-24 skeleton rounded"></div>
+                </div>
+            </div>
+            <p id="trials-footer" class="text-xs text-dark-400 mt-4 text-center">Loading trials from ClinicalTrials.gov...</p>
         </div>
     </section>
 
@@ -931,6 +1041,128 @@
 
         // Load FDA calendar
         loadFDACalendar();
+
+        // Clinical Trials
+        let trialsCache = { recent: null, results: null, phase3: null };
+
+        async function fetchClinicalTrials(filter = 'recent') {
+            const trialsGrid = document.getElementById('trials-grid');
+            const trialsFooter = document.getElementById('trials-footer');
+
+            // Use cache if available
+            if (trialsCache[filter]) {
+                renderTrials(trialsCache[filter], filter);
+                return;
+            }
+
+            trialsGrid.innerHTML = `
+                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                    <div class="h-3 w-16 skeleton rounded mb-2"></div>
+                    <div class="h-4 w-full skeleton rounded mb-2"></div>
+                    <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
+                    <div class="h-3 w-24 skeleton rounded"></div>
+                </div>`.repeat(3);
+
+            try {
+                // Build query based on filter
+                let queryParams = 'query.term=biotech OR oncology OR gene therapy&pageSize=12&sort=LastUpdatePostDate:desc';
+
+                if (filter === 'recent') {
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:2 3,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
+                } else if (filter === 'results') {
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:2 3,results:with&pageSize=12&sort=ResultsFirstPostDate:desc';
+                } else if (filter === 'phase3') {
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:3,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
+                }
+
+                const response = await fetch(`https://clinicaltrials.gov/api/v2/studies?${queryParams}`, {
+                    signal: AbortSignal.timeout(10000)
+                });
+
+                if (!response.ok) throw new Error('API error');
+
+                const data = await response.json();
+                const trials = data.studies || [];
+
+                trialsCache[filter] = trials;
+                renderTrials(trials, filter);
+
+            } catch (error) {
+                console.error('Failed to fetch clinical trials:', error);
+                trialsGrid.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">Unable to load clinical trials. Try refreshing.</div>';
+                trialsFooter.textContent = '';
+            }
+        }
+
+        function renderTrials(trials, filter) {
+            const trialsGrid = document.getElementById('trials-grid');
+            const trialsFooter = document.getElementById('trials-footer');
+
+            if (!trials || trials.length === 0) {
+                trialsGrid.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">No trials found</div>';
+                trialsFooter.textContent = '';
+                return;
+            }
+
+            trialsGrid.innerHTML = trials.slice(0, 9).map(study => {
+                const protocol = study.protocolSection || {};
+                const id = protocol.identificationModule || {};
+                const status = protocol.statusModule || {};
+                const sponsor = protocol.sponsorCollaboratorsModule?.leadSponsor?.name || 'Unknown';
+                const phase = protocol.designModule?.phases?.[0] || 'N/A';
+                const conditions = protocol.conditionsModule?.conditions?.slice(0, 2).join(', ') || 'N/A';
+
+                const nctId = id.nctId || '';
+                const title = id.briefTitle || 'Untitled Study';
+                const shortTitle = title.length > 80 ? title.substring(0, 80) + '...' : title;
+
+                const overallStatus = status.overallStatus || '';
+                const statusColor = overallStatus === 'RECRUITING' ? 'text-green-500' :
+                                   overallStatus === 'ACTIVE_NOT_RECRUITING' ? 'text-yellow-500' :
+                                   overallStatus === 'COMPLETED' ? 'text-blue-500' : 'text-dark-400';
+                const statusLabel = overallStatus.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+
+                const phaseColor = phase.includes('3') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
+                                  phase.includes('2') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                  'bg-dark-100 text-dark-600 dark:bg-dark-800 dark:text-dark-400';
+
+                const hasResults = study.hasResults;
+
+                return `
+                    <a href="https://clinicaltrials.gov/study/${nctId}" target="_blank" rel="noopener"
+                       class="block p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all group">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2 py-0.5 text-xs font-medium rounded ${phaseColor}">${phase.replace('PHASE', 'Phase ')}</span>
+                            ${hasResults ? '<span class="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Results</span>' : ''}
+                        </div>
+                        <h4 class="font-medium text-sm mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">${shortTitle}</h4>
+                        <p class="text-xs text-dark-500 dark:text-dark-400 mb-2">${sponsor}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-dark-400">${conditions}</span>
+                            <span class="text-xs font-medium ${statusColor}">${statusLabel}</span>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+
+            trialsFooter.textContent = `${trials.length} trials · ClinicalTrials.gov · Click to view details`;
+        }
+
+        // Tab switching
+        document.querySelectorAll('.trials-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.trials-tab').forEach(t => {
+                    t.classList.remove('active', 'bg-indigo-500', 'text-white');
+                    t.classList.add('bg-dark-100', 'dark:bg-dark-800', 'text-dark-600', 'dark:text-dark-300');
+                });
+                tab.classList.add('active', 'bg-indigo-500', 'text-white');
+                tab.classList.remove('bg-dark-100', 'dark:bg-dark-800', 'text-dark-600', 'dark:text-dark-300');
+                fetchClinicalTrials(tab.dataset.filter);
+            });
+        });
+
+        // Load trials on page load
+        fetchClinicalTrials('recent');
 
         // Ticker pause on tap (mobile)
         const tickerWrapper = document.getElementById('ticker-wrapper');
