@@ -507,16 +507,29 @@
                         <h3 class="font-semibold text-sm">Biotech KOL Feed</h3>
                     </div>
                     <div class="twitter-timeline-container p-4" id="twitter-feed">
+                        <!-- Option A: Link to private list (requires login) -->
+                        <div class="flex flex-col items-center justify-center h-full py-8">
+                            <svg class="w-12 h-12 text-[#1DA1F2] mb-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            <p class="text-sm text-dark-500 dark:text-dark-400 mb-4 text-center">Biotech KOL feed<br><span class="text-xs">(Private list - requires X login)</span></p>
+                            <a href="https://x.com/i/lists/2012593946535362865"
+                               target="_blank"
+                               rel="noopener"
+                               class="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white text-sm font-medium rounded-full transition-colors">
+                                Open KOL Feed →
+                            </a>
+                        </div>
+
+                        <!-- Option B: Public search embed (uncomment to use instead)
                         <a class="twitter-timeline"
                            data-height="420"
                            data-theme="dark"
                            data-chrome="noheader nofooter transparent"
-                           href="https://twitter.com/i/lists/2012593946535362865">
-                           Loading biotech KOL feed...
+                           href="https://twitter.com/search?q=(biotech OR %24XBI OR %24MRNA OR pharma) (FDA OR catalyst OR PDUFA OR data)&f=live">
+                           Biotech Twitter Feed
                         </a>
-                        <noscript>
-                            <p class="text-sm text-dark-400 text-center py-8">Enable JavaScript to view Twitter feed</p>
-                        </noscript>
+                        -->
                     </div>
                 </div>
 
@@ -1121,19 +1134,19 @@
             const refreshTimeEl = document.getElementById('sentiment-refresh-time');
             const footerEl = document.getElementById('sentiment-footer');
 
-            // Sort: bullish first, then neutral, then bearish
+            // Sort: bullish first, then neutral, then bearish, errors last
             const sortOrder = { bullish: 0, neutral: 1, bearish: 2, error: 3 };
-            results.sort((a, b) => {
+            const sorted = [...results].sort((a, b) => {
                 const orderA = a.error ? 3 : sortOrder[a.sentiment];
                 const orderB = b.error ? 3 : sortOrder[b.sentiment];
                 if (orderA !== orderB) return orderA - orderB;
                 return (b.bullishPct || 0) - (a.bullishPct || 0);
             });
 
-            sentimentGrid.innerHTML = results.map(item => {
+            sentimentGrid.innerHTML = sorted.map(item => {
                 if (item.error) {
                     return `
-                        <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg opacity-50">
+                        <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg opacity-40">
                             <div class="font-semibold text-xs">${item.ticker}</div>
                             <div class="text-xs text-dark-400">--</div>
                         </div>
@@ -1142,12 +1155,13 @@
 
                 const icon = item.sentiment === 'bullish' ? '🟢' :
                             item.sentiment === 'bearish' ? '🔴' : '🟡';
+                const activityIcon = item.activity === 'hot' ? '🔥' : '';
 
                 return `
                     <a href="https://stocktwits.com/symbol/${item.ticker}" target="_blank" rel="noopener"
                        class="block p-2 bg-dark-50 dark:bg-dark-800 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors group">
                         <div class="flex items-center justify-between gap-1">
-                            <span class="font-semibold text-xs group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${item.ticker}</span>
+                            <span class="font-semibold text-xs group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${item.ticker}${activityIcon}</span>
                             <span class="text-xs">${icon} ${item.bullishPct}%</span>
                         </div>
                     </a>
@@ -1156,60 +1170,115 @@
 
             // Update refresh time and footer
             const now = new Date();
-            refreshTimeEl.textContent = `Updated ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-            if (footerEl) footerEl.textContent = `${results.filter(r => !r.error).length} tickers · StockTwits API · Refreshes every 5 min`;
+            const loadedCount = results.filter(r => !r.error).length;
+            refreshTimeEl.textContent = `${loadedCount}/${SENTIMENT_TICKERS.length} loaded`;
+            if (footerEl) {
+                const hotCount = results.filter(r => r.activity === 'hot').length;
+                footerEl.textContent = hotCount > 0
+                    ? `${loadedCount} tickers · ${hotCount} trending 🔥 · Refreshes every 5 min`
+                    : `${loadedCount} tickers · StockTwits · Refreshes every 5 min`;
+            }
         }
 
         async function fetchStockTwitsSentiment() {
-            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const sentimentGrid = document.getElementById('sentiment-grid');
             const results = [];
 
-            for (const ticker of SENTIMENT_TICKERS) {
-                try {
-                    const url = `https://api.stocktwits.com/api/2/streams/symbol/${ticker}.json`;
-                    const response = await fetch(corsProxy + encodeURIComponent(url));
+            // Use multiple CORS proxies as fallbacks
+            const corsProxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?',
+                'https://api.codetabs.com/v1/proxy?quest='
+            ];
 
-                    if (!response.ok) {
-                        results.push({ ticker, error: true });
-                        continue;
-                    }
+            // Process in batches to avoid rate limiting
+            const batchSize = 10;
+            const delayBetweenBatches = 500; // ms
 
-                    const data = await response.json();
+            for (let i = 0; i < SENTIMENT_TICKERS.length; i += batchSize) {
+                const batch = SENTIMENT_TICKERS.slice(i, i + batchSize);
 
-                    // Calculate sentiment from messages
-                    const messages = data.messages || [];
-                    let bullish = 0;
-                    let bearish = 0;
+                const batchPromises = batch.map(async (ticker) => {
+                    for (const proxy of corsProxies) {
+                        try {
+                            const url = `https://api.stocktwits.com/api/2/streams/symbol/${ticker}.json`;
+                            const response = await fetch(proxy + encodeURIComponent(url), {
+                                signal: AbortSignal.timeout(8000)
+                            });
 
-                    messages.forEach(msg => {
-                        if (msg.entities && msg.entities.sentiment) {
-                            if (msg.entities.sentiment.basic === 'Bullish') bullish++;
-                            if (msg.entities.sentiment.basic === 'Bearish') bearish++;
+                            if (!response.ok) continue;
+
+                            const data = await response.json();
+                            const messages = data.messages || [];
+
+                            // Enhanced sentiment calculation
+                            let bullishScore = 0;
+                            let bearishScore = 0;
+                            let totalEngagement = 0;
+                            const now = Date.now();
+                            const fourHoursAgo = now - (4 * 60 * 60 * 1000);
+
+                            messages.forEach(msg => {
+                                if (!msg.entities?.sentiment?.basic) return;
+
+                                const msgTime = new Date(msg.created_at).getTime();
+                                const isRecent = msgTime > fourHoursAgo;
+
+                                // Weight factors
+                                const recencyWeight = isRecent ? 1.5 : 1;
+                                const followerWeight = Math.min(Math.log10(msg.user?.followers || 1) / 3, 2);
+                                const engagementWeight = 1 + ((msg.likes?.total || 0) + (msg.reshares?.total || 0)) * 0.1;
+
+                                const weight = recencyWeight * followerWeight * engagementWeight;
+                                totalEngagement += (msg.likes?.total || 0);
+
+                                if (msg.entities.sentiment.basic === 'Bullish') {
+                                    bullishScore += weight;
+                                } else if (msg.entities.sentiment.basic === 'Bearish') {
+                                    bearishScore += weight;
+                                }
+                            });
+
+                            const totalScore = bullishScore + bearishScore;
+                            const bullishPct = totalScore > 0 ? Math.round((bullishScore / totalScore) * 100) : 50;
+
+                            let sentiment = 'neutral';
+                            if (bullishPct > 60) sentiment = 'bullish';
+                            else if (bullishPct < 40) sentiment = 'bearish';
+
+                            // Determine activity level
+                            const msgCount = messages.length;
+                            const activity = msgCount > 25 ? 'hot' : msgCount > 10 ? 'active' : 'quiet';
+
+                            return {
+                                ticker,
+                                bullishPct,
+                                sentiment,
+                                messageCount: msgCount,
+                                activity,
+                                engagement: totalEngagement
+                            };
+                        } catch (error) {
+                            continue; // Try next proxy
                         }
-                    });
+                    }
+                    return { ticker, error: true };
+                });
 
-                    const total = bullish + bearish;
-                    const bullishPct = total > 0 ? Math.round((bullish / total) * 100) : 50;
+                const batchResults = await Promise.all(batchPromises);
+                results.push(...batchResults);
 
-                    let sentiment = 'neutral';
-                    if (bullishPct > 60) sentiment = 'bullish';
-                    else if (bullishPct < 40) sentiment = 'bearish';
+                // Update UI progressively
+                renderSentimentGrid(results);
 
-                    results.push({
-                        ticker,
-                        bullishPct,
-                        sentiment,
-                        messageCount: messages.length
-                    });
-
-                } catch (error) {
-                    console.warn(`Failed to fetch sentiment for ${ticker}:`, error);
-                    results.push({ ticker, error: true });
+                // Delay between batches
+                if (i + batchSize < SENTIMENT_TICKERS.length) {
+                    await new Promise(r => setTimeout(r, delayBetweenBatches));
                 }
             }
 
-            if (results.length === 0) {
-                document.getElementById('sentiment-grid').innerHTML = '<div class="col-span-full text-center py-4 text-dark-400">Unable to load sentiment data</div>';
+            if (results.filter(r => !r.error).length === 0) {
+                sentimentGrid.innerHTML = '<div class="col-span-full text-center py-4 text-dark-400">Unable to load sentiment data. Try refreshing.</div>';
                 return;
             }
 
