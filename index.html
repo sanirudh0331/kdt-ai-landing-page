@@ -295,33 +295,9 @@
             <div class="flex items-center gap-4">
                 <span class="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-red-500 text-white rounded">LIVE</span>
                 <div class="ticker-wrapper flex-1">
-                    <div class="ticker-content text-sm text-dark-600 dark:text-dark-400">
+                    <div id="news-ticker" class="ticker-content text-sm text-dark-600 dark:text-dark-400">
                         <span class="inline-flex items-center gap-6">
-                            <span>FDA approves Eli Lilly's new Alzheimer's drug for broader patient population</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>Moderna announces Phase 3 results for RSV vaccine candidate</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>Pfizer acquires oncology biotech for $2.3B</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>BioNTech reports positive data from cancer vaccine trial</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>Regeneron expands collaboration with Sanofi</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>XBI up 2.3% on sector optimism</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <!-- Duplicate for seamless loop -->
-                            <span>FDA approves Eli Lilly's new Alzheimer's drug for broader patient population</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>Moderna announces Phase 3 results for RSV vaccine candidate</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>Pfizer acquires oncology biotech for $2.3B</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>BioNTech reports positive data from cancer vaccine trial</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>Regeneron expands collaboration with Sanofi</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
-                            <span>XBI up 2.3% on sector optimism</span>
-                            <span class="text-dark-300 dark:text-dark-600">|</span>
+                            <span class="text-dark-400">Loading biotech news...</span>
                         </span>
                     </div>
                 </div>
@@ -605,6 +581,71 @@
         setTimeout(() => {
             chartSkeleton.style.display = 'none';
         }, 3000);
+
+        // Fetch biotech news from RSS feeds
+        async function fetchBiotechNews() {
+            const rssFeeds = [
+                'https://www.fiercebiotech.com/rss/xml',
+                'https://www.biopharmadive.com/feeds/news/',
+                'https://endpts.com/feed/'
+            ];
+
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const allNews = [];
+
+            for (const feedUrl of rssFeeds) {
+                try {
+                    const response = await fetch(corsProxy + encodeURIComponent(feedUrl));
+                    if (!response.ok) continue;
+
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(text, 'text/xml');
+
+                    const items = xml.querySelectorAll('item');
+                    items.forEach((item, index) => {
+                        if (index < 5) { // Get top 5 from each feed
+                            const title = item.querySelector('title')?.textContent || '';
+                            const link = item.querySelector('link')?.textContent || '';
+                            if (title) {
+                                allNews.push({ title: title.trim(), link: link.trim() });
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.warn('Failed to fetch RSS feed:', feedUrl, error);
+                }
+            }
+
+            return allNews;
+        }
+
+        async function populateNewsTicker() {
+            const tickerEl = document.getElementById('news-ticker');
+            const news = await fetchBiotechNews();
+
+            if (news.length === 0) {
+                tickerEl.innerHTML = '<span class="inline-flex items-center gap-6"><span class="text-dark-400">Unable to load news. Please try again later.</span></span>';
+                return;
+            }
+
+            // Shuffle and pick top items
+            const shuffled = news.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+            // Build ticker HTML (duplicate for seamless loop)
+            const separator = '<span class="text-dark-300 dark:text-dark-600 mx-4">|</span>';
+            const newsHtml = shuffled.map(item =>
+                `<a href="${item.link}" target="_blank" rel="noopener" class="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">${item.title}</a>`
+            ).join(separator);
+
+            tickerEl.innerHTML = `<span class="inline-flex items-center gap-2">${newsHtml}${separator}${newsHtml}</span>`;
+        }
+
+        // Load news on page load
+        populateNewsTicker();
+
+        // Refresh news every 5 minutes
+        setInterval(populateNewsTicker, 5 * 60 * 1000);
     </script>
 </body>
 </html>
