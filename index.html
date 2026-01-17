@@ -507,60 +507,21 @@
                         <h3 class="font-semibold text-sm">Biotech KOL Feed</h3>
                     </div>
                     <div class="twitter-timeline-container p-4" id="twitter-feed">
-                        <!-- Dummy tweets for preview - replace with real Twitter embed later -->
-                        <div class="space-y-4">
-                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex-shrink-0"></div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-sm">Brad Loncar</span>
-                                        <span class="text-xs text-dark-400">@bradloncar · 2h</span>
-                                    </div>
-                                    <p class="text-sm text-dark-600 dark:text-dark-300">XBI holding up well despite broader market weakness. Biotech showing relative strength here. Key support at $85.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex-shrink-0"></div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-sm">Adam Feuerstein</span>
-                                        <span class="text-xs text-dark-400">@adamfeuerstein · 3h</span>
-                                    </div>
-                                    <p class="text-sm text-dark-600 dark:text-dark-300">BREAKING: FDA accepts BLA for review. PDUFA date set for Q3. This is earlier than expected.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex-shrink-0"></div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-sm">Bruce Booth</span>
-                                        <span class="text-xs text-dark-400">@LifeSciVC · 5h</span>
-                                    </div>
-                                    <p class="text-sm text-dark-600 dark:text-dark-300">New blog post: "The State of Biotech Venture in 2025" - fundraising trends, valuations, and what's next for the sector.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex-shrink-0"></div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-sm">Endpoints News</span>
-                                        <span class="text-xs text-dark-400">@EndptsNews · 6h</span>
-                                    </div>
-                                    <p class="text-sm text-dark-600 dark:text-dark-300">Moderna shares jump 8% on updated COVID vaccine data showing improved efficacy against latest variants.</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-600 flex-shrink-0"></div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-sm">Jacob Plieth</span>
-                                        <span class="text-xs text-dark-400">@JacobPlieth · 8h</span>
-                                    </div>
-                                    <p class="text-sm text-dark-600 dark:text-dark-300">Interesting AdComm dynamics yesterday. Panel voted 8-4 in favor but with notable caveats on post-marketing requirements.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-xs text-dark-400 mt-4 text-center italic">Preview mode - replace with Twitter list embed</p>
+                        <!--
+                        TO ACTIVATE: Replace YOUR_LIST_ID below with your Twitter list ID
+                        Example: If your list URL is twitter.com/i/lists/1234567890
+                        Then use: href="https://twitter.com/i/lists/1234567890"
+                        -->
+                        <a class="twitter-timeline"
+                           data-height="420"
+                           data-theme="dark"
+                           data-chrome="noheader nofooter transparent"
+                           href="https://twitter.com/i/lists/YOUR_LIST_ID">
+                           Loading biotech KOL feed...
+                        </a>
+                        <noscript>
+                            <p class="text-sm text-dark-400 text-center py-8">Enable JavaScript to view Twitter feed</p>
+                        </noscript>
                     </div>
                 </div>
 
@@ -573,37 +534,25 @@
                             </svg>
                             <h3 class="font-semibold text-sm">StockTwits Sentiment</h3>
                         </div>
-                        <span id="sentiment-refresh-time" class="text-xs text-dark-400"></span>
+                        <span id="sentiment-refresh-time" class="text-xs text-dark-400">Loading...</span>
                     </div>
-                    <div class="p-4">
-                        <div id="sentiment-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="p-3 max-h-[420px] overflow-y-auto">
+                        <div id="sentiment-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
                             <!-- Loading skeletons -->
-                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
-                                <div class="h-5 w-20 skeleton rounded"></div>
-                            </div>
-                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
-                                <div class="h-5 w-20 skeleton rounded"></div>
-                            </div>
-                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
-                                <div class="h-5 w-20 skeleton rounded"></div>
-                            </div>
-                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
-                                <div class="h-5 w-20 skeleton rounded"></div>
-                            </div>
-                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
-                                <div class="h-5 w-20 skeleton rounded"></div>
-                            </div>
-                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
-                                <div class="h-5 w-20 skeleton rounded"></div>
-                            </div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
+                            <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg"><div class="h-4 w-10 skeleton rounded mb-1"></div><div class="h-3 w-14 skeleton rounded"></div></div>
                         </div>
-                        <p class="text-xs text-dark-400 mt-3 text-center italic" id="sentiment-footer">Preview mode - dummy data shown</p>
+                        <p class="text-xs text-dark-400 mt-3 text-center" id="sentiment-footer">Loading sentiment data...</p>
                     </div>
                 </div>
             </div>
@@ -1016,86 +965,111 @@
             tickerWrapper.classList.toggle('ticker-paused');
         }, { passive: true });
 
-        // StockTwits Sentiment - DUMMY DATA MODE
-        // Set to false to use real API data
-        const USE_DUMMY_SENTIMENT = true;
-
+        // StockTwits Sentiment
         const SENTIMENT_TICKERS = [
-            'XBI',   // SPDR S&P Biotech ETF
-            'VRTX',  // Vertex Pharmaceuticals
-            'REGN',  // Regeneron
-            'MRNA',  // Moderna
-            'GILD',  // Gilead Sciences
-            'BIIB',  // Biogen
-            'AMGN',  // Amgen
-            'LLY',   // Eli Lilly
-            'ABBV',  // AbbVie
-            'BMY',   // Bristol-Myers Squibb
-            'PFE',   // Pfizer
-            'AZN'    // AstraZeneca
-        ];
-
-        // Dummy sentiment data for preview
-        const DUMMY_SENTIMENT = [
-            { ticker: 'XBI', bullishPct: 62, sentiment: 'bullish' },
-            { ticker: 'VRTX', bullishPct: 71, sentiment: 'bullish' },
-            { ticker: 'REGN', bullishPct: 38, sentiment: 'bearish' },
-            { ticker: 'MRNA', bullishPct: 58, sentiment: 'neutral' },
-            { ticker: 'GILD', bullishPct: 52, sentiment: 'neutral' },
-            { ticker: 'BIIB', bullishPct: 45, sentiment: 'neutral' },
-            { ticker: 'AMGN', bullishPct: 67, sentiment: 'bullish' },
-            { ticker: 'LLY', bullishPct: 78, sentiment: 'bullish' },
-            { ticker: 'ABBV', bullishPct: 55, sentiment: 'neutral' },
-            { ticker: 'BMY', bullishPct: 34, sentiment: 'bearish' },
-            { ticker: 'PFE', bullishPct: 41, sentiment: 'neutral' },
-            { ticker: 'AZN', bullishPct: 63, sentiment: 'bullish' }
+            // ETFs
+            'XBI',    // SPDR S&P Biotech ETF
+            'IBB',    // iShares Biotechnology ETF
+            'LABU',   // Direxion Daily S&P Biotech Bull 3X
+            // Large Cap Biotech
+            'VRTX',   // Vertex Pharmaceuticals
+            'REGN',   // Regeneron
+            'MRNA',   // Moderna
+            'GILD',   // Gilead Sciences
+            'BIIB',   // Biogen
+            'AMGN',   // Amgen
+            'ILMN',   // Illumina
+            'ALNY',   // Alnylam
+            'SGEN',   // Seagen
+            'BMRN',   // BioMarin
+            'INCY',   // Incyte
+            'EXEL',   // Exelixis
+            // Mid Cap Biotech
+            'SRPT',   // Sarepta
+            'IONS',   // Ionis Pharmaceuticals
+            'RARE',   // Ultragenyx
+            'NBIX',   // Neurocrine Biosciences
+            'UTHR',   // United Therapeutics
+            'HALO',   // Halozyme
+            'PCVX',   // Vaxcyte
+            'KRYS',   // Krystal Biotech
+            'CRNX',   // Crinetics
+            'INSM',   // Insmed
+            'RXRX',   // Recursion
+            'DNLI',   // Denali
+            'BEAM',   // Beam Therapeutics
+            'CRSP',   // CRISPR Therapeutics
+            'NTLA',   // Intellia
+            'EDIT',   // Editas
+            // Small Cap / Speculative
+            'SAVA',   // Cassava Sciences
+            'ACAD',   // Acadia
+            'ARCT',   // Arcturus
+            'KRTX',   // Karuna (now part of BMS)
+            'IMVT',   // Immunovant
+            'RVMD',   // Revolution Medicines
+            'XENE',   // Xenon
+            'RLAY',   // Relay
+            'DAWN',   // Day One Bio
+            // Big Pharma (biotech-adjacent)
+            'LLY',    // Eli Lilly
+            'ABBV',   // AbbVie
+            'BMY',    // Bristol-Myers
+            'PFE',    // Pfizer
+            'MRK',    // Merck
+            'JNJ',    // Johnson & Johnson
+            'AZN',    // AstraZeneca
+            'NVS',    // Novartis
+            'SNY',    // Sanofi
+            'GSK',    // GSK
+            'RHHBY'   // Roche
         ];
 
         function renderSentimentGrid(results) {
             const sentimentGrid = document.getElementById('sentiment-grid');
             const refreshTimeEl = document.getElementById('sentiment-refresh-time');
+            const footerEl = document.getElementById('sentiment-footer');
+
+            // Sort: bullish first, then neutral, then bearish
+            const sortOrder = { bullish: 0, neutral: 1, bearish: 2, error: 3 };
+            results.sort((a, b) => {
+                const orderA = a.error ? 3 : sortOrder[a.sentiment];
+                const orderB = b.error ? 3 : sortOrder[b.sentiment];
+                if (orderA !== orderB) return orderA - orderB;
+                return (b.bullishPct || 0) - (a.bullishPct || 0);
+            });
 
             sentimentGrid.innerHTML = results.map(item => {
                 if (item.error) {
                     return `
-                        <div class="p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
-                            <div class="font-semibold text-sm">${item.ticker}</div>
-                            <div class="text-xs text-dark-400">Unavailable</div>
+                        <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg opacity-50">
+                            <div class="font-semibold text-xs">${item.ticker}</div>
+                            <div class="text-xs text-dark-400">--</div>
                         </div>
                     `;
                 }
 
                 const icon = item.sentiment === 'bullish' ? '🟢' :
                             item.sentiment === 'bearish' ? '🔴' : '🟡';
-                const label = item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1);
 
                 return `
                     <a href="https://stocktwits.com/symbol/${item.ticker}" target="_blank" rel="noopener"
-                       class="block p-3 bg-dark-50 dark:bg-dark-800 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors group">
-                        <div class="font-semibold text-sm mb-1 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${item.ticker}</div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="sentiment-badge ${item.sentiment}">
-                                ${icon} ${item.bullishPct}% ${label}
-                            </span>
+                       class="block p-2 bg-dark-50 dark:bg-dark-800 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors group">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="font-semibold text-xs group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${item.ticker}</span>
+                            <span class="text-xs">${icon} ${item.bullishPct}%</span>
                         </div>
                     </a>
                 `;
             }).join('');
 
-            // Update refresh time
+            // Update refresh time and footer
             const now = new Date();
-            refreshTimeEl.textContent = USE_DUMMY_SENTIMENT
-                ? 'Preview mode'
-                : `Updated ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+            refreshTimeEl.textContent = `Updated ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+            if (footerEl) footerEl.textContent = `${results.filter(r => !r.error).length} tickers · StockTwits API · Refreshes every 5 min`;
         }
 
         async function fetchStockTwitsSentiment() {
-            // Use dummy data for preview
-            if (USE_DUMMY_SENTIMENT) {
-                renderSentimentGrid(DUMMY_SENTIMENT);
-                return;
-            }
-
             const corsProxy = 'https://api.allorigins.win/raw?url=';
             const results = [];
 
@@ -1154,10 +1128,8 @@
         // Load sentiment on page load
         fetchStockTwitsSentiment();
 
-        // Refresh sentiment every 5 minutes (only if using real data)
-        if (!USE_DUMMY_SENTIMENT) {
-            setInterval(fetchStockTwitsSentiment, 5 * 60 * 1000);
-        }
+        // Refresh sentiment every 5 minutes
+        setInterval(fetchStockTwitsSentiment, 5 * 60 * 1000);
 
         // Twitter widget script (loads async)
         (function() {
