@@ -326,95 +326,18 @@
     <!-- FDA Calendar Widget -->
     <section class="pb-16 sm:pb-24">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="mb-6">
-                <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Upcoming FDA Dates</h2>
-                <p class="text-sm text-dark-500 dark:text-dark-400">Key PDUFA dates and advisory committee meetings</p>
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Upcoming FDA Dates</h2>
+                    <p class="text-sm text-dark-500 dark:text-dark-400">Key PDUFA dates and advisory committee meetings</p>
+                </div>
+                <a href="https://www.biopharmcatalyst.com/calendars/fda-calendar" target="_blank" rel="noopener"
+                   class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    View Full Calendar →
+                </a>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- FDA Event 1 -->
-                <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs font-medium text-red-500 uppercase tracking-wide mb-1">PDUFA</div>
-                            <h4 class="font-semibold text-sm mb-1">Vertex - Vanzacaftor</h4>
-                            <p class="text-xs text-dark-500 dark:text-dark-400">Cystic Fibrosis triple combo</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold">Jan 24</div>
-                            <div class="text-xs text-dark-400">2025</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- FDA Event 2 -->
-                <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs font-medium text-blue-500 uppercase tracking-wide mb-1">AdCom</div>
-                            <h4 class="font-semibold text-sm mb-1">Biogen - Aducanumab</h4>
-                            <p class="text-xs text-dark-500 dark:text-dark-400">Alzheimer's disease</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold">Feb 8</div>
-                            <div class="text-xs text-dark-400">2025</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- FDA Event 3 -->
-                <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs font-medium text-red-500 uppercase tracking-wide mb-1">PDUFA</div>
-                            <h4 class="font-semibold text-sm mb-1">Alnylam - Vutrisiran</h4>
-                            <p class="text-xs text-dark-500 dark:text-dark-400">ATTR cardiomyopathy</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold">Feb 14</div>
-                            <div class="text-xs text-dark-400">2025</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- FDA Event 4 -->
-                <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs font-medium text-red-500 uppercase tracking-wide mb-1">PDUFA</div>
-                            <h4 class="font-semibold text-sm mb-1">Sarepta - Elevidys</h4>
-                            <p class="text-xs text-dark-500 dark:text-dark-400">DMD gene therapy</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold">Feb 28</div>
-                            <div class="text-xs text-dark-400">2025</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- FDA Event 5 -->
-                <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs font-medium text-blue-500 uppercase tracking-wide mb-1">AdCom</div>
-                            <h4 class="font-semibold text-sm mb-1">Amgen - Tarlatamab</h4>
-                            <p class="text-xs text-dark-500 dark:text-dark-400">Small cell lung cancer</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold">Mar 5</div>
-                            <div class="text-xs text-dark-400">2025</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- FDA Event 6 -->
-                <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <div class="text-xs font-medium text-red-500 uppercase tracking-wide mb-1">PDUFA</div>
-                            <h4 class="font-semibold text-sm mb-1">Merck - Islatravir</h4>
-                            <p class="text-xs text-dark-500 dark:text-dark-400">HIV prevention</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-lg font-bold">Mar 22</div>
-                            <div class="text-xs text-dark-400">2025</div>
-                        </div>
-                    </div>
-                </div>
+            <div id="fda-calendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="col-span-full text-center py-8 text-dark-400">Loading FDA calendar...</div>
             </div>
         </div>
     </section>
@@ -664,6 +587,69 @@
 
         // Refresh news every 5 minutes
         setInterval(populateNewsTicker, 5 * 60 * 1000);
+
+        // FDA Calendar
+        async function loadFDACalendar() {
+            const calendarEl = document.getElementById('fda-calendar');
+
+            try {
+                const response = await fetch('static/fda-calendar.json');
+                if (!response.ok) throw new Error('Failed to load');
+
+                const data = await response.json();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Filter to upcoming events and sort by date
+                const upcoming = data.events
+                    .filter(e => new Date(e.date) >= today)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date))
+                    .slice(0, 6);
+
+                if (upcoming.length === 0) {
+                    calendarEl.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">No upcoming FDA dates</div>';
+                    return;
+                }
+
+                const formatDate = (dateStr) => {
+                    const date = new Date(dateStr);
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    return {
+                        month: months[date.getMonth()],
+                        day: date.getDate(),
+                        year: date.getFullYear()
+                    };
+                };
+
+                calendarEl.innerHTML = upcoming.map(event => {
+                    const d = formatDate(event.date);
+                    const typeColor = event.type === 'PDUFA' ? 'text-red-500' : 'text-blue-500';
+
+                    return `
+                        <div class="p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="text-xs font-medium ${typeColor} uppercase tracking-wide mb-1">${event.type}</div>
+                                    <h4 class="font-semibold text-sm mb-1">${event.company} - ${event.drug}</h4>
+                                    <p class="text-xs text-dark-500 dark:text-dark-400">${event.indication}</p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-lg font-bold">${d.month} ${d.day}</div>
+                                    <div class="text-xs text-dark-400">${d.year}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Failed to load FDA calendar:', error);
+                calendarEl.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">Unable to load FDA calendar</div>';
+            }
+        }
+
+        // Load FDA calendar
+        loadFDACalendar();
     </script>
 </body>
 </html>

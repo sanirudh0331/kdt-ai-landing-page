@@ -1,0 +1,68 @@
+{
+  "lastUpdated": "2025-01-17",
+  "events": [
+    {
+      "type": "PDUFA",
+      "company": "Vertex",
+      "drug": "Vanzacaftor/tezacaftor/deutivacaftor",
+      "indication": "Cystic Fibrosis",
+      "date": "2025-01-23"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Neurocrine",
+      "drug": "Crinecerfont",
+      "indication": "Congenital Adrenal Hyperplasia",
+      "date": "2025-01-28"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Madrigal",
+      "drug": "Resmetirom",
+      "indication": "NASH/MASH",
+      "date": "2025-02-06"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Roche",
+      "drug": "Crovalimab",
+      "indication": "PNH",
+      "date": "2025-02-18"
+    },
+    {
+      "type": "PDUFA",
+      "company": "AbbVie",
+      "drug": "Tavapadon",
+      "indication": "Parkinson's Disease",
+      "date": "2025-02-28"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Ascendis",
+      "drug": "TransCon PTH",
+      "indication": "Hypoparathyroidism",
+      "date": "2025-03-01"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Eli Lilly",
+      "drug": "Tirzepatide",
+      "indication": "Heart Failure with Obesity",
+      "date": "2025-03-04"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Sarepta",
+      "drug": "Elevidys",
+      "indication": "DMD (Full Approval)",
+      "date": "2025-03-20"
+    },
+    {
+      "type": "AdCom",
+      "company": "Cassava Sciences",
+      "drug": "Simufilam",
+      "indication": "Alzheimer's Disease",
+      "date": "2025-02-25"
+    }
+  ]
+}
