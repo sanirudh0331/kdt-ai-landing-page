@@ -965,13 +965,17 @@
             tickerWrapper.classList.toggle('ticker-paused');
         }, { passive: true });
 
-        // StockTwits Sentiment
+        // StockTwits Sentiment - Comprehensive Biotech List
         const SENTIMENT_TICKERS = [
-            // ETFs
+            // === ETFs ===
             'XBI',    // SPDR S&P Biotech ETF
             'IBB',    // iShares Biotechnology ETF
             'LABU',   // Direxion Daily S&P Biotech Bull 3X
-            // Large Cap Biotech
+            'LABD',   // Direxion Daily S&P Biotech Bear 3X
+            'XLV',    // Health Care Select Sector
+            'ARKG',   // ARK Genomic Revolution ETF
+
+            // === Large Cap Biotech ===
             'VRTX',   // Vertex Pharmaceuticals
             'REGN',   // Regeneron
             'MRNA',   // Moderna
@@ -980,11 +984,14 @@
             'AMGN',   // Amgen
             'ILMN',   // Illumina
             'ALNY',   // Alnylam
-            'SGEN',   // Seagen
             'BMRN',   // BioMarin
             'INCY',   // Incyte
             'EXEL',   // Exelixis
-            // Mid Cap Biotech
+            'MDGL',   // Madrigal Pharma
+            'ARGX',   // Argenx
+            'ROIV',   // Roivant
+
+            // === Mid Cap Biotech ===
             'SRPT',   // Sarepta
             'IONS',   // Ionis Pharmaceuticals
             'RARE',   // Ultragenyx
@@ -997,21 +1004,106 @@
             'INSM',   // Insmed
             'RXRX',   // Recursion
             'DNLI',   // Denali
+            'PTCT',   // PTC Therapeutics
+            'FOLD',   // Amicus
+            'NTRA',   // Natera
+            'TWST',   // Twist Bioscience
+            'CYTK',   // Cytokinetics
+            'APLS',   // Apellis
+            'RCKT',   // Rocket Pharma
+            'VERV',   // Verve Therapeutics
+            'ACLX',   // Arcellx
+            'LEGN',   // Legend Biotech
+            'CGTX',   // Cognition Therapeutics
+
+            // === Gene Editing / Cell Therapy ===
             'BEAM',   // Beam Therapeutics
             'CRSP',   // CRISPR Therapeutics
             'NTLA',   // Intellia
             'EDIT',   // Editas
-            // Small Cap / Speculative
+            'BLUE',   // Bluebird Bio
+            'CART',   // Instil Bio
+            'FATE',   // Fate Therapeutics
+            'PSTX',   // Poseida
+
+            // === Clinical Stage / Speculative ===
             'SAVA',   // Cassava Sciences
             'ACAD',   // Acadia
             'ARCT',   // Arcturus
-            'KRTX',   // Karuna (now part of BMS)
             'IMVT',   // Immunovant
             'RVMD',   // Revolution Medicines
             'XENE',   // Xenon
-            'RLAY',   // Relay
+            'RLAY',   // Relay Therapeutics
             'DAWN',   // Day One Bio
-            // Big Pharma (biotech-adjacent)
+            'AKRO',   // Akero
+            'IOVA',   // Iovance
+            'TGTX',   // TG Therapeutics
+            'GERN',   // Geron
+            'SNDX',   // Syndax
+            'VKTX',   // Viking Therapeutics
+            'VRNA',   // Verona Pharma
+            'AXSM',   // Axsome
+            'CORT',   // Corcept
+            'AUPH',   // Aurinia
+            'SAGE',   // Sage Therapeutics
+            'PRAX',   // Praxis Precision
+            'ANNX',   // Annexon
+            'TVTX',   // Travere
+            'TERN',   // Terns Pharma
+            'AADI',   // Aadi Bioscience
+            'KYMR',   // Kymera
+            'ARDX',   // Ardelyx
+            'IDYA',   // IDEAYA Bio
+            'JANX',   // Janux
+            'ELVN',   // Enliven
+            'IRON',   // Disc Medicine
+            'CDNA',   // CareDx
+            'MRSN',   // Mersana
+            'ADVM',   // Adverum
+            'ABCL',   // AbCellera
+            'SDGR',   // Schrodinger
+            'ALEC',   // Alector
+            'DCPH',   // Deciphera
+            'SMMT',   // Summit Therapeutics
+            'IMCR',   // Immunocore
+            'BCRX',   // BioCryst
+            'AMAM',   // Ambrx
+
+            // === Oncology Focus ===
+            'RYTM',   // Rhythm Pharma
+            'MEIP',   // MEI Pharma
+            'SRRK',   // Scholar Rock
+            'GPCR',   // Structure Therapeutics
+            'OLMA',   // Olema Oncology
+            'NUVB',   // Nuvation Bio
+            'ARQT',   // Arcus Bio
+            'PMVP',   // PMV Pharma
+            'PHAT',   // Phathom Pharma
+
+            // === Obesity / Metabolic ===
+            'GPCR',   // Structure Therapeutics
+            'ALT',    // Altimmune
+            'ZEAL',   // Zealand Pharma
+
+            // === CNS / Neuro ===
+            'CERE',   // Cerevel (now part of AbbVie)
+            'ARVN',   // Arvinas
+            'CPRX',   // Catalyst Pharma
+            'PRTA',   // Prothena
+            'VNDA',   // Vanda Pharma
+
+            // === Diagnostics / Tools ===
+            'EXAS',   // Exact Sciences
+            'GH',     // Guardant Health
+            'CDXS',   // Codexis
+            'PACB',   // PacBio
+            'BIO',    // Bio-Rad
+            'A',      // Agilent
+            'TMO',    // Thermo Fisher
+            'DHR',    // Danaher
+            'QGEN',   // Qiagen
+
+            // === Big Pharma ===
             'LLY',    // Eli Lilly
             'ABBV',   // AbbVie
             'BMY',    // Bristol-Myers
@@ -1022,7 +1114,11 @@
             'NVS',    // Novartis
             'SNY',    // Sanofi
             'GSK',    // GSK
-            'RHHBY'   // Roche
+            'RHHBY',  // Roche
+            'NVO',    // Novo Nordisk
+            'TAK',    // Takeda
+            'BAYRY',  // Bayer
+            'TEVA'    // Teva
         ];
 
         function renderSentimentGrid(results) {
