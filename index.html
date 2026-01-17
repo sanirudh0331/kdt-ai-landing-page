@@ -599,15 +599,19 @@
                 const data = await response.json();
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
+                const ninetyDaysOut = new Date(today);
+                ninetyDaysOut.setDate(ninetyDaysOut.getDate() + 90);
 
-                // Filter to upcoming events and sort by date
+                // Filter to events in next 90 days and sort by date
                 const upcoming = data.events
-                    .filter(e => new Date(e.date) >= today)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date))
-                    .slice(0, 6);
+                    .filter(e => {
+                        const eventDate = new Date(e.date);
+                        return eventDate >= today && eventDate <= ninetyDaysOut;
+                    })
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 if (upcoming.length === 0) {
-                    calendarEl.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">No upcoming FDA dates</div>';
+                    calendarEl.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">No FDA dates in the next 90 days</div>';
                     return;
                 }
 
