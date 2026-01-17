@@ -178,6 +178,51 @@
             50% { opacity: 0.7; }
         }
 
+        /* Sentiment indicators */
+        .sentiment-bullish { color: #22c55e; }
+        .sentiment-bearish { color: #ef4444; }
+        .sentiment-neutral { color: #eab308; }
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .sentiment-badge.bullish {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+        .sentiment-badge.bearish {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        .sentiment-badge.neutral {
+            background: rgba(234, 179, 8, 0.15);
+            color: #eab308;
+        }
+
+        /* Twitter embed container */
+        .twitter-timeline-container {
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .twitter-timeline-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .twitter-timeline-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .twitter-timeline-container::-webkit-scrollbar-thumb {
+            background: #71717a;
+            border-radius: 3px;
+        }
+        .dark .twitter-timeline-container::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+        }
+
         /* Card load animation */
         .card-animate {
             animation: cardFadeIn 0.4s ease-out forwards;
@@ -440,6 +485,126 @@
                 <!-- TradingView Widget -->
                 <div id="tradingview-widget" class="tradingview-widget-container" style="height: 400px;">
                     <div id="tradingview-chart" style="height: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Investor Sentiment Section -->
+    <section class="pb-8 sm:pb-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-6">
+                <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Investor Sentiment</h2>
+                <p class="text-sm text-dark-500 dark:text-dark-400">Biotech KOL chatter and market mood</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Twitter KOL Feed -->
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-dark-200 dark:border-dark-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-[#1DA1F2]" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        <h3 class="font-semibold text-sm">Biotech KOL Feed</h3>
+                    </div>
+                    <div class="twitter-timeline-container p-4" id="twitter-feed">
+                        <!-- Dummy tweets for preview - replace with real Twitter embed later -->
+                        <div class="space-y-4">
+                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold text-sm">Brad Loncar</span>
+                                        <span class="text-xs text-dark-400">@bradloncar · 2h</span>
+                                    </div>
+                                    <p class="text-sm text-dark-600 dark:text-dark-300">XBI holding up well despite broader market weakness. Biotech showing relative strength here. Key support at $85.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold text-sm">Adam Feuerstein</span>
+                                        <span class="text-xs text-dark-400">@adamfeuerstein · 3h</span>
+                                    </div>
+                                    <p class="text-sm text-dark-600 dark:text-dark-300">BREAKING: FDA accepts BLA for review. PDUFA date set for Q3. This is earlier than expected.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold text-sm">Bruce Booth</span>
+                                        <span class="text-xs text-dark-400">@LifeSciVC · 5h</span>
+                                    </div>
+                                    <p class="text-sm text-dark-600 dark:text-dark-300">New blog post: "The State of Biotech Venture in 2025" - fundraising trends, valuations, and what's next for the sector.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 pb-4 border-b border-dark-200 dark:border-dark-800">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold text-sm">Endpoints News</span>
+                                        <span class="text-xs text-dark-400">@EndptsNews · 6h</span>
+                                    </div>
+                                    <p class="text-sm text-dark-600 dark:text-dark-300">Moderna shares jump 8% on updated COVID vaccine data showing improved efficacy against latest variants.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-600 flex-shrink-0"></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="font-semibold text-sm">Jacob Plieth</span>
+                                        <span class="text-xs text-dark-400">@JacobPlieth · 8h</span>
+                                    </div>
+                                    <p class="text-sm text-dark-600 dark:text-dark-300">Interesting AdComm dynamics yesterday. Panel voted 8-4 in favor but with notable caveats on post-marketing requirements.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-dark-400 mt-4 text-center italic">Preview mode - replace with Twitter list embed</p>
+                    </div>
+                </div>
+
+                <!-- StockTwits Sentiment -->
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-dark-200 dark:border-dark-800 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-[#1DA1F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <h3 class="font-semibold text-sm">StockTwits Sentiment</h3>
+                        </div>
+                        <span id="sentiment-refresh-time" class="text-xs text-dark-400"></span>
+                    </div>
+                    <div class="p-4">
+                        <div id="sentiment-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <!-- Loading skeletons -->
+                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
+                                <div class="h-5 w-20 skeleton rounded"></div>
+                            </div>
+                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
+                                <div class="h-5 w-20 skeleton rounded"></div>
+                            </div>
+                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
+                                <div class="h-5 w-20 skeleton rounded"></div>
+                            </div>
+                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
+                                <div class="h-5 w-20 skeleton rounded"></div>
+                            </div>
+                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
+                                <div class="h-5 w-20 skeleton rounded"></div>
+                            </div>
+                            <div class="sentiment-skeleton p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                                <div class="h-4 w-12 skeleton rounded mb-2"></div>
+                                <div class="h-5 w-20 skeleton rounded"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-dark-400 mt-3 text-center italic" id="sentiment-footer">Preview mode - dummy data shown</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -850,6 +1015,157 @@
         tickerWrapper.addEventListener('touchstart', (e) => {
             tickerWrapper.classList.toggle('ticker-paused');
         }, { passive: true });
+
+        // StockTwits Sentiment - DUMMY DATA MODE
+        // Set to false to use real API data
+        const USE_DUMMY_SENTIMENT = true;
+
+        const SENTIMENT_TICKERS = [
+            'XBI',   // SPDR S&P Biotech ETF
+            'VRTX',  // Vertex Pharmaceuticals
+            'REGN',  // Regeneron
+            'MRNA',  // Moderna
+            'GILD',  // Gilead Sciences
+            'BIIB',  // Biogen
+            'AMGN',  // Amgen
+            'LLY',   // Eli Lilly
+            'ABBV',  // AbbVie
+            'BMY',   // Bristol-Myers Squibb
+            'PFE',   // Pfizer
+            'AZN'    // AstraZeneca
+        ];
+
+        // Dummy sentiment data for preview
+        const DUMMY_SENTIMENT = [
+            { ticker: 'XBI', bullishPct: 62, sentiment: 'bullish' },
+            { ticker: 'VRTX', bullishPct: 71, sentiment: 'bullish' },
+            { ticker: 'REGN', bullishPct: 38, sentiment: 'bearish' },
+            { ticker: 'MRNA', bullishPct: 58, sentiment: 'neutral' },
+            { ticker: 'GILD', bullishPct: 52, sentiment: 'neutral' },
+            { ticker: 'BIIB', bullishPct: 45, sentiment: 'neutral' },
+            { ticker: 'AMGN', bullishPct: 67, sentiment: 'bullish' },
+            { ticker: 'LLY', bullishPct: 78, sentiment: 'bullish' },
+            { ticker: 'ABBV', bullishPct: 55, sentiment: 'neutral' },
+            { ticker: 'BMY', bullishPct: 34, sentiment: 'bearish' },
+            { ticker: 'PFE', bullishPct: 41, sentiment: 'neutral' },
+            { ticker: 'AZN', bullishPct: 63, sentiment: 'bullish' }
+        ];
+
+        function renderSentimentGrid(results) {
+            const sentimentGrid = document.getElementById('sentiment-grid');
+            const refreshTimeEl = document.getElementById('sentiment-refresh-time');
+
+            sentimentGrid.innerHTML = results.map(item => {
+                if (item.error) {
+                    return `
+                        <div class="p-3 bg-dark-50 dark:bg-dark-800 rounded-lg">
+                            <div class="font-semibold text-sm">${item.ticker}</div>
+                            <div class="text-xs text-dark-400">Unavailable</div>
+                        </div>
+                    `;
+                }
+
+                const icon = item.sentiment === 'bullish' ? '🟢' :
+                            item.sentiment === 'bearish' ? '🔴' : '🟡';
+                const label = item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1);
+
+                return `
+                    <a href="https://stocktwits.com/symbol/${item.ticker}" target="_blank" rel="noopener"
+                       class="block p-3 bg-dark-50 dark:bg-dark-800 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors group">
+                        <div class="font-semibold text-sm mb-1 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${item.ticker}</div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="sentiment-badge ${item.sentiment}">
+                                ${icon} ${item.bullishPct}% ${label}
+                            </span>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+
+            // Update refresh time
+            const now = new Date();
+            refreshTimeEl.textContent = USE_DUMMY_SENTIMENT
+                ? 'Preview mode'
+                : `Updated ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        }
+
+        async function fetchStockTwitsSentiment() {
+            // Use dummy data for preview
+            if (USE_DUMMY_SENTIMENT) {
+                renderSentimentGrid(DUMMY_SENTIMENT);
+                return;
+            }
+
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const results = [];
+
+            for (const ticker of SENTIMENT_TICKERS) {
+                try {
+                    const url = `https://api.stocktwits.com/api/2/streams/symbol/${ticker}.json`;
+                    const response = await fetch(corsProxy + encodeURIComponent(url));
+
+                    if (!response.ok) {
+                        results.push({ ticker, error: true });
+                        continue;
+                    }
+
+                    const data = await response.json();
+
+                    // Calculate sentiment from messages
+                    const messages = data.messages || [];
+                    let bullish = 0;
+                    let bearish = 0;
+
+                    messages.forEach(msg => {
+                        if (msg.entities && msg.entities.sentiment) {
+                            if (msg.entities.sentiment.basic === 'Bullish') bullish++;
+                            if (msg.entities.sentiment.basic === 'Bearish') bearish++;
+                        }
+                    });
+
+                    const total = bullish + bearish;
+                    const bullishPct = total > 0 ? Math.round((bullish / total) * 100) : 50;
+
+                    let sentiment = 'neutral';
+                    if (bullishPct > 60) sentiment = 'bullish';
+                    else if (bullishPct < 40) sentiment = 'bearish';
+
+                    results.push({
+                        ticker,
+                        bullishPct,
+                        sentiment,
+                        messageCount: messages.length
+                    });
+
+                } catch (error) {
+                    console.warn(`Failed to fetch sentiment for ${ticker}:`, error);
+                    results.push({ ticker, error: true });
+                }
+            }
+
+            if (results.length === 0) {
+                document.getElementById('sentiment-grid').innerHTML = '<div class="col-span-full text-center py-4 text-dark-400">Unable to load sentiment data</div>';
+                return;
+            }
+
+            renderSentimentGrid(results);
+        }
+
+        // Load sentiment on page load
+        fetchStockTwitsSentiment();
+
+        // Refresh sentiment every 5 minutes (only if using real data)
+        if (!USE_DUMMY_SENTIMENT) {
+            setInterval(fetchStockTwitsSentiment, 5 * 60 * 1000);
+        }
+
+        // Twitter widget script (loads async)
+        (function() {
+            const twitterScript = document.createElement('script');
+            twitterScript.src = 'https://platform.twitter.com/widgets.js';
+            twitterScript.async = true;
+            document.body.appendChild(twitterScript);
+        })();
     </script>
 
     <!-- Cloudflare Web Analytics -->
