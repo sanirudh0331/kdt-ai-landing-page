@@ -496,7 +496,7 @@
             <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Clinical Trials Tracker</h2>
-                    <p class="text-sm text-dark-500 dark:text-dark-400">Recent Phase 2/3 trials and results from ClinicalTrials.gov</p>
+                    <p class="text-sm text-dark-500 dark:text-dark-400">Recent trials and results from ClinicalTrials.gov</p>
                 </div>
                 <a href="https://clinicaltrials.gov/search?aggFilters=phase:2%203,status:rec%20act%20not&viewType=Table" target="_blank" rel="noopener"
                    class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">
@@ -510,6 +510,12 @@
                 </button>
                 <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="results">
                     Results Available
+                </button>
+                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase1">
+                    Phase 1
+                </button>
+                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase2">
+                    Phase 2
                 </button>
                 <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase3">
                     Phase 3
@@ -985,7 +991,7 @@
         loadFDACalendar();
 
         // Clinical Trials
-        let trialsCache = { recent: null, results: null, phase3: null };
+        let trialsCache = { recent: null, results: null, phase1: null, phase2: null, phase3: null };
 
         async function fetchClinicalTrials(filter = 'recent') {
             const trialsGrid = document.getElementById('trials-grid');
@@ -1010,9 +1016,13 @@
                 let queryParams = 'query.term=biotech OR oncology OR gene therapy&pageSize=12&sort=LastUpdatePostDate:desc';
 
                 if (filter === 'recent') {
-                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:2 3,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:1 2 3,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
                 } else if (filter === 'results') {
-                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:2 3,results:with&pageSize=12&sort=ResultsFirstPostDate:desc';
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:1 2 3,results:with&pageSize=12&sort=ResultsFirstPostDate:desc';
+                } else if (filter === 'phase1') {
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:1,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
+                } else if (filter === 'phase2') {
+                    queryParams = 'query.term=biotech OR pharma&aggFilters=phase:2,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
                 } else if (filter === 'phase3') {
                     queryParams = 'query.term=biotech OR pharma&aggFilters=phase:3,status:rec act&pageSize=12&sort=LastUpdatePostDate:desc';
                 }
@@ -1046,6 +1056,12 @@
                 return;
             }
 
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            };
+
             trialsGrid.innerHTML = trials.slice(0, 9).map(study => {
                 const protocol = study.protocolSection || {};
                 const id = protocol.identificationModule || {};
@@ -1056,32 +1072,45 @@
 
                 const nctId = id.nctId || '';
                 const title = id.briefTitle || 'Untitled Study';
-                const shortTitle = title.length > 80 ? title.substring(0, 80) + '...' : title;
+                const shortTitle = title.length > 70 ? title.substring(0, 70) + '...' : title;
+
+                // Get relevant date
+                const lastUpdate = status.lastUpdatePostDateStruct?.date;
+                const resultsDate = study.resultsSection?.pointOfContactSection?.pointOfContactPhoneExt ||
+                                   protocol.statusModule?.resultsFirstPostDateStruct?.date;
+                const startDate = status.startDateStruct?.date;
+                const displayDate = formatDate(lastUpdate || startDate);
 
                 const overallStatus = status.overallStatus || '';
-                const statusColor = overallStatus === 'RECRUITING' ? 'text-green-500' :
-                                   overallStatus === 'ACTIVE_NOT_RECRUITING' ? 'text-yellow-500' :
-                                   overallStatus === 'COMPLETED' ? 'text-blue-500' : 'text-dark-400';
+                const statusColor = overallStatus === 'RECRUITING' ? 'text-green-600 dark:text-green-400' :
+                                   overallStatus === 'ACTIVE_NOT_RECRUITING' ? 'text-yellow-600 dark:text-yellow-400' :
+                                   overallStatus === 'COMPLETED' ? 'text-blue-600 dark:text-blue-400' : 'text-dark-500';
                 const statusLabel = overallStatus.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
 
                 const phaseColor = phase.includes('3') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
                                   phase.includes('2') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                  phase.includes('1') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' :
                                   'bg-dark-100 text-dark-600 dark:bg-dark-800 dark:text-dark-400';
 
                 const hasResults = study.hasResults;
 
                 return `
                     <a href="https://clinicaltrials.gov/study/${nctId}" target="_blank" rel="noopener"
-                       class="block p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all group">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="px-2 py-0.5 text-xs font-medium rounded ${phaseColor}">${phase.replace('PHASE', 'Phase ')}</span>
-                            ${hasResults ? '<span class="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Results</span>' : ''}
+                       class="flex flex-col p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all group h-full">
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded ${phaseColor}">${phase.replace('PHASE', 'P')}</span>
+                                ${hasResults ? '<span class="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Results</span>' : ''}
+                            </div>
+                            <span class="text-xs text-dark-400 whitespace-nowrap">${displayDate}</span>
                         </div>
-                        <h4 class="font-medium text-sm mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">${shortTitle}</h4>
-                        <p class="text-xs text-dark-500 dark:text-dark-400 mb-2">${sponsor}</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-dark-400">${conditions}</span>
-                            <span class="text-xs font-medium ${statusColor}">${statusLabel}</span>
+                        <h4 class="font-medium text-sm leading-snug mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors flex-grow">${shortTitle}</h4>
+                        <div class="mt-auto pt-2 border-t border-dark-100 dark:border-dark-800">
+                            <p class="text-xs font-medium text-dark-600 dark:text-dark-300 mb-1 truncate">${sponsor}</p>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs text-dark-400 truncate">${conditions}</span>
+                                <span class="text-xs font-medium ${statusColor} whitespace-nowrap">${statusLabel}</span>
+                            </div>
                         </div>
                     </a>
                 `;
