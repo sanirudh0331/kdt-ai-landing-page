@@ -1072,7 +1072,6 @@
 
                 const nctId = id.nctId || '';
                 const title = id.briefTitle || 'Untitled Study';
-                const shortTitle = title.length > 70 ? title.substring(0, 70) + '...' : title;
 
                 // Get relevant date
                 const lastUpdate = status.lastUpdatePostDateStruct?.date;
@@ -1087,6 +1086,8 @@
                                    overallStatus === 'COMPLETED' ? 'text-blue-600 dark:text-blue-400' : 'text-dark-500';
                 const statusLabel = overallStatus.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
 
+                // Format phase label nicely
+                const phaseLabel = phase.replace('PHASE', 'Phase ').replace('_', '/');
                 const phaseColor = phase.includes('3') ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
                                   phase.includes('2') ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                                   phase.includes('1') ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' :
@@ -1096,20 +1097,20 @@
 
                 return `
                     <a href="https://clinicaltrials.gov/study/${nctId}" target="_blank" rel="noopener"
-                       class="flex flex-col p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all group h-full">
-                        <div class="flex items-center justify-between gap-2 mb-3">
-                            <div class="flex items-center gap-1.5">
-                                <span class="px-2 py-0.5 text-xs font-medium rounded ${phaseColor}">${phase.replace('PHASE', 'P')}</span>
+                       class="flex flex-col p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all group">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 text-xs font-medium rounded ${phaseColor}">${phaseLabel}</span>
                                 ${hasResults ? '<span class="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Results</span>' : ''}
                             </div>
                             <span class="text-xs text-dark-400 whitespace-nowrap">${displayDate}</span>
                         </div>
-                        <h4 class="font-medium text-sm leading-snug mb-2 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors flex-grow">${shortTitle}</h4>
-                        <div class="mt-auto pt-2 border-t border-dark-100 dark:border-dark-800">
-                            <p class="text-xs font-medium text-dark-600 dark:text-dark-300 mb-1 truncate">${sponsor}</p>
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs text-dark-400 truncate">${conditions}</span>
-                                <span class="text-xs font-medium ${statusColor} whitespace-nowrap">${statusLabel}</span>
+                        <h4 class="font-medium text-sm leading-relaxed mb-3 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${title}</h4>
+                        <div class="mt-auto pt-3 border-t border-dark-100 dark:border-dark-800">
+                            <p class="text-xs font-medium text-dark-600 dark:text-dark-300 mb-1">${sponsor}</p>
+                            <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                                <span class="text-xs text-dark-400">${conditions}</span>
+                                <span class="text-xs font-medium ${statusColor}">${statusLabel}</span>
                             </div>
                         </div>
                     </a>
