@@ -289,21 +289,21 @@
         </div>
     </main>
 
-    <!-- Biotech News Ticker -->
-    <section class="py-4 border-y border-dark-200 dark:border-dark-800 bg-dark-100/50 dark:bg-dark-900/50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="flex items-center gap-4">
-                <span class="flex-shrink-0 px-2 py-1 text-xs font-semibold bg-red-500 text-white rounded">LIVE</span>
-                <div class="ticker-wrapper flex-1">
-                    <div id="news-ticker" class="ticker-content text-sm text-dark-600 dark:text-dark-400">
-                        <span class="inline-flex items-center gap-6">
-                            <span class="text-dark-400">Loading biotech news...</span>
-                        </span>
-                    </div>
+    <!-- Floating Biotech News Ticker -->
+    <div class="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 dark:bg-dark-950/95 backdrop-blur-sm border-t border-dark-700 dark:border-dark-800">
+        <div class="flex items-center h-10">
+            <div class="flex-shrink-0 px-4 h-full flex items-center bg-red-600">
+                <span class="text-xs font-bold text-white tracking-wide">LIVE</span>
+            </div>
+            <div class="ticker-wrapper flex-1 overflow-hidden">
+                <div id="news-ticker" class="ticker-content text-sm text-dark-200">
+                    <span class="inline-flex items-center gap-6">
+                        <span class="text-dark-400">Loading biotech news...</span>
+                    </span>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- XBI Market Data Section -->
     <section class="py-12 sm:py-16">
@@ -420,7 +420,7 @@
     </section>
 
     <!-- Floating Feedback Button -->
-    <div id="feedbackWidget" class="fixed bottom-6 right-6 z-50">
+    <div id="feedbackWidget" class="fixed bottom-16 right-6 z-50">
         <!-- Expanded Form -->
         <div id="feedbackPanel" class="hidden mb-3 w-72 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl p-4">
             <div class="flex items-center justify-between mb-3">
@@ -431,14 +431,16 @@
                     </svg>
                 </button>
             </div>
-            <form id="feedbackForm" class="space-y-2">
+            <form id="feedbackForm" action="https://formsubmit.co/ajax/sanirudh0331@gmail.com" method="POST" class="space-y-2">
+                <input type="hidden" name="_subject" value="KdT AI Landing Page Feedback">
+                <input type="hidden" name="_captcha" value="false">
                 <input type="text" name="name" placeholder="Your name" required
                        class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                 <input type="email" name="email" placeholder="Your email" required
                        class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                 <textarea name="message" rows="3" placeholder="Your feedback..." required
                           class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"></textarea>
-                <button type="submit"
+                <button type="submit" id="feedbackSubmit"
                         class="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all">
                     Send
                 </button>
@@ -455,7 +457,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-dark-200 dark:border-dark-800">
+    <footer class="border-t border-dark-200 dark:border-dark-800 mb-10">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <div class="text-center text-xs sm:text-sm text-dark-500 dark:text-dark-500">
                 Powered by KdT AI
@@ -534,21 +536,37 @@
             feedbackPanel.classList.add('hidden');
         });
 
-        feedbackForm.addEventListener('submit', (e) => {
+        feedbackForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(feedbackForm);
-            const name = formData.get('name');
-            const email = formData.get('email');
-            const message = formData.get('message');
-            const subject = encodeURIComponent('KdT AI Feedback');
-            const body = encodeURIComponent(`From: ${name}\nEmail: ${email}\n\n${message}`);
-            window.location.href = `mailto:sanirudh0331@gmail.com?subject=${subject}&body=${body}`;
-            feedbackForm.reset();
-            feedbackSuccess.classList.remove('hidden');
-            setTimeout(() => {
-                feedbackSuccess.classList.add('hidden');
-                feedbackPanel.classList.add('hidden');
-            }, 2000);
+            const submitBtn = document.getElementById('feedbackSubmit');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(feedbackForm);
+                const response = await fetch(feedbackForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    feedbackForm.reset();
+                    feedbackSuccess.classList.remove('hidden');
+                    setTimeout(() => {
+                        feedbackSuccess.classList.add('hidden');
+                        feedbackPanel.classList.add('hidden');
+                    }, 2000);
+                } else {
+                    alert('Failed to send feedback. Please try again.');
+                }
+            } catch (error) {
+                alert('Failed to send feedback. Please try again.');
+            }
+
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         });
 
         // Keyboard shortcuts (1-5) to navigate to tools
@@ -633,9 +651,9 @@
             const shuffled = news.sort(() => 0.5 - Math.random()).slice(0, 10);
 
             // Build ticker HTML (duplicate for seamless loop)
-            const separator = '<span class="text-dark-300 dark:text-dark-600 mx-4">|</span>';
+            const separator = '<span class="text-dark-500 mx-4">•</span>';
             const newsHtml = shuffled.map(item =>
-                `<a href="${item.link}" target="_blank" rel="noopener" class="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">${item.title}</a>`
+                `<a href="${item.link}" target="_blank" rel="noopener" class="text-dark-200 hover:text-white transition-colors">${item.title}</a>`
             ).join(separator);
 
             tickerEl.innerHTML = `<span class="inline-flex items-center gap-2">${newsHtml}${separator}${newsHtml}</span>`;
