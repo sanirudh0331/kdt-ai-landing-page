@@ -990,6 +990,9 @@
         // Load FDA calendar
         loadFDACalendar();
 
+        // Refresh FDA calendar every 15 minutes
+        setInterval(loadFDACalendar, 15 * 60 * 1000);
+
         // Clinical Trials
         let trialsCache = { recent: null, results: null, phase1: null, phase2: null, phase3: null };
 
@@ -1135,6 +1138,14 @@
 
         // Load trials on page load
         fetchClinicalTrials('recent');
+
+        // Refresh clinical trials every 10 minutes (clear cache to get fresh data)
+        setInterval(() => {
+            trialsCache = { recent: null, results: null, phase1: null, phase2: null, phase3: null };
+            const activeTab = document.querySelector('.trials-tab.active');
+            const filter = activeTab ? activeTab.dataset.filter : 'recent';
+            fetchClinicalTrials(filter);
+        }, 10 * 60 * 1000);
 
         // Ticker pause on tap (mobile)
         const tickerWrapper = document.getElementById('ticker-wrapper');
