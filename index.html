@@ -599,7 +599,6 @@
                     <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">FDA Dates & Approvals</h2>
                     <p class="text-sm text-dark-500 dark:text-dark-400">
                         PDUFA dates, advisory committees, and recent approvals
-                        <span id="fda-last-updated" class="hidden"> · Updated <span class="fda-update-date"></span></span>
                     </p>
                 </div>
                 <a href="https://www.biopharmcatalyst.com/calendars/fda-calendar" target="_blank" rel="noopener"
@@ -916,7 +915,6 @@
         // FDA Calendar
         async function loadFDACalendar() {
             const calendarEl = document.getElementById('fda-calendar');
-            const lastUpdatedEl = document.getElementById('fda-last-updated');
 
             try {
                 const response = await fetch('static/fda-calendar.json');
@@ -927,13 +925,6 @@
                 today.setHours(0, 0, 0, 0);
                 const ninetyDaysOut = new Date(today);
                 ninetyDaysOut.setDate(ninetyDaysOut.getDate() + 90);
-
-                // Show last updated
-                if (data.lastUpdated && lastUpdatedEl) {
-                    const updateDate = new Date(data.lastUpdated);
-                    lastUpdatedEl.querySelector('.fda-update-date').textContent = updateDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    lastUpdatedEl.classList.remove('hidden');
-                }
 
                 // Filter to events in next 90 days and sort by date
                 const upcoming = data.events
