@@ -606,6 +606,18 @@
                     View Full Calendar →
                 </a>
             </div>
+            <!-- Filter tabs -->
+            <div class="flex gap-2 mb-4">
+                <button class="fda-filter-tab active px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-500 text-white" data-filter="all">
+                    All
+                </button>
+                <button class="fda-filter-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="pdufa">
+                    PDUFA
+                </button>
+                <button class="fda-filter-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="adcom">
+                    AdCom
+                </button>
+            </div>
             <div id="fda-calendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Loading skeletons -->
                 <div class="fda-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
@@ -904,24 +916,38 @@
         setInterval(populateNewsTicker, 5 * 60 * 1000);
 
         // FDA Calendar
-        async function loadFDACalendar() {
+        let fdaEventsCache = null;
+        let currentFdaFilter = 'all';
+
+        async function loadFDACalendar(filter = 'all') {
             const calendarEl = document.getElementById('fda-calendar');
+            currentFdaFilter = filter;
 
             try {
-                const response = await fetch('static/fda-calendar.json');
-                if (!response.ok) throw new Error('Failed to load');
+                // Use cache if available
+                if (!fdaEventsCache) {
+                    const response = await fetch('static/fda-calendar.json');
+                    if (!response.ok) throw new Error('Failed to load');
+                    const data = await response.json();
+                    fdaEventsCache = data.events || [];
+                }
 
-                const data = await response.json();
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const ninetyDaysOut = new Date(today);
                 ninetyDaysOut.setDate(ninetyDaysOut.getDate() + 90);
 
-                // Filter to events in next 90 days and sort by date
-                const upcoming = data.events
+                // Filter to events in next 90 days, by type, and sort by date
+                const upcoming = fdaEventsCache
                     .filter(e => {
                         const eventDate = new Date(e.date);
-                        return eventDate >= today && eventDate <= ninetyDaysOut;
+                        const inRange = eventDate >= today && eventDate <= ninetyDaysOut;
+                        if (!inRange) return false;
+
+                        if (filter === 'all') return true;
+                        if (filter === 'pdufa') return e.type === 'PDUFA';
+                        if (filter === 'adcom') return e.type === 'AdCom' || e.type === 'ADCOM';
+                        return true;
                     })
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -981,8 +1007,21 @@
         // Load FDA calendar
         loadFDACalendar();
 
+        // FDA filter tab switching
+        document.querySelectorAll('.fda-filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.fda-filter-tab').forEach(t => {
+                    t.classList.remove('active', 'bg-indigo-500', 'text-white');
+                    t.classList.add('bg-dark-100', 'dark:bg-dark-800', 'text-dark-600', 'dark:text-dark-300');
+                });
+                tab.classList.add('active', 'bg-indigo-500', 'text-white');
+                tab.classList.remove('bg-dark-100', 'dark:bg-dark-800', 'text-dark-600', 'dark:text-dark-300');
+                loadFDACalendar(tab.dataset.filter);
+            });
+        });
+
         // Refresh FDA calendar every 15 minutes
-        setInterval(loadFDACalendar, 15 * 60 * 1000);
+        setInterval(() => loadFDACalendar(currentFdaFilter), 15 * 60 * 1000);
 
         // Clinical Trials
         let trialsCache = { recent: null, results: null, phase1: null, phase2: null, phase3: null };
