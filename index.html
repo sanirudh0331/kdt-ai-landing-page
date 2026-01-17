@@ -251,31 +251,6 @@
         .ticker-paused .ticker-content {
             animation-play-state: paused;
         }
-
-        /* Typewriter effect */
-        .typewriter {
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 3px solid;
-            border-image: linear-gradient(to bottom, #6366f1, #a855f7) 1;
-            width: 0;
-            animation: typewriter 2s steps(20) 0.5s forwards, blink 0.7s step-end infinite;
-        }
-        .typewriter.done {
-            border-right: none;
-            animation: none;
-            width: auto;
-        }
-        @keyframes typewriter {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
-        .typewriter-container {
-            display: inline-block;
-        }
     </style>
 </head>
 <body class="bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-50 min-h-screen antialiased">
@@ -314,37 +289,7 @@
             // Check if already authenticated
             if (sessionStorage.getItem('kdt-auth') === 'true') {
                 gate.style.display = 'none';
-                // Skip animation if already logged in (not fresh login)
-                if (sessionStorage.getItem('kdt-just-logged-in') !== 'true') {
-                    skipTypewriterAnimation();
-                } else {
-                    startTypewriterAnimation();
-                    sessionStorage.removeItem('kdt-just-logged-in');
-                }
                 return;
-            }
-
-            function startTypewriterAnimation() {
-                const heroText = document.getElementById('hero-text');
-                const heroSubtitle = document.getElementById('hero-subtitle');
-                if (heroText) {
-                    heroText.classList.add('typewriter');
-                    // Show subtitle after typewriter finishes
-                    setTimeout(() => {
-                        heroText.classList.add('done');
-                        if (heroSubtitle) heroSubtitle.style.opacity = '1';
-                    }, 2800);
-                }
-            }
-
-            function skipTypewriterAnimation() {
-                const heroText = document.getElementById('hero-text');
-                const heroSubtitle = document.getElementById('hero-subtitle');
-                if (heroText) {
-                    heroText.classList.remove('typewriter');
-                    heroText.classList.add('done');
-                }
-                if (heroSubtitle) heroSubtitle.style.opacity = '1';
             }
 
             form.addEventListener('submit', (e) => {
@@ -354,10 +299,7 @@
 
                 if (username === 'kdtai' && password === 'kdtftw') {
                     sessionStorage.setItem('kdt-auth', 'true');
-                    sessionStorage.setItem('kdt-just-logged-in', 'true');
                     gate.style.display = 'none';
-                    // Trigger typewriter animation
-                    startTypewriterAnimation();
                 } else {
                     errorMsg.classList.remove('hidden');
                     document.getElementById('login-password').value = '';
@@ -397,11 +339,9 @@
         <div class="particles" id="particles"></div>
         <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10">
             <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
-                <span class="typewriter-container">
-                    <span id="hero-text" class="typewriter">Welcome to <span class="hero-gradient">KdT AI</span></span>
-                </span>
+                Welcome to <span class="hero-gradient">KdT AI</span>
             </h1>
-            <p id="hero-subtitle" class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto opacity-0 transition-opacity duration-500">
+            <p class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto">
                 Your AI toolkit for venture
             </p>
         </div>
