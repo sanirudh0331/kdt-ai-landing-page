@@ -880,33 +880,39 @@
             ];
 
             const corsProxy = 'https://api.allorigins.win/raw?url=';
-            const allNews = [];
 
-            for (const feedUrl of rssFeeds) {
+            // Fetch all feeds in parallel for speed
+            const fetchPromises = rssFeeds.map(async (feedUrl) => {
                 try {
-                    const response = await fetch(corsProxy + encodeURIComponent(feedUrl));
-                    if (!response.ok) continue;
+                    const response = await fetch(corsProxy + encodeURIComponent(feedUrl), {
+                        signal: AbortSignal.timeout(5000) // 5 second timeout per feed
+                    });
+                    if (!response.ok) return [];
 
                     const text = await response.text();
                     const parser = new DOMParser();
                     const xml = parser.parseFromString(text, 'text/xml');
 
                     const items = xml.querySelectorAll('item');
+                    const newsItems = [];
                     items.forEach((item, index) => {
                         if (index < 5) { // Get top 5 from each feed
                             const title = item.querySelector('title')?.textContent || '';
                             const link = item.querySelector('link')?.textContent || '';
                             if (title) {
-                                allNews.push({ title: title.trim(), link: link.trim() });
+                                newsItems.push({ title: title.trim(), link: link.trim() });
                             }
                         }
                     });
+                    return newsItems;
                 } catch (error) {
                     console.warn('Failed to fetch RSS feed:', feedUrl, error);
+                    return [];
                 }
-            }
+            });
 
-            return allNews;
+            const results = await Promise.all(fetchPromises);
+            return results.flat();
         }
 
         async function populateNewsTicker() {
