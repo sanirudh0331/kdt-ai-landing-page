@@ -859,7 +859,7 @@
                 // Filter to events in next 90 days, by type, and sort by date
                 const upcoming = fdaEventsCache
                     .filter(e => {
-                        const eventDate = new Date(e.date);
+                        const eventDate = new Date(e.date + 'T00:00:00');
                         const inRange = eventDate >= today && eventDate <= ninetyDaysOut;
                         if (!inRange) return false;
 
@@ -868,7 +868,7 @@
                         if (filter === 'adcom') return e.type === 'AdCom' || e.type === 'ADCOM';
                         return true;
                     })
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                    .sort((a, b) => new Date(a.date + 'T00:00:00') - new Date(b.date + 'T00:00:00'));
 
                 if (upcoming.length === 0) {
                     calendarEl.innerHTML = '<div class="col-span-full text-center py-8 text-dark-400">No FDA dates in the next 90 days</div>';
@@ -876,7 +876,7 @@
                 }
 
                 const formatDate = (dateStr) => {
-                    const date = new Date(dateStr);
+                    const date = new Date(dateStr + 'T00:00:00');
                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                     return {
                         month: months[date.getMonth()],
@@ -886,7 +886,7 @@
                 };
 
                 const getDaysUntil = (dateStr) => {
-                    const eventDate = new Date(dateStr);
+                    const eventDate = new Date(dateStr + 'T00:00:00');
                     eventDate.setHours(0, 0, 0, 0);
                     const diffTime = eventDate - today;
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
