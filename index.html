@@ -225,6 +225,45 @@
         .ticker-paused .ticker-content {
             animation-play-state: paused;
         }
+
+        /* Login transition */
+        #login-gate {
+            transition: opacity 0.35s ease;
+        }
+        #login-gate.fade-out {
+            opacity: 0;
+        }
+        .transition-overlay {
+            position: fixed;
+            inset: 0;
+            background: #09090b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .dark .transition-overlay {
+            background: #09090b;
+        }
+        .transition-overlay:not(.dark) {
+            background: #fafafa;
+        }
+        .transition-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .transition-logo {
+            width: 64px;
+            height: 64px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .transition-logo.visible {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-50 min-h-screen antialiased">
@@ -273,7 +312,37 @@
 
                 if (username === 'kdtai' && password === 'kdtftw') {
                     sessionStorage.setItem('kdt-auth', 'true');
-                    gate.style.display = 'none';
+
+                    // Transition animation
+                    const overlay = document.getElementById('transition-overlay');
+                    const logo = document.getElementById('transition-logo');
+
+                    // Match current theme for overlay background
+                    if (document.documentElement.classList.contains('dark')) {
+                        overlay.style.background = '#09090b';
+                    } else {
+                        overlay.style.background = '#fafafa';
+                    }
+
+                    // Fade out login, show overlay
+                    gate.classList.add('fade-out');
+                    overlay.classList.add('active');
+
+                    // After login fades, show logo
+                    setTimeout(() => {
+                        gate.style.display = 'none';
+                        logo.classList.add('visible');
+                    }, 350);
+
+                    // Hold, then fade out logo
+                    setTimeout(() => {
+                        logo.classList.remove('visible');
+                    }, 1300);
+
+                    // Hide overlay
+                    setTimeout(() => {
+                        overlay.classList.remove('active');
+                    }, 1800);
                 } else {
                     errorMsg.classList.remove('hidden');
                     document.getElementById('login-password').value = '';
@@ -281,6 +350,11 @@
             });
         })();
     </script>
+
+    <!-- Transition Overlay -->
+    <div class="transition-overlay" id="transition-overlay">
+        <img src="static/kdt-logo.png" alt="KdT" class="transition-logo" id="transition-logo">
+    </div>
 
     <!-- Navigation -->
     <nav class="border-b border-dark-200 dark:border-dark-800 bg-dark-50/80 dark:bg-dark-950/80 backdrop-blur-sm sticky top-0 z-50">
