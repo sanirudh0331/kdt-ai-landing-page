@@ -324,9 +324,13 @@
                         overlay.style.background = '#fafafa';
                     }
 
-                    // Fade out login, show overlay
-                    gate.classList.add('fade-out');
+                    // Show overlay instantly first
+                    overlay.style.transition = 'none';
                     overlay.classList.add('active');
+
+                    // Force reflow, then fade out login
+                    overlay.offsetHeight;
+                    gate.classList.add('fade-out');
 
                     // After login fades, show logo
                     setTimeout(() => {
@@ -339,8 +343,9 @@
                         logo.classList.remove('visible');
                     }, 1300);
 
-                    // Hide overlay
+                    // Hide overlay (restore transition for smooth fade out)
                     setTimeout(() => {
+                        overlay.style.transition = 'opacity 0.3s ease';
                         overlay.classList.remove('active');
                     }, 1800);
                 } else {
