@@ -178,32 +178,6 @@
             50% { opacity: 0.7; }
         }
 
-        /* Sentiment indicators */
-        .sentiment-bullish { color: #22c55e; }
-        .sentiment-bearish { color: #ef4444; }
-        .sentiment-neutral { color: #eab308; }
-        .sentiment-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.125rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-        .sentiment-badge.bullish {
-            background: rgba(34, 197, 94, 0.15);
-            color: #22c55e;
-        }
-        .sentiment-badge.bearish {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-        }
-        .sentiment-badge.neutral {
-            background: rgba(234, 179, 8, 0.15);
-            color: #eab308;
-        }
-
         /* Twitter embed container */
         .twitter-timeline-container {
             max-height: 450px;
@@ -559,51 +533,6 @@
         </div>
     </section>
 
-    <!-- INVESTOR SENTIMENT SECTION - HIDDEN (uncomment to re-enable)
-    <section class="pb-8 sm:pb-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="mb-6">
-                <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Investor Sentiment</h2>
-                <p class="text-sm text-dark-500 dark:text-dark-400">Biotech KOL chatter and market mood</p>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden">
-                    <div class="px-4 py-3 border-b border-dark-200 dark:border-dark-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-[#1DA1F2]" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                        </svg>
-                        <h3 class="font-semibold text-sm">Biotech KOL Feed</h3>
-                    </div>
-                    <div class="twitter-timeline-container p-4" id="twitter-feed">
-                        <div class="flex flex-col items-center justify-center h-full py-8">
-                            <svg class="w-12 h-12 text-[#1DA1F2] mb-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                            </svg>
-                            <p class="text-sm text-dark-500 dark:text-dark-400 mb-4 text-center">Biotech KOL feed<br><span class="text-xs">(Private list - requires X login)</span></p>
-                            <a href="https://x.com/i/lists/2012593946535362865" target="_blank" rel="noopener" class="px-4 py-2 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white text-sm font-medium rounded-full transition-colors">Open KOL Feed →</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden">
-                    <div class="px-4 py-3 border-b border-dark-200 dark:border-dark-800 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-[#1DA1F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                            <h3 class="font-semibold text-sm">StockTwits Sentiment</h3>
-                        </div>
-                        <span id="sentiment-refresh-time" class="text-xs text-dark-400">Loading...</span>
-                    </div>
-                    <div class="p-3 max-h-[420px] overflow-y-auto">
-                        <div id="sentiment-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
-                        <p class="text-xs text-dark-400 mt-3 text-center" id="sentiment-footer">Loading sentiment data...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    END INVESTOR SENTIMENT SECTION -->
-
     <!-- FDA Calendar Widget -->
     <section class="pb-8 sm:pb-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
@@ -865,54 +794,17 @@
             chartSkeleton.style.display = 'none';
         }, 3000);
 
-        // Fetch biotech news from RSS feeds
+        // Fetch biotech news from backend API (server-side RSS fetching)
         async function fetchBiotechNews() {
-            const rssFeeds = [
-                'https://www.fiercebiotech.com/rss/xml',
-                'https://www.biopharmadive.com/feeds/news/',
-                'https://endpts.com/feed/',
-                'https://www.statnews.com/feed/',
-                'https://www.biospace.com/rss/',
-                'https://www.genengnews.com/feed/',
-                'https://www.nature.com/nbt.rss',
-                'https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml',
-                'https://www.reuters.com/arc/outboundfeeds/v3/all/health/?outputType=xml'
-            ];
-
-            const corsProxy = 'https://api.allorigins.win/raw?url=';
-
-            // Fetch all feeds in parallel for speed
-            const fetchPromises = rssFeeds.map(async (feedUrl) => {
-                try {
-                    const response = await fetch(corsProxy + encodeURIComponent(feedUrl), {
-                        signal: AbortSignal.timeout(5000) // 5 second timeout per feed
-                    });
-                    if (!response.ok) return [];
-
-                    const text = await response.text();
-                    const parser = new DOMParser();
-                    const xml = parser.parseFromString(text, 'text/xml');
-
-                    const items = xml.querySelectorAll('item');
-                    const newsItems = [];
-                    items.forEach((item, index) => {
-                        if (index < 5) { // Get top 5 from each feed
-                            const title = item.querySelector('title')?.textContent || '';
-                            const link = item.querySelector('link')?.textContent || '';
-                            if (title) {
-                                newsItems.push({ title: title.trim(), link: link.trim() });
-                            }
-                        }
-                    });
-                    return newsItems;
-                } catch (error) {
-                    console.warn('Failed to fetch RSS feed:', feedUrl, error);
-                    return [];
-                }
-            });
-
-            const results = await Promise.all(fetchPromises);
-            return results.flat();
+            try {
+                const response = await fetch('/api/news');
+                if (!response.ok) throw new Error('API request failed');
+                const data = await response.json();
+                return data.news || [];
+            } catch (error) {
+                console.warn('Failed to fetch news:', error);
+                return [];
+            }
         }
 
         async function populateNewsTicker() {
@@ -939,8 +831,8 @@
         // Load news on page load
         populateNewsTicker();
 
-        // Refresh news every 5 minutes
-        setInterval(populateNewsTicker, 5 * 60 * 1000);
+        // Refresh news every 15 minutes
+        setInterval(populateNewsTicker, 15 * 60 * 1000);
 
         // FDA Calendar
         let fdaEventsCache = null;
@@ -953,7 +845,7 @@
             try {
                 // Use cache if available
                 if (!fdaEventsCache) {
-                    const response = await fetch('static/fda-calendar.json');
+                    const response = await fetch('/api/fda-calendar');
                     if (!response.ok) throw new Error('Failed to load');
                     const data = await response.json();
                     fdaEventsCache = data.events || [];
@@ -1212,325 +1104,6 @@
         tickerWrapper.addEventListener('touchstart', (e) => {
             tickerWrapper.classList.toggle('ticker-paused');
         }, { passive: true });
-
-        /* STOCKTWITS SENTIMENT - DISABLED (uncomment to re-enable)
-        const SENTIMENT_TICKERS = [
-            // === ETFs ===
-            'XBI',    // SPDR S&P Biotech ETF
-            'IBB',    // iShares Biotechnology ETF
-            'LABU',   // Direxion Daily S&P Biotech Bull 3X
-            'LABD',   // Direxion Daily S&P Biotech Bear 3X
-            'XLV',    // Health Care Select Sector
-            'ARKG',   // ARK Genomic Revolution ETF
-
-            // === Large Cap Biotech ===
-            'VRTX',   // Vertex Pharmaceuticals
-            'REGN',   // Regeneron
-            'MRNA',   // Moderna
-            'GILD',   // Gilead Sciences
-            'BIIB',   // Biogen
-            'AMGN',   // Amgen
-            'ILMN',   // Illumina
-            'ALNY',   // Alnylam
-            'BMRN',   // BioMarin
-            'INCY',   // Incyte
-            'EXEL',   // Exelixis
-            'MDGL',   // Madrigal Pharma
-            'ARGX',   // Argenx
-            'ROIV',   // Roivant
-
-            // === Mid Cap Biotech ===
-            'SRPT',   // Sarepta
-            'IONS',   // Ionis Pharmaceuticals
-            'RARE',   // Ultragenyx
-            'NBIX',   // Neurocrine Biosciences
-            'UTHR',   // United Therapeutics
-            'HALO',   // Halozyme
-            'PCVX',   // Vaxcyte
-            'KRYS',   // Krystal Biotech
-            'CRNX',   // Crinetics
-            'INSM',   // Insmed
-            'RXRX',   // Recursion
-            'DNLI',   // Denali
-            'PTCT',   // PTC Therapeutics
-            'FOLD',   // Amicus
-            'NTRA',   // Natera
-            'TWST',   // Twist Bioscience
-            'CYTK',   // Cytokinetics
-            'APLS',   // Apellis
-            'RCKT',   // Rocket Pharma
-            'VERV',   // Verve Therapeutics
-            'ACLX',   // Arcellx
-            'LEGN',   // Legend Biotech
-            'CGTX',   // Cognition Therapeutics
-
-            // === Gene Editing / Cell Therapy ===
-            'BEAM',   // Beam Therapeutics
-            'CRSP',   // CRISPR Therapeutics
-            'NTLA',   // Intellia
-            'EDIT',   // Editas
-            'BLUE',   // Bluebird Bio
-            'CART',   // Instil Bio
-            'FATE',   // Fate Therapeutics
-            'PSTX',   // Poseida
-
-            // === Clinical Stage / Speculative ===
-            'SAVA',   // Cassava Sciences
-            'ACAD',   // Acadia
-            'ARCT',   // Arcturus
-            'IMVT',   // Immunovant
-            'RVMD',   // Revolution Medicines
-            'XENE',   // Xenon
-            'RLAY',   // Relay Therapeutics
-            'DAWN',   // Day One Bio
-            'AKRO',   // Akero
-            'IOVA',   // Iovance
-            'TGTX',   // TG Therapeutics
-            'GERN',   // Geron
-            'SNDX',   // Syndax
-            'VKTX',   // Viking Therapeutics
-            'VRNA',   // Verona Pharma
-            'AXSM',   // Axsome
-            'CORT',   // Corcept
-            'AUPH',   // Aurinia
-            'SAGE',   // Sage Therapeutics
-            'PRAX',   // Praxis Precision
-            'ANNX',   // Annexon
-            'TVTX',   // Travere
-            'TERN',   // Terns Pharma
-            'AADI',   // Aadi Bioscience
-            'KYMR',   // Kymera
-            'ARDX',   // Ardelyx
-            'IDYA',   // IDEAYA Bio
-            'JANX',   // Janux
-            'ELVN',   // Enliven
-            'IRON',   // Disc Medicine
-            'CDNA',   // CareDx
-            'MRSN',   // Mersana
-            'ADVM',   // Adverum
-            'ABCL',   // AbCellera
-            'SDGR',   // Schrodinger
-            'ALEC',   // Alector
-            'DCPH',   // Deciphera
-            'SMMT',   // Summit Therapeutics
-            'IMCR',   // Immunocore
-            'BCRX',   // BioCryst
-            'AMAM',   // Ambrx
-
-            // === Oncology Focus ===
-            'RYTM',   // Rhythm Pharma
-            'MEIP',   // MEI Pharma
-            'SRRK',   // Scholar Rock
-            'GPCR',   // Structure Therapeutics
-            'OLMA',   // Olema Oncology
-            'NUVB',   // Nuvation Bio
-            'ARQT',   // Arcus Bio
-            'PMVP',   // PMV Pharma
-            'PHAT',   // Phathom Pharma
-
-            // === Obesity / Metabolic ===
-            'GPCR',   // Structure Therapeutics
-            'ALT',    // Altimmune
-            'ZEAL',   // Zealand Pharma
-
-            // === CNS / Neuro ===
-            'CERE',   // Cerevel (now part of AbbVie)
-            'ARVN',   // Arvinas
-            'CPRX',   // Catalyst Pharma
-            'PRTA',   // Prothena
-            'VNDA',   // Vanda Pharma
-
-            // === Diagnostics / Tools ===
-            'EXAS',   // Exact Sciences
-            'GH',     // Guardant Health
-            'CDXS',   // Codexis
-            'PACB',   // PacBio
-            'BIO',    // Bio-Rad
-            'A',      // Agilent
-            'TMO',    // Thermo Fisher
-            'DHR',    // Danaher
-            'QGEN',   // Qiagen
-
-            // === Big Pharma ===
-            'LLY',    // Eli Lilly
-            'ABBV',   // AbbVie
-            'BMY',    // Bristol-Myers
-            'PFE',    // Pfizer
-            'MRK',    // Merck
-            'JNJ',    // Johnson & Johnson
-            'AZN',    // AstraZeneca
-            'NVS',    // Novartis
-            'SNY',    // Sanofi
-            'GSK',    // GSK
-            'RHHBY',  // Roche
-            'NVO',    // Novo Nordisk
-            'TAK',    // Takeda
-            'BAYRY',  // Bayer
-            'TEVA'    // Teva
-        ];
-
-        function renderSentimentGrid(results) {
-            const sentimentGrid = document.getElementById('sentiment-grid');
-            const refreshTimeEl = document.getElementById('sentiment-refresh-time');
-            const footerEl = document.getElementById('sentiment-footer');
-
-            // Sort: bullish first, then neutral, then bearish, errors last
-            const sortOrder = { bullish: 0, neutral: 1, bearish: 2, error: 3 };
-            const sorted = [...results].sort((a, b) => {
-                const orderA = a.error ? 3 : sortOrder[a.sentiment];
-                const orderB = b.error ? 3 : sortOrder[b.sentiment];
-                if (orderA !== orderB) return orderA - orderB;
-                return (b.bullishPct || 0) - (a.bullishPct || 0);
-            });
-
-            sentimentGrid.innerHTML = sorted.map(item => {
-                if (item.error) {
-                    return `
-                        <div class="p-2 bg-dark-50 dark:bg-dark-800 rounded-lg opacity-40">
-                            <div class="font-semibold text-xs">${item.ticker}</div>
-                            <div class="text-xs text-dark-400">--</div>
-                        </div>
-                    `;
-                }
-
-                const icon = item.sentiment === 'bullish' ? '🟢' :
-                            item.sentiment === 'bearish' ? '🔴' : '🟡';
-                const activityIcon = item.activity === 'hot' ? '🔥' : '';
-
-                return `
-                    <a href="https://stocktwits.com/symbol/${item.ticker}" target="_blank" rel="noopener"
-                       class="block p-2 bg-dark-50 dark:bg-dark-800 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-700 transition-colors group">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="font-semibold text-xs group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">${item.ticker}${activityIcon}</span>
-                            <span class="text-xs">${icon} ${item.bullishPct}%</span>
-                        </div>
-                    </a>
-                `;
-            }).join('');
-
-            // Update refresh time and footer
-            const now = new Date();
-            const loadedCount = results.filter(r => !r.error).length;
-            refreshTimeEl.textContent = `${loadedCount}/${SENTIMENT_TICKERS.length} loaded`;
-            if (footerEl) {
-                const hotCount = results.filter(r => r.activity === 'hot').length;
-                footerEl.textContent = hotCount > 0
-                    ? `${loadedCount} tickers · ${hotCount} trending 🔥 · Refreshes every 5 min`
-                    : `${loadedCount} tickers · StockTwits · Refreshes every 5 min`;
-            }
-        }
-
-        async function fetchStockTwitsSentiment() {
-            const sentimentGrid = document.getElementById('sentiment-grid');
-            const results = [];
-
-            // Use multiple CORS proxies as fallbacks
-            const corsProxies = [
-                'https://api.allorigins.win/raw?url=',
-                'https://corsproxy.io/?',
-                'https://api.codetabs.com/v1/proxy?quest='
-            ];
-
-            // Process in batches to avoid rate limiting
-            const batchSize = 10;
-            const delayBetweenBatches = 500; // ms
-
-            for (let i = 0; i < SENTIMENT_TICKERS.length; i += batchSize) {
-                const batch = SENTIMENT_TICKERS.slice(i, i + batchSize);
-
-                const batchPromises = batch.map(async (ticker) => {
-                    for (const proxy of corsProxies) {
-                        try {
-                            const url = `https://api.stocktwits.com/api/2/streams/symbol/${ticker}.json`;
-                            const response = await fetch(proxy + encodeURIComponent(url), {
-                                signal: AbortSignal.timeout(8000)
-                            });
-
-                            if (!response.ok) continue;
-
-                            const data = await response.json();
-                            const messages = data.messages || [];
-
-                            // Enhanced sentiment calculation
-                            let bullishScore = 0;
-                            let bearishScore = 0;
-                            let totalEngagement = 0;
-                            const now = Date.now();
-                            const fourHoursAgo = now - (4 * 60 * 60 * 1000);
-
-                            messages.forEach(msg => {
-                                if (!msg.entities?.sentiment?.basic) return;
-
-                                const msgTime = new Date(msg.created_at).getTime();
-                                const isRecent = msgTime > fourHoursAgo;
-
-                                // Weight factors
-                                const recencyWeight = isRecent ? 1.5 : 1;
-                                const followerWeight = Math.min(Math.log10(msg.user?.followers || 1) / 3, 2);
-                                const engagementWeight = 1 + ((msg.likes?.total || 0) + (msg.reshares?.total || 0)) * 0.1;
-
-                                const weight = recencyWeight * followerWeight * engagementWeight;
-                                totalEngagement += (msg.likes?.total || 0);
-
-                                if (msg.entities.sentiment.basic === 'Bullish') {
-                                    bullishScore += weight;
-                                } else if (msg.entities.sentiment.basic === 'Bearish') {
-                                    bearishScore += weight;
-                                }
-                            });
-
-                            const totalScore = bullishScore + bearishScore;
-                            const bullishPct = totalScore > 0 ? Math.round((bullishScore / totalScore) * 100) : 50;
-
-                            let sentiment = 'neutral';
-                            if (bullishPct > 60) sentiment = 'bullish';
-                            else if (bullishPct < 40) sentiment = 'bearish';
-
-                            // Determine activity level
-                            const msgCount = messages.length;
-                            const activity = msgCount > 25 ? 'hot' : msgCount > 10 ? 'active' : 'quiet';
-
-                            return {
-                                ticker,
-                                bullishPct,
-                                sentiment,
-                                messageCount: msgCount,
-                                activity,
-                                engagement: totalEngagement
-                            };
-                        } catch (error) {
-                            continue; // Try next proxy
-                        }
-                    }
-                    return { ticker, error: true };
-                });
-
-                const batchResults = await Promise.all(batchPromises);
-                results.push(...batchResults);
-
-                // Update UI progressively
-                renderSentimentGrid(results);
-
-                // Delay between batches
-                if (i + batchSize < SENTIMENT_TICKERS.length) {
-                    await new Promise(r => setTimeout(r, delayBetweenBatches));
-                }
-            }
-
-            if (results.filter(r => !r.error).length === 0) {
-                sentimentGrid.innerHTML = '<div class="col-span-full text-center py-4 text-dark-400">Unable to load sentiment data. Try refreshing.</div>';
-                return;
-            }
-
-            renderSentimentGrid(results);
-        }
-
-        // Load sentiment on page load
-        // fetchStockTwitsSentiment();
-
-        // Refresh sentiment every 5 minutes
-        // setInterval(fetchStockTwitsSentiment, 5 * 60 * 1000);
-        END STOCKTWITS SENTIMENT */
     </script>
 
     <!-- Cloudflare Web Analytics -->
