@@ -1010,7 +1010,8 @@
 
             const formatDate = (dateStr) => {
                 if (!dateStr) return '';
-                const date = new Date(dateStr);
+                // Parse as UTC to avoid timezone shifting the date back a day
+                const date = new Date(dateStr + 'T00:00:00');
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             };
 
