@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-17",
+  "lastUpdated": "2026-01-21",
   "events": [
     {
       "type": "PDUFA",
@@ -14,6 +14,20 @@
       "drug": "Crinecerfont",
       "indication": "Congenital Adrenal Hyperplasia",
       "date": "2026-01-28"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Aquestive",
+      "drug": "Anaphylm",
+      "indication": "Type 1 Allergic Reactions",
+      "date": "2026-01-31"
+    },
+    {
+      "type": "PDUFA",
+      "company": "REGENXBIO",
+      "drug": "RGX-121",
+      "indication": "Hunter Syndrome (Gene Therapy)",
+      "date": "2026-02-08"
     },
     {
       "type": "PDUFA",
@@ -45,6 +59,13 @@
     },
     {
       "type": "PDUFA",
+      "company": "Bristol Myers Squibb",
+      "drug": "Deucravacitinib",
+      "indication": "Psoriatic Arthritis",
+      "date": "2026-03-06"
+    },
+    {
+      "type": "PDUFA",
       "company": "Eli Lilly",
       "drug": "Orforglipron",
       "indication": "Type 2 Diabetes",
@@ -56,6 +77,20 @@
       "drug": "Elevidys",
       "indication": "DMD (Full Approval)",
       "date": "2026-03-20"
+    },
+    {
+      "type": "PDUFA",
+      "company": "GSK",
+      "drug": "Linerixibat",
+      "indication": "Cholestatic Pruritus (PBC)",
+      "date": "2026-03-24"
+    },
+    {
+      "type": "PDUFA",
+      "company": "Rocket Pharma",
+      "drug": "Kresladi",
+      "indication": "LAD-I (Gene Therapy)",
+      "date": "2026-03-28"
     },
     {
       "type": "PDUFA",
