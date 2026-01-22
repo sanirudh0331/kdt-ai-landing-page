@@ -1,58 +1,58 @@
 {
   "lastUpdated": "2026-01-22",
-  "source": "Google Calendar ICS (FDA Tracker)",
+  "source": "Google Calendar ICS (FDA Tracker) + Perplexity AI",
   "events": [
     {
       "type": "PDUFA",
       "ticker": "4568",
       "company": "DAIICHI SANKYO",
-      "drug": "",
-      "indication": "",
+      "drug": "ENHERTU (trastuzumab deruxtecan) plus pertuzumab",
+      "indication": "First-line treatment of unresectable or metastatic HER2-positive breast cancer",
       "url": "https://www.businesswire.com/news/home/20250923746690/en/ENHERTU-Plus-Pertuzumab-Granted-Priority-Review-in-the-U.S.-as-First-Line-Treatment-for-Patients-with-HER2-Positive-Metastatic-Breast-Cancer",
       "date": "2026-01-23"
     },
     {
       "type": "PDUFA",
       "ticker": "6622",
-      "company": "TENPOINT THERAPEUTICS, LTD.",
-      "drug": "",
-      "indication": "",
+      "company": "TENPOINT THERAPEUTICS\\",
+      "drug": "Brimochol PF",
+      "indication": "Presbyopia",
       "url": "https://www.businesswire.com/news/home/20251105608942/en/Tenpoint-Therapeutics-Ltd.-Announces-Submission-of-a-New-Drug-Application-for-BRIMOCHOL-PF-for-the-Treatment-of-Presbyopia-to-the-MFDS-in-South-Korea",
       "date": "2026-01-28"
     },
     {
       "type": "PDUFA",
-      "ticker": "AQST",
-      "company": "Aquestive Therapeutics",
-      "drug": "",
-      "indication": "Type 1 allergic reactions",
-      "url": "https://www.sec.gov/Archives/edgar/data/1398733/000162828025031455/aqst-20250613.htm",
+      "ticker": "PHAR",
+      "company": "Pharming Group",
+      "drug": "leniolisib",
+      "indication": "activated phosphoinositide 3-kinase delta syndrome (APDS) in children aged 4 to 11 years",
+      "url": "https://www.globenewswire.com/news-release/2025/10/01/3159182/0/en/Pharming-Group-announces-U-S-FDA-acceptance-and-Priority-Review-of-supplemental-New-Drug-Application-for-leniolisib-in-children-with-APDS-aged-4-to-11-years.html",
       "date": "2026-01-31"
     },
     {
       "type": "PDUFA",
-      "ticker": "PHAR",
-      "company": "Pharming Group",
-      "drug": "",
-      "indication": "",
-      "url": "https://www.globenewswire.com/news-release/2025/10/01/3159182/0/en/Pharming-Group-announces-U-S-FDA-acceptance-and-Priority-Review-of-supplemental-New-Drug-Application-for-leniolisib-in-children-with-APDS-aged-4-to-11-years.html",
+      "ticker": "AQST",
+      "company": "Aquestive Therapeutics\\",
+      "drug": "Anaphylm™",
+      "indication": "Severe allergic reactions, including anaphylaxis",
+      "url": "https://www.sec.gov/Archives/edgar/data/1398733/000162828025031455/aqst-20250613.htm",
       "date": "2026-01-31"
     },
     {
       "type": "PDUFA",
       "ticker": "RGNX",
       "company": "REGENXBIO",
-      "drug": "",
-      "indication": "",
+      "drug": "Clemidsogene lanparvovec (RGX-121)",
+      "indication": "Mucopolysaccharidosis II (MPS II), also known as Hunter syndrome",
       "url": "https://www.prnewswire.com/news-releases/regenxbio-highlights-key-2026-catalysts-and-announces-positive-long-term-functional-outcomes-in-lead-duchenne-gene-therapy-program-302657988.html",
       "date": "2026-02-08"
     },
     {
       "type": "PDUFA",
       "ticker": "MRK",
-      "company": "MERCK & CO., INC.",
-      "drug": "",
-      "indication": "",
+      "company": "MERCK & CO.\\",
+      "drug": "KEYTRUDA (pembrolizumab)",
+      "indication": "platinum-resistant recurrent ovarian cancer",
       "url": "https://www.businesswire.com/news/home/20251018982840/en/KEYTRUDA-pembrolizumab-Plus-Chemotherapy-With-or-Without-Bevacizumab-Reduced-Risk-of-Disease-Progression-or-Death-Versus-Chemotherapy-With-or-Without-Bevacizumab-in-Certain-Patients-With-Platinum-Resistant-Recurrent-Ovarian-Cancer",
       "date": "2026-02-20"
     },
@@ -60,35 +60,26 @@
       "type": "PDUFA",
       "ticker": "VNDA",
       "company": "Vanda Pharmaceuticals",
-      "drug": "",
-      "indication": "Bipolar I disorder and the treatment of schizophreni...",
+      "drug": "Bysanti™ (milsaperidone)",
+      "indication": "acute treatment of bipolar I disorder and schizophrenia",
       "url": "https://www.sec.gov/Archives/edgar/data/1347178/000162828025023154/vnda8-k572025exhibit991.htm",
       "date": "2026-02-21"
     },
     {
       "type": "PDUFA",
       "ticker": "ETON",
-      "company": "Eton Pharmaceuticals",
-      "drug": "",
-      "indication": "Rare diseases",
+      "company": "Eton Pharmaceuticals\\",
+      "drug": "ET-600",
+      "indication": "central diabetes insipidus in pediatric patients",
       "url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774925022298/ex_836124.htm",
       "date": "2026-02-25"
     },
     {
       "type": "PDUFA",
-      "ticker": "ASND",
-      "company": "Ascendis Pharma",
-      "drug": "",
-      "indication": "",
-      "url": "https://www.globenewswire.com/news-release/2025/11/25/3194804/0/en/Ascendis-Announces-Extension-of-FDA-Review-Period-for-TransCon-CNP-navepegritide-for-Children-with-Achondroplasia.html",
-      "date": "2026-02-28"
-    },
-    {
-      "type": "PDUFA",
       "ticker": "BMRN",
       "company": "BioMarin Pharmaceutical",
-      "drug": "",
-      "indication": "",
+      "drug": "PALYNZIQ (pegvaliase-pqpz)",
+      "indication": "Phenylketonuria (PKU) in adolescents aged 12-17",
       "url": "https://www.prnewswire.com/news-releases/fda-accepts-biomarins-palynziq-pegvaliase-pqpz-supplemental-biologics-license-application-for-priority-review-to-expand-use-to-adolescents-aged-12-17-with-phenylketonuria-302597628.html",
       "date": "2026-02-28"
     },
@@ -96,10 +87,28 @@
       "type": "PDUFA",
       "ticker": "SNY",
       "company": "Sanofi",
-      "drug": "",
-      "indication": "And Tarrytown",
+      "drug": "Dupixent (dupilumab)",
+      "indication": "Allergic fungal rhinosinusitis (AFRS)",
       "url": "https://www.sec.gov/Archives/edgar/data/1121404/000119312525285701/d895566dex991.htm",
       "date": "2026-02-28"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "ASND",
+      "company": "Ascendis Pharma",
+      "drug": "TransCon CNP (navepegritide)",
+      "indication": "children with achondroplasia",
+      "url": "https://www.globenewswire.com/news-release/2025/11/25/3194804/0/en/Ascendis-Announces-Extension-of-FDA-Review-Period-for-TransCon-CNP-navepegritide-for-Children-with-Achondroplasia.html",
+      "date": "2026-02-28"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "LNTH",
+      "company": "Lantheus Holdings\\",
+      "drug": "Piflufolastat F 18",
+      "indication": "PSMA-positive lesions in men with prostate cancer who have suspected metastasis or recurrence",
+      "url": "https://www.sec.gov/Archives/edgar/data/1521036/000095017025103543/lnth-ex99_2.htm",
+      "date": "2026-03-06"
     },
     {
       "type": "PDUFA",
@@ -112,17 +121,8 @@
     },
     {
       "type": "PDUFA",
-      "ticker": "LNTH",
-      "company": "Lantheus Holdings",
-      "drug": "",
-      "indication": "",
-      "url": "https://www.sec.gov/Archives/edgar/data/1521036/000095017025103543/lnth-ex99_2.htm",
-      "date": "2026-03-06"
-    },
-    {
-      "type": "PDUFA",
       "ticker": "ALDX",
-      "company": "ALDEYRA THERAPEUTICS, INC.",
+      "company": "ALDEYRA THERAPEUTICS\\",
       "drug": "",
       "indication": "",
       "url": "https://www.businesswire.com/news/home/20251215293677/en/Aldeyra-Therapeutics-Announces-PDUFA-Extension-of-the-New-Drug-Application-of-Reproxalap-for-the-Treatment-of-Dry-Eye-Disease",
@@ -131,8 +131,8 @@
     {
       "type": "PDUFA",
       "ticker": "RYTM",
-      "company": "RHYTHM PHARMACEUTICALS, INC.",
-      "drug": "",
+      "company": "RHYTHM PHARMACEUTICALS\\",
+      "drug": "IMCIVREE",
       "indication": "Acquired hypothalamic obesity",
       "url": "https://www.sec.gov/Archives/edgar/data/1649904/000110465925108154/rytm-20251106xex99d1.htm",
       "date": "2026-03-20"
@@ -149,7 +149,7 @@
     {
       "type": "PDUFA",
       "ticker": "RCKT",
-      "company": "ROCKET PHARMACEUTICALS, INC.",
+      "company": "ROCKET PHARMACEUTICALS\\",
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1281895/000114036125038030/ef20057000_8k.htm",
@@ -158,7 +158,7 @@
     {
       "type": "PDUFA",
       "ticker": "LNTH",
-      "company": "Lantheus Holdings",
+      "company": "Lantheus Holdings\\",
       "drug": "",
       "indication": "",
       "url": "https://www.globenewswire.com/news-release/2025/10/30/3177418/0/en/Lantheus-Announces-FDA-Grants-PDUFA-Date-for-LNTH-2501-Ga-68-edotreotide-a-PET-Diagnostic-Imaging-Kit-Targeting-Somatostatin-Receptor-Positive-SSTR-Neuroendocrine-Tumors-NETs.html",
@@ -166,30 +166,21 @@
     },
     {
       "type": "PDUFA",
-      "ticker": "RPRX",
-      "company": "Royalty Pharma",
-      "drug": "",
-      "indication": "",
-      "url": "https://www.globenewswire.com/news-release/2025/12/04/3199663/0/en/Royalty-Pharma-and-Denali-Therapeutics-Announce-275-Million-Royalty-Funding-Agreement.html",
-      "date": "2026-04-05"
-    },
-    {
-      "type": "PDUFA",
       "ticker": "DNLI",
       "company": "Denali Therapeutics",
-      "drug": "",
+      "drug": "tividenofusp",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1714899/000171489925000209/dnli-20251204.htm",
       "date": "2026-04-05"
     },
     {
       "type": "PDUFA",
-      "ticker": "PFE",
-      "company": "Astellas Pharma",
-      "drug": "",
+      "ticker": "RPRX",
+      "company": "Royalty Pharma",
+      "drug": "accelerated",
       "indication": "",
-      "url": "https://www.prnewswire.com/news-releases/padcev-enfortumab-vedotin-ejfv-plus-keytruda-pembrolizumab-sbla-granted-fda-priority-review-for-treatment-of-certain-patients-with-muscle-invasive-bladder-cancer-302590744.html",
-      "date": "2026-04-07"
+      "url": "https://www.globenewswire.com/news-release/2025/12/04/3199663/0/en/Royalty-Pharma-and-Denali-Therapeutics-Announce-275-Million-Royalty-Funding-Agreement.html",
+      "date": "2026-04-05"
     },
     {
       "type": "PDUFA",
@@ -198,6 +189,15 @@
       "drug": "",
       "indication": "",
       "url": "https://www.businesswire.com/news/home/20251022622711/en/FDA-Grants-Priority-Review-for-KEYTRUDA-pembrolizumab-and-KEYTRUDA-QLEX-pembrolizumab-and-berahyaluronidase-alfa-pmph-Each-in-Combination-with-Padcev-enfortumab-vedotin-ejfv-for-Certain-Patients-with-Muscle-Invasive-Bladder-Cancer",
+      "date": "2026-04-07"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "PFE",
+      "company": "Astellas Pharma",
+      "drug": "",
+      "indication": "",
+      "url": "https://www.prnewswire.com/news-releases/padcev-enfortumab-vedotin-ejfv-plus-keytruda-pembrolizumab-sbla-granted-fda-priority-review-for-treatment-of-certain-patients-with-muscle-invasive-bladder-cancer-302590744.html",
       "date": "2026-04-07"
     },
     {
@@ -212,7 +212,7 @@
     {
       "type": "PDUFA",
       "ticker": "REPL",
-      "company": "Replimune Group",
+      "company": "Replimune Group\\",
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1737953/000110465925100605/tm2529069d1_8k.htm",
@@ -221,11 +221,20 @@
     {
       "type": "PDUFA",
       "ticker": "TVTX",
-      "company": "Travere Therapeutics",
+      "company": "Travere Therapeutics\\",
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1438533/000143853326000005/tvtx-20260113.htm",
       "date": "2026-04-13"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "GRCE",
+      "company": "Grace Therapeutics\\",
+      "drug": "",
+      "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1444192/000114036125032847/ef20054617_8k.htm",
+      "date": "2026-04-23"
     },
     {
       "type": "PDUFA",
@@ -234,15 +243,6 @@
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1121404/000112140425000026/pressreleaseq32025english.htm",
-      "date": "2026-04-23"
-    },
-    {
-      "type": "PDUFA",
-      "ticker": "GRCE",
-      "company": "Grace Therapeutics",
-      "drug": "",
-      "indication": "",
-      "url": "https://www.sec.gov/Archives/edgar/data/1444192/000114036125032847/ef20054617_8k.htm",
       "date": "2026-04-23"
     },
     {
@@ -257,7 +257,7 @@
     {
       "type": "PDUFA",
       "ticker": "MRK",
-      "company": "Merck & Co.",
+      "company": "Merck & Co.\\",
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/310158/000110465925071380/tm2521736d1_ex99-1.htm",
@@ -275,7 +275,7 @@
     {
       "type": "PDUFA",
       "ticker": "AXSM",
-      "company": "Axsome Therapeutics",
+      "company": "Axsome Therapeutics\\",
       "drug": "",
       "indication": "",
       "url": "https://www.globenewswire.com/news-release/2025/12/31/3211743/33090/en/Axsome-Therapeutics-Announces-FDA-Acceptance-and-Priority-Review-of-Supplemental-New-Drug-Application-for-AXS-05-for-the-Treatment-of-Alzheimer-s-Disease-Agitation.html",
@@ -320,7 +320,7 @@
     {
       "type": "PDUFA",
       "ticker": "ARVN",
-      "company": "ARVINAS, INC.",
+      "company": "ARVINAS\\",
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1655759/000165575925000141/arvn-20250808.htm",
@@ -329,7 +329,7 @@
     {
       "type": "PDUFA",
       "ticker": "VRDN",
-      "company": "VIRIDIAN THERAPEUTICS, INC.",
+      "company": "VIRIDIAN THERAPEUTICS\\",
       "drug": "",
       "indication": "",
       "url": "https://www.businesswire.com/news/home/20251222159703/en/Viridian-Therapeutics-Announces-BLA-Acceptance-and-Priority-Review-for-Veligrotug-for-the-Treatment-of-Thyroid-Eye-Disease",
@@ -347,7 +347,7 @@
     {
       "type": "PDUFA",
       "ticker": "CORT",
-      "company": "CORCEPT THERAPEUTICS INC",
+      "company": "CORCEPT THERAPEUTICS",
       "drug": "",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1088856/000119312525199706/d947259dex991.htm",
@@ -383,7 +383,7 @@
     {
       "type": "PDUFA",
       "ticker": "LNTH",
-      "company": "Lantheus Holdings",
+      "company": "Lantheus Holdings\\",
       "drug": "",
       "indication": "",
       "url": "https://www.globenewswire.com/news-release/2025/10/28/3175415/0/en/Lantheus-Announces-FDA-Acceptance-of-New-Drug-Application-for-MK-6240-a-PET-Imaging-Agent-Targeting-Tau-in-Alzheimer-s-Disease.html",
@@ -393,15 +393,24 @@
       "type": "PDUFA",
       "ticker": "6446",
       "company": "PHARMAESSENTIA USA CORPORATION",
-      "drug": "",
+      "drug": "the",
       "indication": "Essential thrombocythemia (ET)",
       "url": "https://www.businesswire.com/news/home/20260113168572/en/FDA-Confirms-a-PDUFA-Goal-Date-of-August-30-2026-for-the-sBLA-Submission-of-Ropeginterferon-Alfa-2b-njft-in-Essential-Thrombocythemia-ET",
       "date": "2026-08-30"
     },
     {
       "type": "PDUFA",
+      "ticker": "RPRX",
+      "company": "Royalty Pharma",
+      "drug": "zidesamtinib",
+      "indication": "Zidesamtinib (ROS1 mutation-positive non-small cell ...",
+      "url": "https://www.globenewswire.com/news-release/2026/01/12/3216744/0/en/Royalty-Pharma-to-Highlight-Accomplishments-and-Provide-Business-Update-at-44th-Annual-J-P-Morgan-Healthcare-Conference.html",
+      "date": "2026-09-18"
+    },
+    {
+      "type": "PDUFA",
       "ticker": "NUVL",
-      "company": "Nuvalent",
+      "company": "Nuvalent\\",
       "drug": "",
       "indication": "",
       "url": "https://www.prnewswire.com/news-releases/nuvalent-announces-fda-acceptance-of-new-drug-application-for-zidesamtinib-for-the-treatment-of-tki-pre-treated-patients-with-advanced-ros1-positive-nsclc-302620883.html",
@@ -409,18 +418,9 @@
     },
     {
       "type": "PDUFA",
-      "ticker": "RPRX",
-      "company": "Royalty Pharma",
-      "drug": "",
-      "indication": "Zidesamtinib (ROS1 mutation-positive non-small cell ...",
-      "url": "https://www.globenewswire.com/news-release/2026/01/12/3216744/0/en/Royalty-Pharma-to-Highlight-Accomplishments-and-Provide-Business-Update-at-44th-Annual-J-P-Morgan-Healthcare-Conference.html",
-      "date": "2026-09-18"
-    },
-    {
-      "type": "PDUFA",
       "ticker": "INO",
-      "company": "INOVIO PHARMACEUTICALS, INC.",
-      "drug": "",
+      "company": "INOVIO PHARMACEUTICALS\\",
+      "drug": "October 30",
       "indication": "",
       "url": "https://www.sec.gov/Archives/edgar/data/1055726/000119312525332322/d78035dex991.htm",
       "date": "2026-10-30"
