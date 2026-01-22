@@ -1,103 +1,382 @@
 {
-  "lastUpdated": "2026-01-21",
+  "lastUpdated": "2026-01-22",
+  "source": "Google Calendar ICS (FDA Tracker)",
   "events": [
     {
       "type": "PDUFA",
-      "company": "Vertex",
-      "drug": "Vanzacaftor Triple",
-      "indication": "Cystic Fibrosis",
+      "ticker": "4568",
+      "company": "DAIICHI SANKYO",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-01-23"
     },
     {
       "type": "PDUFA",
-      "company": "Neurocrine",
-      "drug": "Crinecerfont",
-      "indication": "Congenital Adrenal Hyperplasia",
+      "ticker": "6622",
+      "company": "TENPOINT THERAPEUTICS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-01-28"
     },
     {
       "type": "PDUFA",
-      "company": "Aquestive",
-      "drug": "Anaphylm",
-      "indication": "Type 1 Allergic Reactions",
+      "ticker": "PHAR",
+      "company": "Pharming Group",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-01-31"
     },
     {
       "type": "PDUFA",
+      "ticker": "AQST",
+      "company": "Aquestive Therapeutics",
+      "drug": "See details",
+      "indication": "Type 1 allergic reactions, including anaphylaxis, and has assigned a Prescriptio",
+      "date": "2026-01-31"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "RGNX",
       "company": "REGENXBIO",
-      "drug": "RGX-121",
-      "indication": "Hunter Syndrome (Gene Therapy)",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-02-08"
     },
     {
       "type": "PDUFA",
-      "company": "Roche",
-      "drug": "Crovalimab",
-      "indication": "PNH",
-      "date": "2026-02-18"
+      "ticker": "MRK",
+      "company": "MERCK & CO.",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-02-20"
     },
     {
-      "type": "AdCom",
-      "company": "Cassava Sciences",
-      "drug": "Simufilam",
-      "indication": "Alzheimer's Disease",
+      "type": "PDUFA",
+      "ticker": "VNDA",
+      "company": "Vanda Pharmaceuticals",
+      "drug": "See details",
+      "indication": "bipolar I disorder and the treatment of schizophrenia was accepted for filing by",
+      "date": "2026-02-21"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "ETON",
+      "company": "Eton Pharmaceuticals",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-02-25"
     },
     {
       "type": "PDUFA",
-      "company": "AbbVie",
-      "drug": "Tavapadon",
-      "indication": "Parkinson's Disease",
+      "ticker": "BMRN",
+      "company": "BioMarin Pharmaceutical",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-02-28"
     },
     {
       "type": "PDUFA",
-      "company": "Ascendis",
-      "drug": "TransCon PTH",
-      "indication": "Hypoparathyroidism",
-      "date": "2026-03-01"
+      "ticker": "ASND",
+      "company": "Ascendis Pharma",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-02-28"
     },
     {
       "type": "PDUFA",
-      "company": "Bristol Myers Squibb",
-      "drug": "Deucravacitinib",
-      "indication": "Psoriatic Arthritis",
+      "ticker": "SNY",
+      "company": "Sanofi",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-02-28"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "BMY",
+      "company": "BRISTOL MYERS SQUIBB",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-03-06"
     },
     {
       "type": "PDUFA",
-      "company": "Eli Lilly",
-      "drug": "Orforglipron",
-      "indication": "Type 2 Diabetes",
-      "date": "2026-03-14"
+      "ticker": "LNTH",
+      "company": "Lantheus Holdings",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-03-06"
     },
     {
       "type": "PDUFA",
-      "company": "Sarepta",
-      "drug": "Elevidys",
-      "indication": "DMD (Full Approval)",
+      "ticker": "ALDX",
+      "company": "ALDEYRA THERAPEUTICS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-03-16"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "RYTM",
+      "company": "RHYTHM PHARMACEUTICALS",
+      "drug": "See details",
+      "indication": "acquired hypothalamic obesity",
       "date": "2026-03-20"
     },
     {
       "type": "PDUFA",
+      "ticker": "GSK",
       "company": "GSK",
-      "drug": "Linerixibat",
-      "indication": "Cholestatic Pruritus (PBC)",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-03-24"
     },
     {
       "type": "PDUFA",
-      "company": "Rocket Pharma",
-      "drug": "Kresladi",
-      "indication": "LAD-I (Gene Therapy)",
+      "ticker": "RCKT",
+      "company": "ROCKET PHARMACEUTICALS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-03-28"
     },
     {
       "type": "PDUFA",
-      "company": "Alnylam",
-      "drug": "Vutrisiran",
-      "indication": "ATTR Cardiomyopathy",
+      "ticker": "LNTH",
+      "company": "Lantheus Holdings",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-03-29"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "RPRX",
+      "company": "Royalty Pharma",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-05"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "DNLI",
+      "company": "Denali Therapeutics",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-05"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "PFE",
+      "company": "Astellas Pharma",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-07"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "MRK",
+      "company": "MERCK & CO.",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-07"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "BMY",
+      "company": "BRISTOL MYERS SQUIBB",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-08"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "REPL",
+      "company": "Replimune Group",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
       "date": "2026-04-10"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "TVTX",
+      "company": "Travere Therapeutics",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-13"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "GRCE",
+      "company": "Grace Therapeutics",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-23"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "SNY",
+      "company": "Sanofi",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-23"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "SNY",
+      "company": "Sanofi",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-27"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "MRK",
+      "company": "Merck & Co.",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-28"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "SNY",
+      "company": "Sanofi",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-29"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "AXSM",
+      "company": "Axsome Therapeutics",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-04-30"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "ARGX",
+      "company": "ARGENX SE",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-05-10"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "4568",
+      "company": "DAIICHI SANKYO",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-05-18"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "MNKD",
+      "company": "MannKind",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-05-29"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "CING",
+      "company": "Cingulate",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-05-31"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "ARVN",
+      "company": "ARVINAS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-06-05"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "VRDN",
+      "company": "VIRIDIAN THERAPEUTICS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-06-30"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "VERA",
+      "company": "Vera Therapeutics",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-07-07"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "CORT",
+      "company": "CORCEPT THERAPEUTICS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-07-11"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "CELC",
+      "company": "Celcuity",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-07-17"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "MNKD",
+      "company": "MannKind",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-07-26"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "VTRS",
+      "company": "Viatris",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-07-30"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "LNTH",
+      "company": "Lantheus Holdings",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-08-13"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "6446",
+      "company": "PHARMAESSENTIA USA CORPORATION",
+      "drug": "See details",
+      "indication": "adult patients with essential thrombocythemia (ET)",
+      "date": "2026-08-30"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "RPRX",
+      "company": "Royalty Pharma",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-09-18"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "NUVL",
+      "company": "Nuvalent",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-09-18"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "INO",
+      "company": "INOVIO PHARMACEUTICALS",
+      "drug": "See details",
+      "indication": "Pending FDA decision",
+      "date": "2026-10-30"
     }
   ]
 }
