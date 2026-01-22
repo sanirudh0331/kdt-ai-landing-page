@@ -1141,23 +1141,13 @@
                         <div class="mt-auto pt-3 border-t border-dark-100 dark:border-dark-800">
                             <p class="text-xs font-medium text-dark-600 dark:text-dark-300 mb-1">${sponsor}</p>
                             <div class="flex items-center justify-between gap-2">
-                                <div class="scroll-container overflow-hidden h-4 flex-1 min-w-0"><span class="text-xs text-dark-400 whitespace-nowrap scroll-text">${conditions}</span></div>
+                                <span class="text-xs text-dark-400 truncate" title="${conditions}">${conditions}</span>
                                 <span class="text-xs font-medium flex-shrink-0 ${statusColor}">${statusLabel}</span>
                             </div>
                         </div>
                     </a>
                 `;
             }).join('');
-
-            // Check for overflow and enable scrolling on long text
-            setTimeout(() => {
-                document.querySelectorAll('#trials-grid .scroll-text').forEach(el => {
-                    if (el.scrollWidth > el.parentElement.clientWidth) {
-                        el.classList.add('scrollable');
-                        el.innerHTML = el.textContent + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + el.textContent;
-                    }
-                });
-            }, 100);
 
             trialsFooter.textContent = '';
         }
