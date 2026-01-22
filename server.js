@@ -16,6 +16,114 @@ const NEWS_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 const FDA_CALENDAR_PATH = path.join(__dirname, 'static', 'fda-calendar.json');
 const FDA_REFRESH_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+// Perplexity API for enriching FDA data
+const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
+
+// Query Perplexity for drug/indication info
+async function enrichWithPerplexity(company, ticker, date) {
+    if (!PERPLEXITY_API_KEY) {
+        console.warn('No Perplexity API key configured');
+        return null;
+    }
+
+    const query = `What drug is ${company} (${ticker}) seeking FDA approval for with PDUFA date ${date}? Give me just the drug name and the medical indication/condition it treats. Be concise - just the drug name and indication, nothing else.`;
+
+    try {
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'sonar',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a helpful assistant that provides concise information about FDA drug approvals. Respond with just the drug name and indication in this format: "Drug: [name], Indication: [condition]". If you cannot find the information, respond with "Unknown".'
+                    },
+                    {
+                        role: 'user',
+                        content: query
+                    }
+                ],
+                max_tokens: 150
+            })
+        });
+
+        if (!response.ok) {
+            console.warn(`Perplexity API error: ${response.status}`);
+            return null;
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content || '';
+
+        // Parse the response and clean up citation markers
+        const cleanText = (text) => text
+            .replace(/\*\*/g, '')           // Remove bold markers
+            .replace(/\[\d+\]/g, '')        // Remove citation numbers [1], [2], etc.
+            .replace(/\s+/g, ' ')           // Normalize whitespace
+            .trim();
+
+        const drugMatch = content.match(/Drug:\s*([^,\n]+)/i);
+        const indicationMatch = content.match(/Indication:\s*([^\n]+)/i);
+
+        if (drugMatch || indicationMatch) {
+            return {
+                drug: drugMatch ? cleanText(drugMatch[1]) : '',
+                indication: indicationMatch ? cleanText(indicationMatch[1]) : ''
+            };
+        }
+
+        // Try to extract from less structured response
+        if (content && content.toLowerCase() !== 'unknown') {
+            // First sentence often has the drug name
+            const firstSentence = content.split('.')[0];
+            return {
+                drug: '',
+                indication: firstSentence.substring(0, 80).trim()
+            };
+        }
+
+        return null;
+    } catch (error) {
+        console.warn('Perplexity API error:', error.message);
+        return null;
+    }
+}
+
+// Enrich multiple events with Perplexity (with rate limiting)
+async function enrichFDAEvents(events, limit = 12) {
+    const eventsToEnrich = events.slice(0, limit);
+    const enrichedEvents = [];
+
+    console.log(`Enriching ${eventsToEnrich.length} FDA events with Perplexity...`);
+
+    for (const event of eventsToEnrich) {
+        // Add small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const enrichment = await enrichWithPerplexity(event.company, event.ticker, event.date);
+
+        if (enrichment) {
+            enrichedEvents.push({
+                ...event,
+                drug: enrichment.drug || event.drug,
+                indication: enrichment.indication || event.indication
+            });
+            console.log(`  ✓ ${event.company}: ${enrichment.drug || 'no drug'} - ${enrichment.indication || 'no indication'}`);
+        } else {
+            enrichedEvents.push(event);
+            console.log(`  ✗ ${event.company}: using fallback data`);
+        }
+    }
+
+    // Add remaining events without enrichment
+    const remaining = events.slice(limit);
+    return [...enrichedEvents, ...remaining];
+}
+
 // RSS feed URLs
 const RSS_FEEDS = [
     'https://www.fiercebiotech.com/rss/xml',
@@ -335,12 +443,19 @@ async function checkAndRefreshFDA() {
         if (!needsRefresh) return;
 
         console.log('Refreshing FDA calendar from Google Calendar...');
-        const events = await fetchFDACalendars();
+        let events = await fetchFDACalendars();
 
         if (events.length > 0) {
+            // Enrich top 12 events with Perplexity for drug/indication details
+            if (PERPLEXITY_API_KEY) {
+                events = await enrichFDAEvents(events, 12);
+            } else {
+                console.log('Skipping Perplexity enrichment (no API key)');
+            }
+
             const updatedData = {
                 lastUpdated: new Date().toISOString().split('T')[0],
-                source: 'Google Calendar ICS (FDA Tracker)',
+                source: 'Google Calendar ICS (FDA Tracker) + Perplexity AI',
                 events
             };
 
