@@ -1031,8 +1031,6 @@
         // Load FDA calendar
         loadFDACalendar();
 
-        // Refresh FDA calendar every 15 minutes
-        setInterval(() => loadFDACalendar(), 15 * 60 * 1000);
 
         // Clinical Trials
         let trialsCache = { recent: null, results: null, phase1: null, phase2: null, phase3: null };
