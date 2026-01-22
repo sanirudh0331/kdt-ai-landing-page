@@ -264,12 +264,12 @@
         .transition-logo.visible {
             opacity: 1;
         }
-        /* Scrolling indication for long text */
-        .indication-scroll-container {
+        /* Scrolling text for overflow content */
+        .scroll-container {
             mask-image: linear-gradient(to right, black 90%, transparent 100%);
             -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
         }
-        .indication-scroll-container:hover .indication-text.scrollable {
+        .scroll-container:hover .scroll-text.scrollable {
             animation: scroll-text 8s linear infinite;
         }
         @keyframes scroll-text {
@@ -984,7 +984,7 @@
                             <div class="min-w-0 flex-1">
                                 <div class="text-xs font-medium ${typeColor} uppercase tracking-wide mb-1">${event.type}</div>
                                 <h4 class="font-semibold text-sm mb-1 truncate">${cleanCompany}</h4>
-                                ${indication ? `<div class="indication-scroll-container overflow-hidden h-4 relative"><p class="text-xs text-dark-500 dark:text-dark-400 whitespace-nowrap indication-text">${indication}</p></div>` : ''}
+                                ${indication ? `<div class="scroll-container overflow-hidden h-4 relative"><p class="text-xs text-dark-500 dark:text-dark-400 whitespace-nowrap scroll-text">${indication}</p></div>` : ''}
                             </div>
                             <div class="text-right flex-shrink-0">
                                 <div class="text-lg font-bold">${d.month} ${d.day}</div>
@@ -1001,12 +1001,11 @@
                     }
                 }).join('');
 
-                // Check for overflow and enable scrolling on long indications
+                // Check for overflow and enable scrolling on long text
                 setTimeout(() => {
-                    document.querySelectorAll('.indication-text').forEach(el => {
+                    document.querySelectorAll('#fda-calendar .scroll-text').forEach(el => {
                         if (el.scrollWidth > el.parentElement.clientWidth) {
                             el.classList.add('scrollable');
-                            // Duplicate text for seamless loop
                             el.innerHTML = el.textContent + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + el.textContent;
                         }
                     });
@@ -1142,13 +1141,23 @@
                         <div class="mt-auto pt-3 border-t border-dark-100 dark:border-dark-800">
                             <p class="text-xs font-medium text-dark-600 dark:text-dark-300 mb-1">${sponsor}</p>
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs text-dark-400 truncate">${conditions}</span>
+                                <div class="scroll-container overflow-hidden h-4 flex-1 min-w-0"><span class="text-xs text-dark-400 whitespace-nowrap scroll-text">${conditions}</span></div>
                                 <span class="text-xs font-medium flex-shrink-0 ${statusColor}">${statusLabel}</span>
                             </div>
                         </div>
                     </a>
                 `;
             }).join('');
+
+            // Check for overflow and enable scrolling on long text
+            setTimeout(() => {
+                document.querySelectorAll('#trials-grid .scroll-text').forEach(el => {
+                    if (el.scrollWidth > el.parentElement.clientWidth) {
+                        el.classList.add('scrollable');
+                        el.innerHTML = el.textContent + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + el.textContent;
+                    }
+                });
+            }, 100);
 
             trialsFooter.textContent = '';
         }
