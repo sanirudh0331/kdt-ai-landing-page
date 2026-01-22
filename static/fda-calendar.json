@@ -8,6 +8,7 @@
       "company": "DAIICHI SANKYO",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20250923746690/en/ENHERTU-Plus-Pertuzumab-Granted-Priority-Review-in-the-U.S.-as-First-Line-Treatment-for-Patients-with-HER2-Positive-Metastatic-Breast-Cancer",
       "date": "2026-01-23"
     },
     {
@@ -16,7 +17,17 @@
       "company": "TENPOINT THERAPEUTICS, LTD.",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20251105608942/en/Tenpoint-Therapeutics-Ltd.-Announces-Submission-of-a-New-Drug-Application-for-BRIMOCHOL-PF-for-the-Treatment-of-Presbyopia-to-the-MFDS-in-South-Korea",
       "date": "2026-01-28"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "AQST",
+      "company": "Aquestive Therapeutics",
+      "drug": "",
+      "indication": "Type 1 allergic reactions",
+      "url": "https://www.sec.gov/Archives/edgar/data/1398733/000162828025031455/aqst-20250613.htm",
+      "date": "2026-01-31"
     },
     {
       "type": "PDUFA",
@@ -24,14 +35,7 @@
       "company": "Pharming Group",
       "drug": "",
       "indication": "",
-      "date": "2026-01-31"
-    },
-    {
-      "type": "PDUFA",
-      "ticker": "AQST",
-      "company": "Aquestive Therapeutics",
-      "drug": "",
-      "indication": "Type 1 allergic reactions, including anaphylaxis, and has assigned a Prescrip...",
+      "url": "https://www.globenewswire.com/news-release/2025/10/01/3159182/0/en/Pharming-Group-announces-U-S-FDA-acceptance-and-Priority-Review-of-supplemental-New-Drug-Application-for-leniolisib-in-children-with-APDS-aged-4-to-11-years.html",
       "date": "2026-01-31"
     },
     {
@@ -39,7 +43,8 @@
       "ticker": "RGNX",
       "company": "REGENXBIO",
       "drug": "",
-      "indication": "MPS II, also known as Hunter syndrome FDA PDUFA target date is February 8, 2026",
+      "indication": "",
+      "url": "https://www.prnewswire.com/news-releases/regenxbio-highlights-key-2026-catalysts-and-announces-positive-long-term-functional-outcomes-in-lead-duchenne-gene-therapy-program-302657988.html",
       "date": "2026-02-08"
     },
     {
@@ -48,6 +53,7 @@
       "company": "MERCK & CO., INC.",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20251018982840/en/KEYTRUDA-pembrolizumab-Plus-Chemotherapy-With-or-Without-Bevacizumab-Reduced-Risk-of-Disease-Progression-or-Death-Versus-Chemotherapy-With-or-Without-Bevacizumab-in-Certain-Patients-With-Platinum-Resistant-Recurrent-Ovarian-Cancer",
       "date": "2026-02-20"
     },
     {
@@ -55,7 +61,8 @@
       "ticker": "VNDA",
       "company": "Vanda Pharmaceuticals",
       "drug": "",
-      "indication": "bipolar I disorder and the treatment of schizophrenia was accepted for filing...",
+      "indication": "Bipolar I disorder and the treatment of schizophreni...",
+      "url": "https://www.sec.gov/Archives/edgar/data/1347178/000162828025023154/vnda8-k572025exhibit991.htm",
       "date": "2026-02-21"
     },
     {
@@ -63,7 +70,8 @@
       "ticker": "ETON",
       "company": "Eton Pharmaceuticals",
       "drug": "",
-      "indication": "rare diseases, today announced the Company’s New Drug Applicat",
+      "indication": "Rare diseases",
+      "url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774925022298/ex_836124.htm",
       "date": "2026-02-25"
     },
     {
@@ -72,6 +80,7 @@
       "company": "Ascendis Pharma",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/11/25/3194804/0/en/Ascendis-Announces-Extension-of-FDA-Review-Period-for-TransCon-CNP-navepegritide-for-Children-with-Achondroplasia.html",
       "date": "2026-02-28"
     },
     {
@@ -80,6 +89,7 @@
       "company": "BioMarin Pharmaceutical",
       "drug": "",
       "indication": "",
+      "url": "https://www.prnewswire.com/news-releases/fda-accepts-biomarins-palynziq-pegvaliase-pqpz-supplemental-biologics-license-application-for-priority-review-to-expand-use-to-adolescents-aged-12-17-with-phenylketonuria-302597628.html",
       "date": "2026-02-28"
     },
     {
@@ -87,7 +97,8 @@
       "ticker": "SNY",
       "company": "Sanofi",
       "drug": "",
-      "indication": "FDA priority review • Phase 3 data to be presented at ACAAI demonstrate Dupix...",
+      "indication": "And Tarrytown",
+      "url": "https://www.sec.gov/Archives/edgar/data/1121404/000119312525285701/d895566dex991.htm",
       "date": "2026-02-28"
     },
     {
@@ -96,6 +107,7 @@
       "company": "BRISTOL MYERS SQUIBB",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20250717182422/en/Bristol-Myers-Squibbs-Supplemental-New-Drug-Application-sNDA-for-Sotyktu-deucravacitinib-for-the-Treatment-of-Adults-with-Active-Psoriatic-Arthritis-Accepted-for-Review-Across-Four-Regions-Globally",
       "date": "2026-03-06"
     },
     {
@@ -104,6 +116,7 @@
       "company": "Lantheus Holdings",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1521036/000095017025103543/lnth-ex99_2.htm",
       "date": "2026-03-06"
     },
     {
@@ -112,6 +125,7 @@
       "company": "ALDEYRA THERAPEUTICS, INC.",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20251215293677/en/Aldeyra-Therapeutics-Announces-PDUFA-Extension-of-the-New-Drug-Application-of-Reproxalap-for-the-Treatment-of-Dry-Eye-Disease",
       "date": "2026-03-16"
     },
     {
@@ -119,7 +133,8 @@
       "ticker": "RYTM",
       "company": "RHYTHM PHARMACEUTICALS, INC.",
       "drug": "",
-      "indication": "acquired hypothalamic obesity",
+      "indication": "Acquired hypothalamic obesity",
+      "url": "https://www.sec.gov/Archives/edgar/data/1649904/000110465925108154/rytm-20251106xex99d1.htm",
       "date": "2026-03-20"
     },
     {
@@ -128,6 +143,7 @@
       "company": "GSK",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1131399/000165495425006373/a8978k.htm",
       "date": "2026-03-24"
     },
     {
@@ -136,6 +152,7 @@
       "company": "ROCKET PHARMACEUTICALS, INC.",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1281895/000114036125038030/ef20057000_8k.htm",
       "date": "2026-03-28"
     },
     {
@@ -144,15 +161,8 @@
       "company": "Lantheus Holdings",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/10/30/3177418/0/en/Lantheus-Announces-FDA-Grants-PDUFA-Date-for-LNTH-2501-Ga-68-edotreotide-a-PET-Diagnostic-Imaging-Kit-Targeting-Somatostatin-Receptor-Positive-SSTR-Neuroendocrine-Tumors-NETs.html",
       "date": "2026-03-29"
-    },
-    {
-      "type": "PDUFA",
-      "ticker": "DNLI",
-      "company": "Denali Therapeutics",
-      "drug": "",
-      "indication": "",
-      "date": "2026-04-05"
     },
     {
       "type": "PDUFA",
@@ -160,6 +170,16 @@
       "company": "Royalty Pharma",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/12/04/3199663/0/en/Royalty-Pharma-and-Denali-Therapeutics-Announce-275-Million-Royalty-Funding-Agreement.html",
+      "date": "2026-04-05"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "DNLI",
+      "company": "Denali Therapeutics",
+      "drug": "",
+      "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1714899/000171489925000209/dnli-20251204.htm",
       "date": "2026-04-05"
     },
     {
@@ -168,6 +188,7 @@
       "company": "Astellas Pharma",
       "drug": "",
       "indication": "",
+      "url": "https://www.prnewswire.com/news-releases/padcev-enfortumab-vedotin-ejfv-plus-keytruda-pembrolizumab-sbla-granted-fda-priority-review-for-treatment-of-certain-patients-with-muscle-invasive-bladder-cancer-302590744.html",
       "date": "2026-04-07"
     },
     {
@@ -176,6 +197,7 @@
       "company": "MERCK & CO.",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20251022622711/en/FDA-Grants-Priority-Review-for-KEYTRUDA-pembrolizumab-and-KEYTRUDA-QLEX-pembrolizumab-and-berahyaluronidase-alfa-pmph-Each-in-Combination-with-Padcev-enfortumab-vedotin-ejfv-for-Certain-Patients-with-Muscle-Invasive-Bladder-Cancer",
       "date": "2026-04-07"
     },
     {
@@ -184,6 +206,7 @@
       "company": "BRISTOL MYERS SQUIBB",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20251210833041/en/U.S.-Food-and-Drug-Administration-FDA-Grants-Priority-Review-to-Bristol-Myers-Squibbs-Application-for-Opdivo-nivolumab-Plus-Chemotherapy-Combination-for-Classical-Hodgkin-Lymphoma",
       "date": "2026-04-08"
     },
     {
@@ -192,6 +215,7 @@
       "company": "Replimune Group",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1737953/000110465925100605/tm2529069d1_8k.htm",
       "date": "2026-04-10"
     },
     {
@@ -200,6 +224,7 @@
       "company": "Travere Therapeutics",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1438533/000143853326000005/tvtx-20260113.htm",
       "date": "2026-04-13"
     },
     {
@@ -208,6 +233,7 @@
       "company": "Sanofi",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1121404/000112140425000026/pressreleaseq32025english.htm",
       "date": "2026-04-23"
     },
     {
@@ -216,6 +242,7 @@
       "company": "Grace Therapeutics",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1444192/000114036125032847/ef20054617_8k.htm",
       "date": "2026-04-23"
     },
     {
@@ -224,6 +251,7 @@
       "company": "Sanofi",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1121404/000112140425000026/pressreleaseq32025english.htm",
       "date": "2026-04-27"
     },
     {
@@ -232,6 +260,7 @@
       "company": "Merck & Co.",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/310158/000110465925071380/tm2521736d1_ex99-1.htm",
       "date": "2026-04-28"
     },
     {
@@ -240,6 +269,7 @@
       "company": "Sanofi",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1121404/000119312526008205/d19776dex991.htm",
       "date": "2026-04-29"
     },
     {
@@ -248,6 +278,7 @@
       "company": "Axsome Therapeutics",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/12/31/3211743/33090/en/Axsome-Therapeutics-Announces-FDA-Acceptance-and-Priority-Review-of-Supplemental-New-Drug-Application-for-AXS-05-for-the-Treatment-of-Alzheimer-s-Disease-Agitation.html",
       "date": "2026-04-30"
     },
     {
@@ -256,6 +287,7 @@
       "company": "ARGENX SE",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1697862/000110465926003037/tm262983d1_ex99-1.htm",
       "date": "2026-05-10"
     },
     {
@@ -264,6 +296,7 @@
       "company": "DAIICHI SANKYO",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20250930135764/en/ENHERTU-Followed-by-THP-Supplemental-Biologics-License-Application-Accepted-in-the-U.S.-for-Patients-with-High-Risk-HER2-Positive-Early-Stage-Breast-Cancer-Prior-to-Surgery",
       "date": "2026-05-18"
     },
     {
@@ -272,6 +305,7 @@
       "company": "MannKind",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/10/13/3165519/29517/en/MannKind-Announces-U-S-FDA-Accepts-for-Review-its-Supplemental-Biologics-License-Application-sBLA-for-Inhaled-Insulin-Afrezza-in-Children-and-Adolescents-Aged-4-17-Years-Living-wit.html",
       "date": "2026-05-29"
     },
     {
@@ -280,6 +314,7 @@
       "company": "Cingulate",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1862150/000149315225017931/ex99-1.htm",
       "date": "2026-05-31"
     },
     {
@@ -288,6 +323,7 @@
       "company": "ARVINAS, INC.",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1655759/000165575925000141/arvn-20250808.htm",
       "date": "2026-06-05"
     },
     {
@@ -296,6 +332,7 @@
       "company": "VIRIDIAN THERAPEUTICS, INC.",
       "drug": "",
       "indication": "",
+      "url": "https://www.businesswire.com/news/home/20251222159703/en/Viridian-Therapeutics-Announces-BLA-Acceptance-and-Priority-Review-for-Veligrotug-for-the-Treatment-of-Thyroid-Eye-Disease",
       "date": "2026-06-30"
     },
     {
@@ -304,6 +341,7 @@
       "company": "Vera Therapeutics",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2026/01/07/3214426/0/en/Vera-Therapeutics-Announces-U-S-FDA-Granted-Priority-Review-to-Biologics-License-Application-for-Atacicept-for-Treatment-of-Adults-with-IgA-Nephropathy.html",
       "date": "2026-07-07"
     },
     {
@@ -312,6 +350,7 @@
       "company": "CORCEPT THERAPEUTICS INC",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1088856/000119312525199706/d947259dex991.htm",
       "date": "2026-07-11"
     },
     {
@@ -320,6 +359,7 @@
       "company": "Celcuity",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2026/01/20/3221601/0/en/Celcuity-Announces-FDA-Acceptance-of-New-Drug-Application-for-Gedatolisib-in-HR-HER2-PIK3CA-Wild-Type-Advanced-Breast-Cancer.html",
       "date": "2026-07-17"
     },
     {
@@ -328,6 +368,7 @@
       "company": "MannKind",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/12/01/3196982/29517/en/MannKind-Announces-U-S-FDA-Accepts-for-Review-its-Supplemental-New-Drug-Application-sNDA-of-FUROSCIX-ReadyFlow-Autoinjector-for-the-Treatment-of-Edema-in-Adults-with-Chronic-Heart-.html",
       "date": "2026-07-26"
     },
     {
@@ -336,6 +377,7 @@
       "company": "Viatris",
       "drug": "",
       "indication": "",
+      "url": "https://www.prnewswire.com/news-releases/viatris-provides-pipeline-update-on-four-regulatory-milestones-302645311.html",
       "date": "2026-07-30"
     },
     {
@@ -344,6 +386,7 @@
       "company": "Lantheus Holdings",
       "drug": "",
       "indication": "",
+      "url": "https://www.globenewswire.com/news-release/2025/10/28/3175415/0/en/Lantheus-Announces-FDA-Acceptance-of-New-Drug-Application-for-MK-6240-a-PET-Imaging-Agent-Targeting-Tau-in-Alzheimer-s-Disease.html",
       "date": "2026-08-13"
     },
     {
@@ -351,16 +394,9 @@
       "ticker": "6446",
       "company": "PHARMAESSENTIA USA CORPORATION",
       "drug": "",
-      "indication": "essential thrombocythemia (ET)",
+      "indication": "Essential thrombocythemia (ET)",
+      "url": "https://www.businesswire.com/news/home/20260113168572/en/FDA-Confirms-a-PDUFA-Goal-Date-of-August-30-2026-for-the-sBLA-Submission-of-Ropeginterferon-Alfa-2b-njft-in-Essential-Thrombocythemia-ET",
       "date": "2026-08-30"
-    },
-    {
-      "type": "PDUFA",
-      "ticker": "RPRX",
-      "company": "Royalty Pharma",
-      "drug": "",
-      "indication": "zidesamtinib (ROS1 mutation-positive non-small cell lung cancer), which has a...",
-      "date": "2026-09-18"
     },
     {
       "type": "PDUFA",
@@ -368,6 +404,16 @@
       "company": "Nuvalent",
       "drug": "",
       "indication": "",
+      "url": "https://www.prnewswire.com/news-releases/nuvalent-announces-fda-acceptance-of-new-drug-application-for-zidesamtinib-for-the-treatment-of-tki-pre-treated-patients-with-advanced-ros1-positive-nsclc-302620883.html",
+      "date": "2026-09-18"
+    },
+    {
+      "type": "PDUFA",
+      "ticker": "RPRX",
+      "company": "Royalty Pharma",
+      "drug": "",
+      "indication": "Zidesamtinib (ROS1 mutation-positive non-small cell ...",
+      "url": "https://www.globenewswire.com/news-release/2026/01/12/3216744/0/en/Royalty-Pharma-to-Highlight-Accomplishments-and-Provide-Business-Update-at-44th-Annual-J-P-Morgan-Healthcare-Conference.html",
       "date": "2026-09-18"
     },
     {
@@ -376,6 +422,7 @@
       "company": "INOVIO PHARMACEUTICALS, INC.",
       "drug": "",
       "indication": "",
+      "url": "https://www.sec.gov/Archives/edgar/data/1055726/000119312525332322/d78035dex991.htm",
       "date": "2026-10-30"
     }
   ]

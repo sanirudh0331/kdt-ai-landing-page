@@ -207,35 +207,49 @@ function parseICSEvents(icsText, eventType) {
             }
         }
 
-        // Try to extract indication with expanded patterns
+        // Extract URL from description (press release link)
+        let url = '';
+        const urlMatch = description.match(/https?:\/\/[^\s\)]+/);
+        if (urlMatch) {
+            url = urlMatch[0].replace(/\\,/g, ',').replace(/\s/g, '');
+        }
+
+        // Try to extract indication - focus on disease/condition names only
         const indicationPatterns = [
-            /treatment\s+of\s+(?:adult\s+)?(?:patients\s+with\s+)?([^\.]{10,100})/i,
-            /for\s+(?:the\s+)?treatment\s+of\s+([^\.]{10,100})/i,
-            /indicated?\s+for\s+(?:the\s+)?(?:treatment\s+of\s+)?([^\.]{10,100})/i,
-            /for\s+(?:use\s+in\s+)?(?:patients\s+with\s+)?([^\.]*?(?:cancer|carcinoma|lymphoma|leukemia|myeloma|disease|disorder|syndrome|deficiency|anemia|arthritis|diabetes|hypertension|infection)[^\.]{0,50})/i,
-            /proposed\s+indication[^:]*:\s*([^\.]+)/i,
-            /for\s+([^\.]*?(?:allergic|anaphylaxis|epilepsy|seizure|pain|inflammation|psoriasis|eczema|asthma|COPD|HIV|hepatitis|obesity)[^\.]{0,30})/i
+            /treatment\s+of\s+(?:adult\s+)?(?:patients\s+with\s+)?([^,\.]{8,60})/i,
+            /for\s+(?:the\s+)?treatment\s+of\s+([^,\.]{8,60})/i,
+            /indication[^:]*(?:is|for|:)\s*([^,\.]{8,60})/i,
+            /for\s+([^,\.]*?(?:allergic|anaphylaxis|cancer|disease|syndrome|disorder)[^,\.]{0,30})/i
         ];
 
         for (const pattern of indicationPatterns) {
             const match = description.match(pattern);
             if (match) {
-                // Clean up the indication text
+                // Clean up the indication - just the condition
                 indication = match[1]
                     .replace(/\s+/g, ' ')
-                    .replace(/^(adult |pediatric )/i, '')
+                    .replace(/^(adult |pediatric |patients with |the )/gi, '')
+                    // Remove trailing junk
+                    .replace(/\s+(FDA|PDUFA|Phase|trial|study|data|review|•|http).*$/i, '')
+                    .replace(/\s+(and|or|with|who|that)\s*$/i, '')
                     .trim();
-                // Remove trailing incomplete phrases
-                indication = indication.replace(/\s+(and|or|with|who|that|in|for)\s*$/i, '').trim();
-                if (indication.length > 100) {
-                    indication = indication.substring(0, 97) + '...';
+
+                // Skip if too short or just noise
+                if (indication.length < 8 || /^(the|a|an|for|in)\s/i.test(indication)) {
+                    indication = '';
+                    continue;
+                }
+
+                // Capitalize first letter
+                indication = indication.charAt(0).toUpperCase() + indication.slice(1);
+
+                // Limit length
+                if (indication.length > 55) {
+                    indication = indication.substring(0, 52) + '...';
                 }
                 break;
             }
         }
-
-        // Skip generic fallback - leave empty if no real indication found
-        // The frontend will hide empty indications
 
         events.push({
             type: eventType,
@@ -243,6 +257,7 @@ function parseICSEvents(icsText, eventType) {
             company,
             drug: drug || '',
             indication: indication || '',
+            url,
             date
         });
     }
