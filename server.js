@@ -207,33 +207,42 @@ function parseICSEvents(icsText, eventType) {
             }
         }
 
-        // Try to extract indication
+        // Try to extract indication with expanded patterns
         const indicationPatterns = [
-            /treatment\s+of\s+(?:patients\s+with\s+)?([^\.]+)/i,
-            /indication.*?(?:is|for)\s+([^\.]+)/i,
-            /for\s+the\s+([^\.]+(?:disease|disorder|syndrome|cancer|carcinoma|lymphoma|leukemia|myeloma)[^\.]*)/i
+            /treatment\s+of\s+(?:adult\s+)?(?:patients\s+with\s+)?([^\.]{10,100})/i,
+            /for\s+(?:the\s+)?treatment\s+of\s+([^\.]{10,100})/i,
+            /indicated?\s+for\s+(?:the\s+)?(?:treatment\s+of\s+)?([^\.]{10,100})/i,
+            /for\s+(?:use\s+in\s+)?(?:patients\s+with\s+)?([^\.]*?(?:cancer|carcinoma|lymphoma|leukemia|myeloma|disease|disorder|syndrome|deficiency|anemia|arthritis|diabetes|hypertension|infection)[^\.]{0,50})/i,
+            /proposed\s+indication[^:]*:\s*([^\.]+)/i,
+            /for\s+([^\.]*?(?:allergic|anaphylaxis|epilepsy|seizure|pain|inflammation|psoriasis|eczema|asthma|COPD|HIV|hepatitis|obesity)[^\.]{0,30})/i
         ];
 
         for (const pattern of indicationPatterns) {
             const match = description.match(pattern);
             if (match) {
-                indication = match[1].trim().substring(0, 100); // Limit length
+                // Clean up the indication text
+                indication = match[1]
+                    .replace(/\s+/g, ' ')
+                    .replace(/^(adult |pediatric )/i, '')
+                    .trim();
+                // Remove trailing incomplete phrases
+                indication = indication.replace(/\s+(and|or|with|who|that|in|for)\s*$/i, '').trim();
+                if (indication.length > 100) {
+                    indication = indication.substring(0, 97) + '...';
+                }
                 break;
             }
         }
 
-        // If no indication found, use a shortened description
-        if (!indication && description.length > 0) {
-            indication = description.substring(0, 80).trim();
-            if (description.length > 80) indication += '...';
-        }
+        // Skip generic fallback - leave empty if no real indication found
+        // The frontend will hide empty indications
 
         events.push({
             type: eventType,
             ticker,
             company,
-            drug: drug || 'See details',
-            indication: indication || 'Pending FDA decision',
+            drug: drug || '',
+            indication: indication || '',
             date
         });
     }
