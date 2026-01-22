@@ -117,20 +117,140 @@ app.get('/api/news', async (req, res) => {
     });
 });
 
-// ============ FDA Calendar with Auto-Refresh ============
+// ============ FDA Calendar from Google Calendar ICS Feeds ============
 
-// Fetch and parse FDA calendar from BioPharmCatalyst
-async function fetchFDAFromSource() {
+// Google Calendar ICS feed URLs (from FDA Tracker's public calendars)
+const FDA_CALENDAR_FEEDS = {
+    pdufa: 'https://calendar.google.com/calendar/ical/5dso8589486irtj53sdkr4h6ek%40group.calendar.google.com/public/basic.ics',
+    adcom: 'https://calendar.google.com/calendar/ical/evgohovm2m3tuvqakdf4hfeq84%40group.calendar.google.com/public/basic.ics'
+};
+
+// Cache for FDA calendar data
+let fdaCache = {
+    data: null,
+    timestamp: 0
+};
+
+// Parse ICS format to extract events
+function parseICSEvents(icsText, eventType) {
+    const events = [];
+    const eventBlocks = icsText.split('BEGIN:VEVENT');
+
+    for (let i = 1; i < eventBlocks.length; i++) {
+        const block = eventBlocks[i];
+        const endIndex = block.indexOf('END:VEVENT');
+        if (endIndex === -1) continue;
+
+        const eventContent = block.substring(0, endIndex);
+
+        // Extract date
+        const dateMatch = eventContent.match(/DTSTART;VALUE=DATE:(\d{4})(\d{2})(\d{2})/);
+        if (!dateMatch) continue;
+
+        const date = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+
+        // Only include future events (within next 365 days)
+        const eventDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const oneYearOut = new Date(today);
+        oneYearOut.setFullYear(oneYearOut.getFullYear() + 1);
+
+        if (eventDate < today || eventDate > oneYearOut) continue;
+
+        // Extract summary (contains ticker and company name)
+        const summaryMatch = eventContent.match(/SUMMARY:(.+?)(?:\r?\n[A-Z]|$)/s);
+        if (!summaryMatch) continue;
+
+        const summary = summaryMatch[1].replace(/\r?\n\s*/g, '').trim();
+
+        // Parse ticker and company from summary
+        // Format is usually: "TICKER Company Name PDUFA" or "TICKER Company Name FDA AdCom"
+        const summaryParts = summary.replace(/ PDUFA$| FDA AdCom$/i, '').trim();
+        const tickerMatch = summaryParts.match(/^([A-Z0-9]{2,5})\s+(.+)$/);
+
+        let ticker = '';
+        let company = summaryParts;
+        if (tickerMatch) {
+            ticker = tickerMatch[1];
+            company = tickerMatch[2].replace(/,?\s*(Inc\.?|Corp\.?|Ltd\.?|plc|AG|SA|N\.V\.?)?\s*$/i, '').trim();
+        }
+
+        // Extract description (contains drug and indication details)
+        const descMatch = eventContent.match(/DESCRIPTION:(.+?)(?:\r?\n[A-Z]|$)/s);
+        let description = '';
+        if (descMatch) {
+            description = descMatch[1]
+                .replace(/\\n/g, ' ')
+                .replace(/\\,/g, ',')
+                .replace(/\r?\n\s*/g, '')
+                .trim();
+        }
+
+        // Try to extract drug name and indication from description
+        let drug = '';
+        let indication = '';
+
+        // Common patterns in descriptions
+        const drugPatterns = [
+            /for\s+([A-Za-z0-9-]+(?:\s+[A-Za-z0-9-]+)?)\s*[\(,]/i,
+            /NDA.*?for\s+([A-Za-z0-9-]+)/i,
+            /BLA.*?for\s+([A-Za-z0-9-]+)/i,
+            /application.*?for\s+([A-Za-z0-9-]+)/i
+        ];
+
+        for (const pattern of drugPatterns) {
+            const match = description.match(pattern);
+            if (match) {
+                drug = match[1].trim();
+                break;
+            }
+        }
+
+        // Try to extract indication
+        const indicationPatterns = [
+            /treatment\s+of\s+(?:patients\s+with\s+)?([^\.]+)/i,
+            /indication.*?(?:is|for)\s+([^\.]+)/i,
+            /for\s+the\s+([^\.]+(?:disease|disorder|syndrome|cancer|carcinoma|lymphoma|leukemia|myeloma)[^\.]*)/i
+        ];
+
+        for (const pattern of indicationPatterns) {
+            const match = description.match(pattern);
+            if (match) {
+                indication = match[1].trim().substring(0, 100); // Limit length
+                break;
+            }
+        }
+
+        // If no indication found, use a shortened description
+        if (!indication && description.length > 0) {
+            indication = description.substring(0, 80).trim();
+            if (description.length > 80) indication += '...';
+        }
+
+        events.push({
+            type: eventType,
+            ticker,
+            company,
+            drug: drug || 'See details',
+            indication: indication || 'Pending FDA decision',
+            date
+        });
+    }
+
+    return events;
+}
+
+// Fetch ICS feed
+async function fetchICSFeed(url, type) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
-        console.log('Fetching FDA calendar from BioPharmCatalyst...');
-        const response = await fetch('https://www.biopharmcatalyst.com/calendars/fda-calendar', {
+        const response = await fetch(url, {
             signal: controller.signal,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                'User-Agent': 'Mozilla/5.0 (compatible; KdT-AI/1.0)'
             }
         });
         clearTimeout(timeout);
@@ -139,138 +259,97 @@ async function fetchFDAFromSource() {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        const html = await response.text();
-        return parseFDACalendarHTML(html);
+        const text = await response.text();
+        return parseICSEvents(text, type);
     } catch (error) {
         clearTimeout(timeout);
-        console.warn('Failed to fetch FDA calendar:', error.message);
-        return null;
+        console.warn(`Failed to fetch ${type} calendar:`, error.message);
+        return [];
     }
 }
 
-// Parse FDA calendar HTML - multiple parsing strategies
-function parseFDACalendarHTML(html) {
-    const events = [];
+// Fetch all FDA calendar data
+async function fetchFDACalendars() {
+    console.log('Fetching FDA calendars from Google Calendar ICS feeds...');
 
-    // Strategy 1: Look for JSON data embedded in page
-    const jsonMatch = html.match(/window\.__NUXT__\s*=\s*(\{[\s\S]*?\});?\s*<\/script>/);
-    if (jsonMatch) {
-        try {
-            // This is complex nested data, try to extract
-            const nuxtData = jsonMatch[1];
-            // Look for PDUFA patterns in the data
-            const pdufaMatches = nuxtData.matchAll(/"date":"(\d{4}-\d{2}-\d{2})"[^}]*"company":"([^"]+)"[^}]*"drug":"([^"]+)"[^}]*"indication":"([^"]+)"/g);
-            for (const match of pdufaMatches) {
-                events.push({
-                    type: 'PDUFA',
-                    date: match[1],
-                    company: match[2],
-                    drug: match[3],
-                    indication: match[4]
-                });
-            }
-        } catch (e) {
-            console.warn('Failed to parse embedded JSON');
-        }
-    }
+    const [pdufaEvents, adcomEvents] = await Promise.all([
+        fetchICSFeed(FDA_CALENDAR_FEEDS.pdufa, 'PDUFA'),
+        fetchICSFeed(FDA_CALENDAR_FEEDS.adcom, 'AdCom')
+    ]);
 
-    // Strategy 2: Parse HTML table rows
-    if (events.length === 0) {
-        // Look for rows with date patterns
-        const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-        let rowMatch;
+    const allEvents = [...pdufaEvents, ...adcomEvents];
 
-        while ((rowMatch = rowRegex.exec(html)) !== null && events.length < 30) {
-            const rowContent = rowMatch[1];
+    // Sort by date
+    allEvents.sort((a, b) => a.date.localeCompare(b.date));
 
-            // Extract cells
-            const cells = [];
-            const cellRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-            let cellMatch;
-            while ((cellMatch = cellRegex.exec(rowContent)) !== null) {
-                cells.push(stripHtml(cellMatch[1]));
-            }
+    console.log(`Fetched ${pdufaEvents.length} PDUFA and ${adcomEvents.length} AdCom events`);
 
-            if (cells.length >= 4) {
-                // Try to find a date in the first cell
-                const dateMatch = cells[0].match(/(\w{3,9})\s+(\d{1,2}),?\s*(\d{4})?/i);
-                if (dateMatch) {
-                    const months = {
-                        'january': '01', 'february': '02', 'march': '03', 'april': '04',
-                        'may': '05', 'june': '06', 'july': '07', 'august': '08',
-                        'september': '09', 'october': '10', 'november': '11', 'december': '12',
-                        'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04',
-                        'jun': '06', 'jul': '07', 'aug': '08', 'sep': '09',
-                        'oct': '10', 'nov': '11', 'dec': '12'
-                    };
-
-                    const monthKey = dateMatch[1].toLowerCase();
-                    const month = months[monthKey];
-                    const day = dateMatch[2].padStart(2, '0');
-                    const year = dateMatch[3] || new Date().getFullYear().toString();
-
-                    if (month && cells[1] && cells[2]) {
-                        const type = rowContent.toLowerCase().includes('adcom') ? 'AdCom' : 'PDUFA';
-                        events.push({
-                            type,
-                            company: cells[1].split(/[(\[]/)[0].trim(),
-                            drug: cells[2].trim(),
-                            indication: cells[3] ? cells[3].trim() : '',
-                            date: `${year}-${month}-${day}`
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    console.log(`Parsed ${events.length} FDA events`);
-    return events.length > 0 ? events : null;
+    return allEvents;
 }
 
-// Check and refresh FDA calendar if needed
+// Check and refresh FDA calendar
 async function checkAndRefreshFDA() {
     try {
-        const currentData = JSON.parse(fs.readFileSync(FDA_CALENDAR_PATH, 'utf8'));
-        const lastUpdated = new Date(currentData.lastUpdated).getTime();
-        const now = Date.now();
+        let needsRefresh = true;
 
-        // Check if 7 days have passed
-        if (now - lastUpdated < FDA_REFRESH_INTERVAL) {
-            const daysUntilRefresh = Math.ceil((FDA_REFRESH_INTERVAL - (now - lastUpdated)) / (24 * 60 * 60 * 1000));
-            console.log(`FDA calendar is fresh. Next refresh in ${daysUntilRefresh} days.`);
-            return;
+        // Check if we have cached data
+        try {
+            const currentData = JSON.parse(fs.readFileSync(FDA_CALENDAR_PATH, 'utf8'));
+            const lastUpdated = new Date(currentData.lastUpdated).getTime();
+            const now = Date.now();
+
+            if (now - lastUpdated < FDA_REFRESH_INTERVAL) {
+                const daysUntilRefresh = Math.ceil((FDA_REFRESH_INTERVAL - (now - lastUpdated)) / (24 * 60 * 60 * 1000));
+                console.log(`FDA calendar is fresh. Next refresh in ${daysUntilRefresh} days.`);
+                needsRefresh = false;
+            }
+        } catch (e) {
+            // No existing data, need to fetch
+            needsRefresh = true;
         }
 
-        console.log('FDA calendar is stale. Attempting refresh...');
-        const newEvents = await fetchFDAFromSource();
+        if (!needsRefresh) return;
 
-        if (newEvents && newEvents.length > 0) {
-            // Filter to only future events
-            const today = new Date().toISOString().split('T')[0];
-            const futureEvents = newEvents.filter(e => e.date >= today);
+        console.log('Refreshing FDA calendar from Google Calendar...');
+        const events = await fetchFDACalendars();
 
-            if (futureEvents.length > 0) {
-                const updatedData = {
-                    lastUpdated: new Date().toISOString().split('T')[0],
-                    events: futureEvents.sort((a, b) => a.date.localeCompare(b.date))
-                };
+        if (events.length > 0) {
+            const updatedData = {
+                lastUpdated: new Date().toISOString().split('T')[0],
+                source: 'Google Calendar ICS (FDA Tracker)',
+                events
+            };
 
-                fs.writeFileSync(FDA_CALENDAR_PATH, JSON.stringify(updatedData, null, 2));
-                console.log(`FDA calendar updated with ${futureEvents.length} events.`);
-            } else {
-                console.log('No future events found, keeping existing data.');
-            }
+            fs.writeFileSync(FDA_CALENDAR_PATH, JSON.stringify(updatedData, null, 2));
+            console.log(`FDA calendar updated with ${events.length} events.`);
+
+            // Update memory cache
+            fdaCache = {
+                data: updatedData,
+                timestamp: Date.now()
+            };
         } else {
-            console.log('Could not fetch new FDA data, keeping existing data.');
+            console.log('No events fetched, keeping existing data.');
         }
     } catch (error) {
-        console.error('Error checking FDA calendar:', error.message);
+        console.error('Error refreshing FDA calendar:', error.message);
     }
 }
 
 // API endpoint for FDA calendar
-app.get('/api/fda-calendar', (req, res) => {
+app.get('/api/fda-calendar', async (req, res) => {
+    // Check for force refresh parameter
+    if (req.query.refresh === 'true') {
+        console.log('Force refresh requested for FDA calendar');
+        // Reset the lastUpdated to force a refresh
+        try {
+            const currentData = JSON.parse(fs.readFileSync(FDA_CALENDAR_PATH, 'utf8'));
+            currentData.lastUpdated = '2000-01-01'; // Force stale
+            fs.writeFileSync(FDA_CALENDAR_PATH, JSON.stringify(currentData, null, 2));
+        } catch (e) {}
+        await checkAndRefreshFDA();
+    }
+
     try {
         const data = JSON.parse(fs.readFileSync(FDA_CALENDAR_PATH, 'utf8'));
         return res.json(data);
