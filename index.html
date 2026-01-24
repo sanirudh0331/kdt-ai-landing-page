@@ -316,13 +316,22 @@
     </div>
     <script>
         // Auth gate with server-side validation
+        // Session persists for 6 hours using localStorage
         (function() {
             const gate = document.getElementById('login-gate');
             const form = document.getElementById('login-form');
             const errorMsg = document.getElementById('login-error');
+            const SIX_HOURS = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
 
-            // Check if already authenticated
-            if (sessionStorage.getItem('kdt-auth') === 'true') {
+            // Check if already authenticated (within 6 hours)
+            function isAuthenticated() {
+                const authTime = localStorage.getItem('kdt-auth-time');
+                if (!authTime) return false;
+                const elapsed = Date.now() - parseInt(authTime, 10);
+                return elapsed < SIX_HOURS;
+            }
+
+            if (isAuthenticated()) {
                 gate.style.display = 'none';
                 // Warm up external services for returning users
                 const warmupUrls = [
@@ -336,6 +345,9 @@
                 });
                 return;
             }
+
+            // Clear expired auth
+            localStorage.removeItem('kdt-auth-time');
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -356,7 +368,8 @@
                     });
 
                     if (response.ok) {
-                        sessionStorage.setItem('kdt-auth', 'true');
+                        // Store auth timestamp for 6-hour persistence
+                        localStorage.setItem('kdt-auth-time', Date.now().toString());
 
                         // Warm up external services in background (Railway cold start mitigation)
                         const warmupUrls = [
