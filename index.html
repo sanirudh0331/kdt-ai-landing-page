@@ -315,7 +315,7 @@
         </div>
     </div>
     <script>
-        // Simple auth gate
+        // Auth gate with server-side validation
         (function() {
             const gate = document.getElementById('login-gate');
             const form = document.getElementById('login-form');
@@ -337,63 +337,84 @@
                 return;
             }
 
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const username = document.getElementById('login-username').value;
                 const password = document.getElementById('login-password').value;
+                const submitBtn = form.querySelector('button[type="submit"]');
 
-                if (username === 'kdtai' && password === 'kdtftw') {
-                    sessionStorage.setItem('kdt-auth', 'true');
+                // Disable button during login
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+                errorMsg.classList.add('hidden');
 
-                    // Warm up external services in background (Railway cold start mitigation)
-                    const warmupUrls = [
-                        'https://grants-tracker-production.up.railway.app/health',
-                        'https://kdttalentscout.up.railway.app/health',
-                        'https://web-production-a9d068.up.railway.app/health',
-                        'https://kdt.up.railway.app/health'
-                    ];
-                    warmupUrls.forEach(url => {
-                        fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
                     });
 
-                    // Transition animation
-                    const overlay = document.getElementById('transition-overlay');
-                    const logo = document.getElementById('transition-logo');
+                    if (response.ok) {
+                        sessionStorage.setItem('kdt-auth', 'true');
 
-                    // Match current theme for overlay background
-                    if (document.documentElement.classList.contains('dark')) {
-                        overlay.style.background = '#09090b';
+                        // Warm up external services in background (Railway cold start mitigation)
+                        const warmupUrls = [
+                            'https://grants-tracker-production.up.railway.app/health',
+                            'https://kdttalentscout.up.railway.app/health',
+                            'https://web-production-a9d068.up.railway.app/health',
+                            'https://kdt.up.railway.app/health'
+                        ];
+                        warmupUrls.forEach(url => {
+                            fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+                        });
+
+                        // Transition animation
+                        const overlay = document.getElementById('transition-overlay');
+                        const logo = document.getElementById('transition-logo');
+
+                        // Match current theme for overlay background
+                        if (document.documentElement.classList.contains('dark')) {
+                            overlay.style.background = '#09090b';
+                        } else {
+                            overlay.style.background = '#fafafa';
+                        }
+
+                        // Show overlay instantly first
+                        overlay.style.transition = 'none';
+                        overlay.classList.add('active');
+
+                        // Force reflow, then fade out login
+                        overlay.offsetHeight;
+                        gate.classList.add('fade-out');
+
+                        // After login fades, show logo
+                        setTimeout(() => {
+                            gate.style.display = 'none';
+                            logo.classList.add('visible');
+                        }, 350);
+
+                        // Hold, then fade out logo
+                        setTimeout(() => {
+                            logo.classList.remove('visible');
+                        }, 1300);
+
+                        // Hide overlay (restore transition for smooth fade out)
+                        setTimeout(() => {
+                            overlay.style.transition = 'opacity 0.3s ease';
+                            overlay.classList.remove('active');
+                        }, 1800);
                     } else {
-                        overlay.style.background = '#fafafa';
+                        errorMsg.classList.remove('hidden');
+                        document.getElementById('login-password').value = '';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Sign In';
                     }
-
-                    // Show overlay instantly first
-                    overlay.style.transition = 'none';
-                    overlay.classList.add('active');
-
-                    // Force reflow, then fade out login
-                    overlay.offsetHeight;
-                    gate.classList.add('fade-out');
-
-                    // After login fades, show logo
-                    setTimeout(() => {
-                        gate.style.display = 'none';
-                        logo.classList.add('visible');
-                    }, 350);
-
-                    // Hold, then fade out logo
-                    setTimeout(() => {
-                        logo.classList.remove('visible');
-                    }, 1300);
-
-                    // Hide overlay (restore transition for smooth fade out)
-                    setTimeout(() => {
-                        overlay.style.transition = 'opacity 0.3s ease';
-                        overlay.classList.remove('active');
-                    }, 1800);
-                } else {
+                } catch (error) {
+                    errorMsg.textContent = 'Connection error. Please try again.';
                     errorMsg.classList.remove('hidden');
-                    document.getElementById('login-password').value = '';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign In';
                 }
             });
         })();

@@ -5,6 +5,24 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Parse JSON bodies for login endpoint
+app.use(express.json());
+
+// Auth credentials from environment variables (with fallback for development)
+const AUTH_USERNAME = process.env.KDT_AUTH_USERNAME || 'kdtai';
+const AUTH_PASSWORD = process.env.KDT_AUTH_PASSWORD || 'kdtftw';
+
+// Login endpoint - validates credentials server-side
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    if (username === AUTH_USERNAME && password === AUTH_PASSWORD) {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+});
+
 // Cache for RSS feeds
 let newsCache = {
     data: [],
