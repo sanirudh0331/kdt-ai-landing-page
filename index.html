@@ -24,8 +24,15 @@
     <!-- Preconnect to external services for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Railway apps - preconnect for TCP/TLS handshake -->
     <link rel="preconnect" href="https://grants-tracker-production.up.railway.app">
+    <link rel="preconnect" href="https://kdttalentscout.up.railway.app">
+    <link rel="preconnect" href="https://web-production-a9d068.up.railway.app">
+    <link rel="preconnect" href="https://kdt.up.railway.app">
     <link rel="dns-prefetch" href="https://grants-tracker-production.up.railway.app">
+    <link rel="dns-prefetch" href="https://kdttalentscout.up.railway.app">
+    <link rel="dns-prefetch" href="https://web-production-a9d068.up.railway.app">
+    <link rel="dns-prefetch" href="https://kdt.up.railway.app">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -317,6 +324,16 @@
             // Check if already authenticated
             if (sessionStorage.getItem('kdt-auth') === 'true') {
                 gate.style.display = 'none';
+                // Warm up external services for returning users
+                const warmupUrls = [
+                    'https://grants-tracker-production.up.railway.app/health',
+                    'https://kdttalentscout.up.railway.app/health',
+                    'https://web-production-a9d068.up.railway.app/health',
+                    'https://kdt.up.railway.app/health'
+                ];
+                warmupUrls.forEach(url => {
+                    fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+                });
                 return;
             }
 
@@ -327,6 +344,17 @@
 
                 if (username === 'kdtai' && password === 'kdtftw') {
                     sessionStorage.setItem('kdt-auth', 'true');
+
+                    // Warm up external services in background (Railway cold start mitigation)
+                    const warmupUrls = [
+                        'https://grants-tracker-production.up.railway.app/health',
+                        'https://kdttalentscout.up.railway.app/health',
+                        'https://web-production-a9d068.up.railway.app/health',
+                        'https://kdt.up.railway.app/health'
+                    ];
+                    warmupUrls.forEach(url => {
+                        fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+                    });
 
                     // Transition animation
                     const overlay = document.getElementById('transition-overlay');
