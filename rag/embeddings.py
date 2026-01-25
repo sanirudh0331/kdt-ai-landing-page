@@ -69,17 +69,21 @@ def get_embedding_function() -> SentenceTransformerEmbeddingFunction:
     return SentenceTransformerEmbeddingFunction()
 
 
-def get_chroma_client() -> chromadb.ClientAPI:
-    """Get or create the ChromaDB persistent client."""
-    CHROMA_PERSIST_DIR.mkdir(parents=True, exist_ok=True)
+_chroma_client = None
 
-    return chromadb.PersistentClient(
-        path=str(CHROMA_PERSIST_DIR),
-        settings=Settings(
-            anonymized_telemetry=False,
-            allow_reset=True,
+def get_chroma_client() -> chromadb.ClientAPI:
+    """Get or create the ChromaDB persistent client (singleton)."""
+    global _chroma_client
+    if _chroma_client is None:
+        CHROMA_PERSIST_DIR.mkdir(parents=True, exist_ok=True)
+        _chroma_client = chromadb.PersistentClient(
+            path=str(CHROMA_PERSIST_DIR),
+            settings=Settings(
+                anonymized_telemetry=False,
+                allow_reset=True,
+            )
         )
-    )
+    return _chroma_client
 
 
 def get_collection(name: str) -> chromadb.Collection:
