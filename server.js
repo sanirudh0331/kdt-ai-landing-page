@@ -515,6 +515,50 @@ app.get('/api/fda-calendar', async (req, res) => {
     }
 });
 
+// RAG Search proxy - forwards to Python FastAPI service
+const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || 'http://localhost:8001';
+
+app.get('/api/rag-search', async (req, res) => {
+    try {
+        const queryParams = new URLSearchParams(req.query).toString();
+        const response = await fetch(`${RAG_SERVICE_URL}/api/rag-search?${queryParams}`, {
+            headers: { 'Accept': 'application/json' },
+            timeout: 30000
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'RAG service error' }));
+            return res.status(response.status).json(error);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('RAG search proxy error:', error.message);
+        res.status(503).json({
+            error: 'RAG search unavailable',
+            detail: 'The search service is not running. Start it with: python rag/server.py'
+        });
+    }
+});
+
+app.get('/api/rag-stats', async (req, res) => {
+    try {
+        const response = await fetch(`${RAG_SERVICE_URL}/api/rag-stats`, {
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+            return res.status(response.status).json({ error: 'RAG service error' });
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(503).json({ error: 'RAG stats unavailable' });
+    }
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname)));
 
