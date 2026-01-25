@@ -53,14 +53,14 @@ class SentenceTransformerEmbeddingFunction:
         embeddings = self.model.encode(input, normalize_embeddings=True)
         return embeddings.tolist()
 
-    def embed_query(self, text: str) -> list[float]:
+    def embed_query(self, input: str) -> list[float]:
         """Embed a single query text (required by ChromaDB for queries)."""
-        embedding = self.model.encode([text], normalize_embeddings=True)
+        embedding = self.model.encode([input], normalize_embeddings=True)
         return embedding[0].tolist()
 
-    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+    def embed_documents(self, input: list[str]) -> list[list[float]]:
         """Embed a list of documents (alias for __call__)."""
-        return self.__call__(texts)
+        return self.__call__(input)
 
 
 @lru_cache(maxsize=1)
