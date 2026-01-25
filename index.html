@@ -74,6 +74,56 @@
         body { font-family: 'Inter', system-ui, sans-serif; }
         * { transition: background-color 200ms, border-color 200ms, color 200ms; }
 
+        /* Background effects */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Radial glow - dark mode */
+        .dark .bg-glow::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+            filter: blur(60px);
+        }
+
+        /* Radial glow - light mode */
+        .bg-glow::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 40%, transparent 70%);
+            filter: blur(60px);
+        }
+
+        /* Noise texture overlay */
+        .bg-glow::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+        }
+
+        .dark .bg-glow::after {
+            opacity: 0.04;
+        }
+
         /* Animated gradient background */
         .hero-gradient {
             background: linear-gradient(-45deg, #6366f1, #8b5cf6, #a855f7, #6366f1);
@@ -283,6 +333,9 @@
     </style>
 </head>
 <body class="bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-50 min-h-screen antialiased">
+    <!-- Background glow effect -->
+    <div class="bg-glow"></div>
+
     <!-- Login Gate -->
     <div id="login-gate" class="fixed inset-0 z-[100] bg-dark-50 dark:bg-dark-950 flex items-center justify-center">
         <div class="w-full max-w-sm mx-4 p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl">
