@@ -978,7 +978,7 @@
 
     <!-- RAG Search Results Modal -->
     <div id="searchResultsModal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
-        <div class="w-full max-w-2xl bg-dark-50 dark:bg-dark-900 rounded-xl shadow-2xl border border-dark-200 dark:border-dark-700 max-h-[70vh] flex flex-col">
+        <div class="w-full max-w-4xl bg-dark-50 dark:bg-dark-900 rounded-xl shadow-2xl border border-dark-200 dark:border-dark-700 max-h-[75vh] flex flex-col">
             <!-- Header -->
             <div class="flex items-center justify-between px-4 py-3 border-b border-dark-200 dark:border-dark-700">
                 <div class="flex items-center gap-2">
@@ -994,19 +994,37 @@
                     </svg>
                 </button>
             </div>
+            <!-- Tabs -->
+            <div class="flex border-b border-dark-200 dark:border-dark-700 px-4">
+                <button id="tabSearch" class="px-4 py-2 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 -mb-px">
+                    Search Results
+                </button>
+                <button id="tabAsk" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-dark-500 hover:text-dark-700 dark:hover:text-dark-300 -mb-px">
+                    Ask AI
+                </button>
+            </div>
             <!-- Loading -->
             <div id="searchLoading" class="hidden py-12 text-center">
                 <div class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-sm text-dark-500 mt-2">Searching across all tools...</p>
+                <p id="loadingText" class="text-sm text-dark-500 mt-2">Searching across all tools...</p>
             </div>
-            <!-- Results -->
+            <!-- Search Results Panel -->
             <div id="searchResultsList" class="flex-1 overflow-y-auto p-4">
                 <!-- Results populated by JavaScript -->
+            </div>
+            <!-- AI Answer Panel -->
+            <div id="askResultsPanel" class="hidden flex-1 overflow-y-auto p-4">
+                <div id="askAnswer" class="prose prose-sm dark:prose-invert max-w-none">
+                    <!-- AI answer populated by JavaScript -->
+                </div>
+                <div id="askSources" class="mt-4 pt-4 border-t border-dark-200 dark:border-dark-700">
+                    <!-- Sources list populated by JavaScript -->
+                </div>
             </div>
             <!-- Footer hint -->
             <div class="px-4 py-2 border-t border-dark-200 dark:border-dark-700 text-xs text-dark-400 flex items-center justify-between">
                 <span>Press <kbd class="px-1.5 py-0.5 bg-dark-200 dark:bg-dark-700 rounded">Esc</kbd> to close</span>
-                <span>Press <kbd class="px-1.5 py-0.5 bg-dark-200 dark:bg-dark-700 rounded">/</kbd> to search</span>
+                <span id="footerRight">Press <kbd class="px-1.5 py-0.5 bg-dark-200 dark:bg-dark-700 rounded">/</kbd> to search</span>
             </div>
         </div>
     </div>
@@ -1634,15 +1652,82 @@
             }
         });
 
+        // Tab elements
+        const tabSearch = document.getElementById('tabSearch');
+        const tabAsk = document.getElementById('tabAsk');
+        const askResultsPanel = document.getElementById('askResultsPanel');
+        const askAnswer = document.getElementById('askAnswer');
+        const askSources = document.getElementById('askSources');
+        const loadingText = document.getElementById('loadingText');
+        const footerRight = document.getElementById('footerRight');
+
+        // Current active tab
+        let activeTab = 'search';
+
+        // Tab switching
+        function setActiveTab(tab) {
+            activeTab = tab;
+            if (tab === 'search') {
+                tabSearch?.classList.add('border-indigo-500', 'text-indigo-600', 'dark:text-indigo-400');
+                tabSearch?.classList.remove('border-transparent', 'text-dark-500');
+                tabAsk?.classList.remove('border-indigo-500', 'text-indigo-600', 'dark:text-indigo-400');
+                tabAsk?.classList.add('border-transparent', 'text-dark-500');
+                searchResultsList?.classList.remove('hidden');
+                askResultsPanel?.classList.add('hidden');
+                if (footerRight) footerRight.innerHTML = 'Press <kbd class="px-1.5 py-0.5 bg-dark-200 dark:bg-dark-700 rounded">/</kbd> to search';
+            } else {
+                tabAsk?.classList.add('border-indigo-500', 'text-indigo-600', 'dark:text-indigo-400');
+                tabAsk?.classList.remove('border-transparent', 'text-dark-500');
+                tabSearch?.classList.remove('border-indigo-500', 'text-indigo-600', 'dark:text-indigo-400');
+                tabSearch?.classList.add('border-transparent', 'text-dark-500');
+                askResultsPanel?.classList.remove('hidden');
+                searchResultsList?.classList.add('hidden');
+                if (footerRight) footerRight.innerHTML = 'Powered by <span class="text-indigo-500">Claude</span>';
+            }
+        }
+
+        tabSearch?.addEventListener('click', () => setActiveTab('search'));
+        tabAsk?.addEventListener('click', () => setActiveTab('ask'));
+
+        // Detect if query is a question
+        function isQuestion(query) {
+            const q = query.toLowerCase().trim();
+            // Starts with question words
+            if (/^(what|who|where|when|why|how|which|can|could|would|should|is|are|do|does|did|will|has|have|tell me|explain|describe|list|show me|find me)/i.test(q)) {
+                return true;
+            }
+            // Ends with question mark
+            if (q.endsWith('?')) {
+                return true;
+            }
+            return false;
+        }
+
         // Perform RAG search
         async function performRAGSearch(query) {
             if (!searchResultsModal || !searchResultsList) return;
+
+            // Auto-detect question and switch tabs
+            const queryIsQuestion = isQuestion(query);
 
             searchLoading?.classList.remove('hidden');
             searchResultsModal.classList.remove('hidden');
             searchResultsQuery.textContent = query;
             searchResultsList.innerHTML = '';
 
+            if (queryIsQuestion) {
+                setActiveTab('ask');
+                if (loadingText) loadingText.textContent = 'Thinking...';
+                await performAsk(query);
+            } else {
+                setActiveTab('search');
+                if (loadingText) loadingText.textContent = 'Searching across all tools...';
+                await performSearch(query);
+            }
+        }
+
+        // Perform search only (no AI)
+        async function performSearch(query) {
             try {
                 const response = await fetch(`/api/rag-search?q=${encodeURIComponent(query)}&n_results=15`);
                 const data = await response.json();
@@ -1662,7 +1747,7 @@
                 if (!data.results || data.results.length === 0) {
                     searchResultsList.innerHTML = `
                         <div class="text-center py-8 text-dark-500">
-                            <p>No results found for "${query}"</p>
+                            <p>No results found for "${escapeHtml(query)}"</p>
                         </div>
                     `;
                     return;
@@ -1714,6 +1799,108 @@
                     </div>
                 `;
             }
+        }
+
+        // Perform AI Q&A
+        async function performAsk(question) {
+            if (!askAnswer || !askSources) return;
+
+            askAnswer.innerHTML = '';
+            askSources.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/rag-ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, n_context: 8 })
+                });
+
+                const data = await response.json();
+
+                searchLoading?.classList.add('hidden');
+
+                if (data.error) {
+                    askAnswer.innerHTML = `
+                        <div class="text-center py-8 text-dark-500">
+                            <p class="font-medium">AI Q&A unavailable</p>
+                            <p class="text-sm mt-1">${data.detail || data.error}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render answer with basic markdown formatting
+                const formattedAnswer = formatMarkdown(data.answer);
+                askAnswer.innerHTML = `
+                    <div class="text-dark-800 dark:text-dark-200 leading-relaxed">
+                        ${formattedAnswer}
+                    </div>
+                `;
+
+                // Render sources
+                if (data.sources && data.sources.length > 0) {
+                    let sourcesHtml = `
+                        <p class="text-xs font-semibold uppercase tracking-wider text-dark-400 mb-2">
+                            Based on ${data.context_count} documents
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                    `;
+
+                    data.sources.forEach(s => {
+                        const sourceColor = sourceColors[s.source] || 'bg-gray-500';
+                        const label = sourceLabels[s.source] || s.source;
+                        if (s.url) {
+                            sourcesHtml += `
+                                <a href="${s.url}" target="_blank"
+                                   class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full ${sourceColor}"></span>
+                                    <span class="text-dark-600 dark:text-dark-300">${escapeHtml(s.title?.substring(0, 40))}${s.title?.length > 40 ? '...' : ''}</span>
+                                </a>
+                            `;
+                        } else {
+                            sourcesHtml += `
+                                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-dark-100 dark:bg-dark-800 text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full ${sourceColor}"></span>
+                                    <span class="text-dark-600 dark:text-dark-300">${escapeHtml(s.title?.substring(0, 40))}${s.title?.length > 40 ? '...' : ''}</span>
+                                </span>
+                            `;
+                        }
+                    });
+
+                    sourcesHtml += '</div>';
+                    askSources.innerHTML = sourcesHtml;
+                }
+
+            } catch (error) {
+                console.error('Ask error:', error);
+                searchLoading?.classList.add('hidden');
+                askAnswer.innerHTML = `
+                    <div class="text-center py-8 text-dark-500">
+                        <p class="font-medium">AI Q&A failed</p>
+                        <p class="text-sm mt-1">Please try again</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Simple markdown formatter
+        function formatMarkdown(text) {
+            if (!text) return '';
+            return text
+                // Bold
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                // Italic
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                // Numbered lists
+                .replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
+                // Bullet lists
+                .replace(/^[-*]\s+(.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+                // Line breaks
+                .replace(/\n\n/g, '</p><p class="mt-3">')
+                .replace(/\n/g, '<br>')
+                // Wrap in paragraph
+                .replace(/^/, '<p>')
+                .replace(/$/, '</p>');
         }
 
         // Escape HTML to prevent XSS

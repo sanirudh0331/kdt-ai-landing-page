@@ -542,6 +542,48 @@ app.get('/api/rag-search', async (req, res) => {
     }
 });
 
+// RAG Ask proxy - AI-powered Q&A (POST with longer timeout for LLM)
+app.post('/api/rag-ask', async (req, res) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000); // 60 second timeout for LLM
+
+    try {
+        const response = await fetch(`${RAG_SERVICE_URL}/api/rag-ask`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(req.body),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'RAG service error' }));
+            return res.status(response.status).json(error);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        clearTimeout(timeout);
+        console.error('RAG ask proxy error:', error.message);
+
+        if (error.name === 'AbortError') {
+            res.status(504).json({
+                error: 'Request timeout',
+                detail: 'The AI took too long to respond. Please try again.'
+            });
+        } else {
+            res.status(503).json({
+                error: 'AI Q&A unavailable',
+                detail: 'The RAG service is not running. Start it with: python rag/server.py'
+            });
+        }
+    }
+});
+
 app.get('/api/rag-stats', async (req, res) => {
     try {
         const response = await fetch(`${RAG_SERVICE_URL}/api/rag-stats`, {

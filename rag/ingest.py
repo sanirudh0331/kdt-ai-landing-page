@@ -1,6 +1,7 @@
 """Data ingestion scripts for RAG search.
 
 Fetches data from KdT AI tool APIs and stores embeddings in ChromaDB.
+Supports checkpointing for resumable ingestion on rate limit errors.
 """
 
 import os
@@ -8,6 +9,7 @@ import json
 import httpx
 from pathlib import Path
 from typing import Generator
+from datetime import datetime
 
 try:
     from embeddings import (
@@ -20,6 +22,47 @@ except ImportError:
 
 # Batch size for embedding operations
 BATCH_SIZE = 100
+
+# Checkpoint file path (in the same directory as ChromaDB data)
+CHECKPOINT_FILE = CHROMA_PERSIST_DIR / "ingest_checkpoint.json"
+
+
+def load_checkpoint() -> dict:
+    """Load ingestion checkpoint from file."""
+    if CHECKPOINT_FILE.exists():
+        try:
+            with open(CHECKPOINT_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"last_updated": None, "sources": {}}
+
+
+def save_checkpoint(source: str, last_id: str, count: int, error: str = None):
+    """Save ingestion progress checkpoint."""
+    checkpoint = load_checkpoint()
+    checkpoint["last_updated"] = datetime.now().isoformat()
+    checkpoint["sources"][source] = {
+        "last_id": last_id,
+        "count": count,
+        "timestamp": datetime.now().isoformat(),
+        "error": error
+    }
+    CHROMA_PERSIST_DIR.mkdir(parents=True, exist_ok=True)
+    with open(CHECKPOINT_FILE, "w") as f:
+        json.dump(checkpoint, f, indent=2)
+
+
+def clear_checkpoint(source: str = None):
+    """Clear checkpoint for a source or all sources."""
+    if source:
+        checkpoint = load_checkpoint()
+        if source in checkpoint.get("sources", {}):
+            del checkpoint["sources"][source]
+            with open(CHECKPOINT_FILE, "w") as f:
+                json.dump(checkpoint, f, indent=2)
+    elif CHECKPOINT_FILE.exists():
+        CHECKPOINT_FILE.unlink()
 
 # Service URLs - use Railway internal networking if available
 SERVICE_URLS = {
@@ -135,19 +178,39 @@ def ingest_patents(reset: bool = False, verbose: bool = True) -> int:
             batch_metadatas.append(metadata)
 
             if len(batch_ids) >= BATCH_SIZE:
-                collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
-                total_indexed += len(batch_ids)
-                if verbose:
-                    print(f"    Indexed {total_indexed} patents...")
+                try:
+                    collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
+                    total_indexed += len(batch_ids)
+                    if verbose:
+                        print(f"    Indexed {total_indexed} patents...")
+                except Exception as e:
+                    # Save checkpoint on failure
+                    last_id = batch_ids[-1] if batch_ids else ""
+                    save_checkpoint("patents", last_id, total_indexed, str(e))
+                    if verbose:
+                        print(f"  Error during batch: {e}")
+                        print(f"  Checkpoint saved at {total_indexed} documents")
+                    raise
                 batch_ids, batch_documents, batch_metadatas = [], [], []
 
     if batch_ids:
-        collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
-        total_indexed += len(batch_ids)
+        try:
+            collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
+            total_indexed += len(batch_ids)
+        except Exception as e:
+            # Save checkpoint on failure
+            last_id = batch_ids[-1] if batch_ids else ""
+            save_checkpoint("patents", last_id, total_indexed, str(e))
+            if verbose:
+                print(f"  Error during final batch: {e}")
+                print(f"  Checkpoint saved. Resume with --resume flag")
+            raise
 
     if verbose:
         print(f"  Patents: {total_indexed} indexed, {skipped} skipped")
 
+    # Clear checkpoint on success
+    clear_checkpoint("patents")
     return total_indexed
 
 

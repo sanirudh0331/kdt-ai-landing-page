@@ -8,8 +8,9 @@ import chromadb
 from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 
-# Persistent storage path for ChromaDB
-CHROMA_PERSIST_DIR = Path(__file__).parent.parent / "data" / "chroma_db"
+# Persistent storage path for ChromaDB (supports Railway volume via env var)
+_default_chroma_dir = Path(__file__).parent.parent / "data" / "chroma_db"
+CHROMA_PERSIST_DIR = Path(os.environ.get("CHROMA_PERSIST_DIR", str(_default_chroma_dir)))
 
 # Embedding model - using fast model for quick indexing
 # Options: "all-MiniLM-L6-v2" (fast, 80MB) or "BAAI/bge-large-en-v1.5" (better quality, 1.3GB)
