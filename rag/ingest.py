@@ -8,9 +8,14 @@ import json
 from pathlib import Path
 from typing import Generator
 
-from rag.embeddings import (
-    get_collection, reset_collection, COLLECTIONS, DATABASE_PATHS, CHROMA_PERSIST_DIR
-)
+try:
+    from embeddings import (
+        get_collection, reset_collection, COLLECTIONS, DATABASE_PATHS, CHROMA_PERSIST_DIR
+    )
+except ImportError:
+    from rag.embeddings import (
+        get_collection, reset_collection, COLLECTIONS, DATABASE_PATHS, CHROMA_PERSIST_DIR
+    )
 
 # Batch size for embedding operations
 BATCH_SIZE = 100

@@ -3,7 +3,10 @@
 from typing import Optional
 from dataclasses import dataclass, asdict
 
-from rag.embeddings import get_collection, COLLECTIONS
+try:
+    from embeddings import get_collection, COLLECTIONS
+except ImportError:
+    from rag.embeddings import get_collection, COLLECTIONS
 
 
 # Tool URLs (Railway deployments)

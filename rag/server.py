@@ -4,8 +4,13 @@ import os
 import sys
 from typing import Optional
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Support both module run (python -m rag.server) and standalone (uvicorn server:app)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,7 +52,10 @@ async def rag_search(
 ):
     """Semantic search across all KdT AI data sources."""
     try:
-        from rag.search import search_with_filters
+        try:
+            from search import search_with_filters
+        except ImportError:
+            from rag.search import search_with_filters
 
         source_list = None
         if sources:
@@ -87,7 +95,10 @@ async def rag_search(
 async def rag_stats():
     """Get statistics about indexed data."""
     try:
-        from rag.ingest import get_collection_stats
+        try:
+            from ingest import get_collection_stats
+        except ImportError:
+            from rag.ingest import get_collection_stats
         return {"collections": get_collection_stats()}
     except ImportError as e:
         return JSONResponse(
