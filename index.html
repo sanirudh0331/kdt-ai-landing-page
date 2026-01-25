@@ -330,6 +330,31 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
+
+        /* Mobile menu animation */
+        #mobileMenu {
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hide scrollbar for filter tabs on mobile */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .overflow-x-auto::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-dark-50 dark:bg-dark-950 text-dark-900 dark:text-dark-50 min-h-screen antialiased">
@@ -337,25 +362,25 @@
     <div class="bg-glow"></div>
 
     <!-- Login Gate -->
-    <div id="login-gate" class="fixed inset-0 z-[100] bg-dark-50 dark:bg-dark-950 flex items-center justify-center">
-        <div class="w-full max-w-sm mx-4 p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl">
-            <div class="text-center mb-6">
-                <img src="static/kdt-logo.png" alt="KdT" class="h-12 mx-auto mb-3">
-                <h2 class="text-xl font-semibold">Welcome to KdT AI</h2>
-                <p class="text-sm text-dark-500 dark:text-dark-400 mt-1">Please sign in to continue</p>
+    <div id="login-gate" class="fixed inset-0 z-[100] bg-dark-50 dark:bg-dark-950 flex items-center justify-center px-4">
+        <div class="w-full max-w-sm p-4 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl">
+            <div class="text-center mb-4 sm:mb-6">
+                <img src="static/kdt-logo.png" alt="KdT" class="h-10 sm:h-12 mx-auto mb-2 sm:mb-3">
+                <h2 class="text-lg sm:text-xl font-semibold">Welcome to KdT AI</h2>
+                <p class="text-xs sm:text-sm text-dark-500 dark:text-dark-400 mt-1">Please sign in to continue</p>
             </div>
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-3 sm:space-y-4">
                 <div>
                     <input type="text" id="login-username" placeholder="Username" required
-                           class="w-full px-4 py-2.5 bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 </div>
                 <div>
                     <input type="password" id="login-password" placeholder="Password" required
-                           class="w-full px-4 py-2.5 bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                           class="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 </div>
-                <p id="login-error" class="hidden text-sm text-red-500 text-center">Invalid username or password</p>
+                <p id="login-error" class="hidden text-xs sm:text-sm text-red-500 text-center">Invalid username or password</p>
                 <button type="submit"
-                        class="w-full px-4 py-2.5 font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all">
+                        class="w-full px-4 py-2 sm:py-2.5 text-sm sm:text-base font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all">
                     Sign In
                 </button>
             </form>
@@ -495,44 +520,90 @@
                     <img src="static/kdt-logo.png" alt="KdT" class="h-6 sm:h-8 w-auto">
                     <span class="text-base sm:text-lg font-semibold tracking-tight">KdT AI</span>
                 </a>
-                <!-- Theme Toggle -->
-                <button id="themeToggle"
-                        class="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors"
-                        aria-label="Toggle theme">
-                    <!-- Sun icon (shown in dark mode) -->
-                    <svg class="w-5 h-5 hidden dark:block text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                    <!-- Moon icon (shown in light mode) -->
-                    <svg class="w-5 h-5 block dark:hidden text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                </button>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="#tools" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Tools</a>
+                    <a href="#market" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Market</a>
+                    <a href="#trials" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Trials</a>
+                    <a href="#fda" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">FDA</a>
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle"
+                            class="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors"
+                            aria-label="Toggle theme">
+                        <!-- Sun icon (shown in dark mode) -->
+                        <svg class="w-5 h-5 hidden dark:block text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <!-- Moon icon (shown in light mode) -->
+                        <svg class="w-5 h-5 block dark:hidden text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex md:hidden items-center gap-2">
+                    <!-- Theme Toggle (Mobile) -->
+                    <button id="themeToggleMobile"
+                            class="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors"
+                            aria-label="Toggle theme">
+                        <!-- Sun icon (shown in dark mode) -->
+                        <svg class="w-5 h-5 hidden dark:block text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <!-- Moon icon (shown in light mode) -->
+                        <svg class="w-5 h-5 block dark:hidden text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                    <!-- Hamburger Menu Button -->
+                    <button id="mobileMenuToggle"
+                            class="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors"
+                            aria-label="Toggle menu">
+                        <svg id="hamburgerIcon" class="w-5 h-5 text-dark-500 dark:text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg id="closeIcon" class="w-5 h-5 text-dark-500 dark:text-dark-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 dark:border-dark-800 py-3">
+                <div class="flex flex-col space-y-2">
+                    <a href="#tools" class="mobile-nav-link px-3 py-2 text-sm text-dark-600 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors">Tools</a>
+                    <a href="#market" class="mobile-nav-link px-3 py-2 text-sm text-dark-600 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors">Market Overview</a>
+                    <a href="#trials" class="mobile-nav-link px-3 py-2 text-sm text-dark-600 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors">Clinical Trials</a>
+                    <a href="#fda" class="mobile-nav-link px-3 py-2 text-sm text-dark-600 dark:text-dark-300 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors">FDA Calendar</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="py-12 sm:py-16 md:py-24 relative">
+    <section class="py-8 sm:py-12 md:py-16 lg:py-24 relative">
         <!-- Floating Particles -->
         <div class="particles" id="particles"></div>
         <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-2 sm:mb-3 md:mb-4">
                 Welcome to <span class="hero-gradient">KdT AI</span>
             </h1>
-            <p class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto">
+            <p class="text-sm sm:text-base md:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto px-4 sm:px-0">
                 Your AI toolkit for venture
             </p>
         </div>
     </section>
 
     <!-- Tools Grid -->
-    <main class="pb-4 sm:pb-6">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
+    <main id="tools" class="pb-4 sm:pb-6">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
 
                 <!-- Portfolio Beacon -->
-                <a href="https://web-production-a9d068.up.railway.app/" target="_blank" rel="noopener" data-key="1" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://web-production-a9d068.up.railway.app/" target="_blank" rel="noopener" data-key="1" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 icon-container">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -547,7 +618,7 @@
                 </a>
 
                 <!-- Talent Scout -->
-                <a href="https://kdttalentscout.up.railway.app/" target="_blank" rel="noopener" data-key="2" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://kdttalentscout.up.railway.app/" target="_blank" rel="noopener" data-key="2" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-emerald-500 text-white rounded-full">New</span>
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25 icon-container">
@@ -563,7 +634,7 @@
                 </a>
 
                 <!-- Conference Navigator -->
-                <a href="https://chatgpt.com/g/g-688fe050ef388191ab360781596d2c10-portfolio-specific-biotech-analyst" target="_blank" rel="noopener" data-key="3" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://chatgpt.com/g/g-688fe050ef388191ab360781596d2c10-portfolio-specific-biotech-analyst" target="_blank" rel="noopener" data-key="3" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 icon-container">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -578,7 +649,7 @@
                 </a>
 
                 <!-- Deal Watchdog -->
-                <a href="https://kdt.up.railway.app/" target="_blank" rel="noopener" data-key="4" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://kdt.up.railway.app/" target="_blank" rel="noopener" data-key="4" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/25 icon-container">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -596,7 +667,7 @@
                 </a>
 
                 <!-- Patent Warrior -->
-                <a href="https://patentwarrior.up.railway.app" target="_blank" rel="noopener" data-key="5" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://patentwarrior.up.railway.app" target="_blank" rel="noopener" data-key="5" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-indigo-500/80 text-white rounded-full">In Development</span>
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center shadow-lg shadow-amber-500/25 icon-container">
@@ -612,7 +683,7 @@
                 </a>
 
                 <!-- Grant Radar -->
-                <a href="https://grants-tracker-production.up.railway.app" target="_blank" rel="noopener" data-key="6" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://grants-tracker-production.up.railway.app" target="_blank" rel="noopener" data-key="6" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-emerald-500 text-white rounded-full">New</span>
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 icon-container">
@@ -628,7 +699,7 @@
                 </a>
 
                 <!-- Policy Watch -->
-                <a href="https://policywatch.up.railway.app" target="_blank" rel="noopener" data-key="7" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <a href="https://policywatch.up.railway.app" target="_blank" rel="noopener" data-key="7" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate">
                     <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-indigo-500/80 text-white rounded-full">In Development</span>
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/25 icon-container">
@@ -644,7 +715,7 @@
                 </a>
 
                 <!-- SEC Sentinel (Coming Soon) -->
-                <div data-key="8" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl opacity-60 cursor-default w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <div data-key="8" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl opacity-60 cursor-default">
                     <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-dark-500 text-white rounded-full">Coming Soon</span>
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center shadow-lg shadow-slate-500/25 icon-container">
@@ -660,7 +731,7 @@
                 </div>
 
                 <!-- Coming Soon Teaser -->
-                <div data-key="9" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 border-dashed rounded-xl opacity-50 cursor-default w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <div data-key="9" class="group relative block p-4 sm:p-5 md:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 border-dashed rounded-xl opacity-50 cursor-default">
                     <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-dark-500 text-white rounded-full">Coming Soon</span>
                     <div class="flex items-start gap-4">
                         <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-dark-400 to-dark-500 flex items-center justify-center shadow-lg shadow-dark-500/25 icon-container">
@@ -680,12 +751,12 @@
 
     <!-- Floating Biotech News Ticker -->
     <div class="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 dark:bg-dark-950/95 backdrop-blur-sm border-t border-dark-700 dark:border-dark-800">
-        <div class="flex items-center h-10">
-            <div class="flex-shrink-0 px-4 h-full flex items-center bg-red-600">
-                <span class="text-xs font-bold text-white tracking-wide">LIVE</span>
+        <div class="flex items-center h-8 sm:h-10">
+            <div class="flex-shrink-0 px-2 sm:px-4 h-full flex items-center bg-red-600">
+                <span class="text-[10px] sm:text-xs font-bold text-white tracking-wide">LIVE</span>
             </div>
             <div id="ticker-wrapper" class="ticker-wrapper flex-1 overflow-hidden cursor-pointer" title="Tap to pause">
-                <div id="news-ticker" class="ticker-content text-sm text-dark-200">
+                <div id="news-ticker" class="ticker-content text-xs sm:text-sm text-dark-200">
                     <span class="inline-flex items-center gap-6">
                         <span class="text-dark-400">Loading biotech news...</span>
                     </span>
@@ -695,17 +766,17 @@
     </div>
 
     <!-- XBI Market Data Section -->
-    <section class="pt-4 pb-12 sm:pt-6 sm:pb-16">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="mb-6">
-                <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Market Overview</h2>
-                <p class="text-sm text-dark-500 dark:text-dark-400">SPDR S&P Biotech ETF (XBI)</p>
+    <section id="market" class="pt-4 pb-8 sm:pt-6 sm:pb-12 md:pb-16">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
+            <div class="mb-4 sm:mb-6">
+                <h2 class="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight mb-1">Market Overview</h2>
+                <p class="text-xs sm:text-sm text-dark-500 dark:text-dark-400">SPDR S&P Biotech ETF (XBI)</p>
             </div>
             <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl overflow-hidden relative">
                 <!-- Loading Skeleton -->
                 <div id="chart-skeleton" class="absolute inset-0 skeleton z-10"></div>
                 <!-- TradingView Widget -->
-                <div id="tradingview-widget" class="tradingview-widget-container" style="height: 400px;">
+                <div id="tradingview-widget" class="tradingview-widget-container h-[280px] sm:h-[350px] md:h-[400px]">
                     <div id="tradingview-chart" style="height: 100%;"></div>
                 </div>
             </div>
@@ -713,14 +784,14 @@
     </section>
 
     <!-- Clinical Trials Section -->
-    <section class="pb-8 sm:pb-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
+    <section id="trials" class="pb-6 sm:pb-8 md:pb-12">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
+            <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Clinical Trials Tracker</h2>
-                    <p class="text-sm text-dark-500 dark:text-dark-400 flex items-center gap-1">
+                    <h2 class="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight mb-1">Clinical Trials Tracker</h2>
+                    <p class="text-xs sm:text-sm text-dark-500 dark:text-dark-400 flex items-center gap-1">
                         Recent trials and results from ClinicalTrials.gov
-                        <span class="relative group cursor-help">
+                        <span class="relative group cursor-help hidden sm:inline">
                             <svg class="w-4 h-4 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -731,43 +802,43 @@
                     </p>
                 </div>
                 <a href="https://clinicaltrials.gov/search?aggFilters=phase:2%203,status:rec%20act%20not&viewType=Table" target="_blank" rel="noopener"
-                   class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">
+                   class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 self-start sm:self-auto">
                     View All Trials →
                 </a>
             </div>
             <!-- Filter tabs -->
-            <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
-                <button class="trials-tab active px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-500 text-white" data-filter="recent">
+            <div class="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0">
+                <button class="trials-tab active px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-full bg-indigo-500 text-white whitespace-nowrap" data-filter="recent">
                     Recently Posted
                 </button>
-                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="results">
+                <button class="trials-tab px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700 whitespace-nowrap" data-filter="results">
                     Results Available
                 </button>
-                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase1">
+                <button class="trials-tab px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700 whitespace-nowrap" data-filter="phase1">
                     Phase 1
                 </button>
-                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase2">
+                <button class="trials-tab px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700 whitespace-nowrap" data-filter="phase2">
                     Phase 2
                 </button>
-                <button class="trials-tab px-3 py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700" data-filter="phase3">
+                <button class="trials-tab px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-full bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700 whitespace-nowrap" data-filter="phase3">
                     Phase 3
                 </button>
             </div>
-            <div id="trials-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div id="trials-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <!-- Loading skeletons -->
-                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                <div class="trials-skeleton p-3 sm:p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
                     <div class="h-3 w-16 skeleton rounded mb-2"></div>
                     <div class="h-4 w-full skeleton rounded mb-2"></div>
                     <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
                     <div class="h-3 w-24 skeleton rounded"></div>
                 </div>
-                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                <div class="trials-skeleton p-3 sm:p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
                     <div class="h-3 w-16 skeleton rounded mb-2"></div>
                     <div class="h-4 w-full skeleton rounded mb-2"></div>
                     <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
                     <div class="h-3 w-24 skeleton rounded"></div>
                 </div>
-                <div class="trials-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hidden sm:block">
+                <div class="trials-skeleton p-3 sm:p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hidden sm:block">
                     <div class="h-3 w-16 skeleton rounded mb-2"></div>
                     <div class="h-4 w-full skeleton rounded mb-2"></div>
                     <div class="h-4 w-3/4 skeleton rounded mb-3"></div>
@@ -779,22 +850,22 @@
     </section>
 
     <!-- FDA Calendar Widget -->
-    <section class="pb-8 sm:pb-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
+    <section id="fda" class="pb-6 sm:pb-8 md:pb-12">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6">
+            <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-semibold tracking-tight mb-1">Upcoming FDA Dates</h2>
-                    <p class="text-sm text-dark-500 dark:text-dark-400">Key PDUFA dates</p>
+                    <h2 class="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight mb-1">Upcoming FDA Dates</h2>
+                    <p class="text-xs sm:text-sm text-dark-500 dark:text-dark-400">Key PDUFA dates</p>
                 </div>
                 <a href="https://www.fdatracker.com/fda-calendar/" target="_blank" rel="noopener"
-                   class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">
+                   class="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 self-start sm:self-auto">
                     View Full Calendar →
                 </a>
             </div>
-            <div id="fda-calendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div id="fda-calendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <!-- Loading skeletons -->
-                <div class="fda-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
+                <div class="fda-skeleton p-3 sm:p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                    <div class="flex items-start justify-between gap-2 sm:gap-3">
                         <div class="flex-1">
                             <div class="h-3 w-12 skeleton rounded mb-2"></div>
                             <div class="h-4 w-32 skeleton rounded mb-2"></div>
@@ -806,8 +877,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="fda-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
-                    <div class="flex items-start justify-between gap-3">
+                <div class="fda-skeleton p-3 sm:p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl">
+                    <div class="flex items-start justify-between gap-2 sm:gap-3">
                         <div class="flex-1">
                             <div class="h-3 w-12 skeleton rounded mb-2"></div>
                             <div class="h-4 w-32 skeleton rounded mb-2"></div>
@@ -819,8 +890,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="fda-skeleton p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hidden sm:block">
-                    <div class="flex items-start justify-between gap-3">
+                <div class="fda-skeleton p-3 sm:p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hidden sm:block">
+                    <div class="flex items-start justify-between gap-2 sm:gap-3">
                         <div class="flex-1">
                             <div class="h-3 w-12 skeleton rounded mb-2"></div>
                             <div class="h-4 w-32 skeleton rounded mb-2"></div>
@@ -837,9 +908,9 @@
     </section>
 
     <!-- Floating Feedback Button -->
-    <div id="feedbackWidget" class="fixed bottom-16 right-6 z-50">
+    <div id="feedbackWidget" class="fixed bottom-16 right-3 sm:right-6 z-50">
         <!-- Expanded Form -->
-        <div id="feedbackPanel" class="hidden mb-3 w-72 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl p-4">
+        <div id="feedbackPanel" class="hidden mb-3 w-64 sm:w-72 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl p-3 sm:p-4">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-sm font-medium">Send Feedback</span>
                 <button id="closeFeedback" class="text-dark-400 hover:text-dark-600 dark:hover:text-dark-200">
@@ -874,8 +945,8 @@
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-dark-200 dark:border-dark-800 mb-10">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <footer class="border-t border-dark-200 dark:border-dark-800 mb-12 sm:mb-10">
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
             <div class="text-center text-xs sm:text-sm text-dark-500 dark:text-dark-500">
                 Powered by KdT AI
             </div>
@@ -911,15 +982,41 @@
         // Initialize widget on load
         initTradingViewWidget();
 
-        // Theme Toggle Script
-        const themeToggle = document.getElementById('themeToggle');
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const closeIcon = document.getElementById('closeIcon');
 
-        themeToggle.addEventListener('click', () => {
+        mobileMenuToggle.addEventListener('click', () => {
+            const isOpen = !mobileMenu.classList.contains('hidden');
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking a nav link
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            });
+        });
+
+        // Theme Toggle Script (both desktop and mobile)
+        const themeToggle = document.getElementById('themeToggle');
+        const themeToggleMobile = document.getElementById('themeToggleMobile');
+
+        function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             // Reinitialize widget with new theme
             setTimeout(initTradingViewWidget, 100);
-        });
+        }
+
+        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+        if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleTheme);
 
         // Generate floating particles
         function createParticles() {
