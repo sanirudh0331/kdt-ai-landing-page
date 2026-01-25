@@ -29,10 +29,12 @@
     <link rel="preconnect" href="https://kdttalentscout.up.railway.app">
     <link rel="preconnect" href="https://web-production-a9d068.up.railway.app">
     <link rel="preconnect" href="https://kdt.up.railway.app">
+    <link rel="preconnect" href="https://policy-tracker-production.up.railway.app">
     <link rel="dns-prefetch" href="https://grants-tracker-production.up.railway.app">
     <link rel="dns-prefetch" href="https://kdttalentscout.up.railway.app">
     <link rel="dns-prefetch" href="https://web-production-a9d068.up.railway.app">
     <link rel="dns-prefetch" href="https://kdt.up.railway.app">
+    <link rel="dns-prefetch" href="https://policy-tracker-production.up.railway.app">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -230,6 +232,7 @@
         .card-animate:nth-child(4) { animation-delay: 0.2s; }
         .card-animate:nth-child(5) { animation-delay: 0.25s; }
         .card-animate:nth-child(6) { animation-delay: 0.3s; }
+        .card-animate:nth-child(7) { animation-delay: 0.35s; }
 
         /* Ticker pause on tap/hover */
         .ticker-paused .ticker-content {
@@ -338,7 +341,8 @@
                     'https://grants-tracker-production.up.railway.app/health',
                     'https://kdttalentscout.up.railway.app/health',
                     'https://web-production-a9d068.up.railway.app/health',
-                    'https://kdt.up.railway.app/health'
+                    'https://kdt.up.railway.app/health',
+                    'https://policy-tracker-production.up.railway.app/health'
                 ];
                 warmupUrls.forEach(url => {
                     fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
@@ -376,7 +380,8 @@
                             'https://grants-tracker-production.up.railway.app/health',
                             'https://kdttalentscout.up.railway.app/health',
                             'https://web-production-a9d068.up.railway.app/health',
-                            'https://kdt.up.railway.app/health'
+                            'https://kdt.up.railway.app/health',
+                            'https://policy-tracker-production.up.railway.app/health'
                         ];
                         warmupUrls.forEach(url => {
                             fetch(url, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
@@ -575,6 +580,22 @@
                         <div class="flex-1 min-w-0">
                             <h3 class="text-base sm:text-lg font-semibold group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">Grant Radar</h3>
                             <p class="text-sm text-dark-500 dark:text-dark-400 leading-relaxed mt-1">Track NIH grants, SBIR awards, and funding to key researchers</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Policy Watch -->
+                <a href="https://policy-tracker-production.up.railway.app" target="_blank" rel="noopener" data-key="7" class="group relative block p-5 sm:p-6 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl hover:border-dark-300 dark:hover:border-dark-700 hover:shadow-lg dark:hover:shadow-dark-900/50 transform hover:scale-[1.02] transition-all duration-200 card-glow card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                    <span class="absolute -top-2 -right-2 px-2 py-0.5 text-xs font-medium bg-green-500 text-white rounded-full badge-new">New</span>
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/25 icon-container">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-semibold group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">Policy Watch</h3>
+                            <p class="text-sm text-dark-500 dark:text-dark-400 leading-relaxed mt-1">Track legislation impacting biotech and deeptech startups</p>
                         </div>
                     </div>
                 </a>
@@ -891,13 +912,13 @@
             submitBtn.disabled = false;
         });
 
-        // Keyboard shortcuts (1-6) to navigate to tools
+        // Keyboard shortcuts (1-7) to navigate to tools
         document.addEventListener('keydown', (e) => {
             // Don't trigger if user is typing in an input/textarea
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
             const key = e.key;
-            if (key >= '1' && key <= '6') {
+            if (key >= '1' && key <= '7') {
                 const card = document.querySelector(`a[data-key="${key}"]`);
                 if (card && card.href && card.href !== '#') {
                     window.open(card.href, '_blank');
