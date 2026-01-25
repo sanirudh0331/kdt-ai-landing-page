@@ -23,15 +23,6 @@ COLLECTIONS = {
     "fda_calendar": "fda_calendar",
 }
 
-# Database paths for each tool (absolute paths to sibling projects)
-HOME_DIR = Path.home()
-DATABASE_PATHS = {
-    "patents": HOME_DIR / "patent_warrior" / "data" / "patents.db",
-    "grants": HOME_DIR / "grants_tracker" / "data" / "grants.db",
-    "researchers": HOME_DIR / "h_index_tracker" / "data" / "hindex.db",
-    "policies": HOME_DIR / "policy_tracker" / "data" / "policy_tracker.db",
-}
-
 
 @lru_cache(maxsize=1)
 def get_embedding_model() -> SentenceTransformer:
