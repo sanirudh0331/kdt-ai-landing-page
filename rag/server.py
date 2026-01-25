@@ -112,6 +112,36 @@ async def rag_stats():
         )
 
 
+@app.post("/api/rag-ingest")
+async def rag_ingest(secret: str = Query(..., description="Ingest secret key")):
+    """Trigger data ingestion (protected endpoint)."""
+    import os
+    expected_secret = os.environ.get("INGEST_SECRET", "")
+
+    if not expected_secret or secret != expected_secret:
+        return JSONResponse(status_code=403, content={"error": "Invalid secret"})
+
+    try:
+        try:
+            from ingest import ingest_all, get_collection_stats
+        except ImportError:
+            from rag.ingest import ingest_all, get_collection_stats
+
+        results = ingest_all(reset=False, verbose=False)
+        stats = get_collection_stats()
+        return {"status": "complete", "indexed": results, "collections": stats}
+    except ImportError as e:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "RAG not available", "detail": str(e)}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("RAG_PORT", 8001))
