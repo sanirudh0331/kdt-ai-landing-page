@@ -4,9 +4,9 @@ from typing import Optional
 from dataclasses import dataclass, asdict
 
 try:
-    from embeddings import get_collection, COLLECTIONS
+    from embeddings import get_collection, get_embedding_function, COLLECTIONS
 except ImportError:
-    from rag.embeddings import get_collection, COLLECTIONS
+    from rag.embeddings import get_collection, get_embedding_function, COLLECTIONS
 
 
 # Tool URLs (Railway deployments)
@@ -89,8 +89,12 @@ def search_collection(
     if collection.count() == 0:
         return []
 
+    # Compute embedding ourselves to avoid ChromaDB callback issues
+    embedding_fn = get_embedding_function()
+    query_embedding = embedding_fn([query])[0]
+
     query_params = {
-        "query_texts": [query],
+        "query_embeddings": [query_embedding],
         "n_results": min(n_results, collection.count()),
         "include": ["documents", "metadatas", "distances"],
     }
