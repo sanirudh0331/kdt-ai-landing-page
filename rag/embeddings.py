@@ -11,8 +11,9 @@ from sentence_transformers import SentenceTransformer
 # Persistent storage path for ChromaDB
 CHROMA_PERSIST_DIR = Path(__file__).parent.parent / "data" / "chroma_db"
 
-# Embedding model - BAAI/bge-large-en-v1.5 is free and high-quality
-EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
+# Embedding model - using fast model for quick indexing
+# Options: "all-MiniLM-L6-v2" (fast, 80MB) or "BAAI/bge-large-en-v1.5" (better quality, 1.3GB)
+EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 
 # Collection names for each data source
 COLLECTIONS = {
