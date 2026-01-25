@@ -2,18 +2,16 @@
 
 import os
 from pathlib import Path
-from functools import lru_cache
 
 import chromadb
 from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
+from chromadb.utils import embedding_functions
 
 # Persistent storage path for ChromaDB (supports Railway volume via env var)
 _default_chroma_dir = Path(__file__).parent.parent / "data" / "chroma_db"
 CHROMA_PERSIST_DIR = Path(os.environ.get("CHROMA_PERSIST_DIR", str(_default_chroma_dir)))
 
 # Embedding model - using fast model for quick indexing
-# Options: "all-MiniLM-L6-v2" (fast, 80MB) or "BAAI/bge-large-en-v1.5" (better quality, 1.3GB)
 EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 
 # Collection names for each data source
@@ -25,51 +23,20 @@ COLLECTIONS = {
     "fda_calendar": "fda_calendar",
 }
 
-
-@lru_cache(maxsize=1)
-def get_embedding_model() -> SentenceTransformer:
-    """Load the sentence transformer model (cached singleton)."""
-    return SentenceTransformer(EMBEDDING_MODEL)
-
-
-class SentenceTransformerEmbeddingFunction:
-    """Custom embedding function for ChromaDB using sentence-transformers."""
-
-    def __init__(self):
-        self._model = None
-
-    @property
-    def model(self):
-        if self._model is None:
-            self._model = get_embedding_model()
-        return self._model
-
-    def name(self) -> str:
-        """Return the name of the embedding function (required by ChromaDB)."""
-        return EMBEDDING_MODEL
-
-    def __call__(self, input: list[str]) -> list[list[float]]:
-        """Generate embeddings for a list of texts."""
-        embeddings = self.model.encode(input, normalize_embeddings=True)
-        return embeddings.tolist()
-
-    def embed_query(self, input: str) -> list[float]:
-        """Embed a single query text (required by ChromaDB for queries)."""
-        embedding = self.model.encode([input], normalize_embeddings=True)
-        return embedding[0].tolist()
-
-    def embed_documents(self, input: list[str]) -> list[list[float]]:
-        """Embed a list of documents (alias for __call__)."""
-        return self.__call__(input)
-
-
-@lru_cache(maxsize=1)
-def get_embedding_function() -> SentenceTransformerEmbeddingFunction:
-    """Get the embedding function (cached singleton)."""
-    return SentenceTransformerEmbeddingFunction()
-
-
+# Singleton instances
 _chroma_client = None
+_embedding_function = None
+
+
+def get_embedding_function():
+    """Get ChromaDB's official SentenceTransformer embedding function (singleton)."""
+    global _embedding_function
+    if _embedding_function is None:
+        _embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+            model_name=EMBEDDING_MODEL
+        )
+    return _embedding_function
+
 
 def get_chroma_client() -> chromadb.ClientAPI:
     """Get or create the ChromaDB persistent client (singleton)."""
