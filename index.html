@@ -1743,15 +1743,22 @@
 
         // Perform RAG search
         async function performRAGSearch(query) {
-            if (!searchResultsModal || !searchResultsList) return;
+            console.log('performRAGSearch called with:', query);
+
+            if (!searchResultsModal || !searchResultsList) {
+                console.error('Modal elements not found');
+                return;
+            }
 
             // Auto-detect question and switch tabs
             const queryIsQuestion = isQuestion(query);
+            console.log('Is question:', queryIsQuestion);
 
-            searchLoading?.classList.remove('hidden');
+            // Show modal and loading state
             searchResultsModal.classList.remove('hidden');
-            searchResultsQuery.textContent = query;
+            searchLoading?.classList.remove('hidden');
             searchResultsList.innerHTML = '';
+            searchResultsQuery.textContent = query;
 
             if (queryIsQuestion) {
                 setActiveTab('ask');
@@ -1766,9 +1773,14 @@
 
         // Perform search only (no AI)
         async function performSearch(query) {
+            console.log('performSearch called with:', query);
             try {
-                const response = await fetch(`/api/rag-search?q=${encodeURIComponent(query)}&n_results=15`);
+                const url = `/api/rag-search?q=${encodeURIComponent(query)}&n_results=15`;
+                console.log('Fetching:', url);
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Search data:', data);
 
                 searchLoading?.classList.add('hidden');
 
@@ -1841,7 +1853,11 @@
 
         // Perform AI Q&A
         async function performAsk(question) {
-            if (!askAnswer || !askSources) return;
+            console.log('performAsk called with:', question);
+            if (!askAnswer || !askSources) {
+                console.error('Ask elements not found');
+                return;
+            }
 
             // Hide placeholder, show content area
             askPlaceholder?.classList.add('hidden');
@@ -1851,13 +1867,16 @@
             askSources.innerHTML = '';
 
             try {
+                console.log('Fetching /api/rag-ask...');
                 const response = await fetch('/api/rag-ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ question, n_context: 8 })
                 });
+                console.log('Response status:', response.status);
 
                 const data = await response.json();
+                console.log('Ask data:', data);
 
                 searchLoading?.classList.add('hidden');
 
