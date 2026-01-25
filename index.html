@@ -528,26 +528,37 @@
                     <a href="#trials" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Trials</a>
                     <a href="#fda" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">FDA</a>
 
-                    <!-- RAG Search Bar -->
-                    <div id="searchContainer" class="relative">
+                    <!-- RAG Search Bar - Animated Expandable -->
+                    <div id="searchContainer" class="relative flex items-center">
+                        <!-- Collapsed State: Small pill -->
                         <button id="searchToggle"
-                                class="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors"
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 border border-dark-200 dark:border-dark-700 transition-all duration-300 ease-out"
                                 aria-label="Search">
-                            <svg class="w-5 h-5 text-dark-500 dark:text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
+                            <span class="text-xs text-dark-400 hidden sm:inline">Search</span>
+                            <kbd class="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded bg-dark-200 dark:bg-dark-700 text-dark-400">/</kbd>
                         </button>
-                        <div id="searchExpanded" class="hidden absolute right-0 top-0 flex items-center gap-2 bg-dark-50 dark:bg-dark-950 rounded-lg shadow-lg border border-dark-200 dark:border-dark-700 p-1">
-                            <input id="ragSearchInput"
-                                   type="text"
-                                   placeholder="Search patents, grants, researchers..."
-                                   class="w-64 px-3 py-2 text-sm bg-transparent border-none focus:outline-none focus:ring-0 text-dark-800 dark:text-dark-200 placeholder-dark-400"
-                                   autocomplete="off">
-                            <button id="searchClose" class="p-2 text-dark-400 hover:text-dark-600 dark:hover:text-dark-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <!-- Expanded State: Full search bar -->
+                        <div id="searchExpanded"
+                             class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 bg-dark-50 dark:bg-dark-900 rounded-full shadow-xl border border-dark-200 dark:border-dark-700 overflow-hidden transition-all duration-300 ease-out opacity-0 pointer-events-none w-0"
+                             style="transform-origin: right center;">
+                            <div class="flex items-center w-full">
+                                <svg class="w-4 h-4 text-dark-400 ml-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
-                            </button>
+                                <input id="ragSearchInput"
+                                       type="text"
+                                       placeholder="Search or ask a question..."
+                                       class="flex-1 px-3 py-2 text-sm bg-transparent border-none focus:outline-none focus:ring-0 text-dark-800 dark:text-dark-200 placeholder-dark-400 min-w-0"
+                                       autocomplete="off">
+                                <button id="searchClose" class="p-2 mr-1 text-dark-400 hover:text-dark-600 dark:hover:text-dark-200 rounded-full hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1550,12 +1561,22 @@
             fda_calendar: 'FDA'
         };
 
-        // Toggle search bar (desktop)
-        searchToggle?.addEventListener('click', () => {
-            searchExpanded.classList.remove('hidden');
-            searchToggle.classList.add('hidden');
-            ragSearchInput.focus();
-        });
+        // Toggle search bar (desktop) - animated expand/collapse
+        function expandSearch() {
+            searchToggle.classList.add('opacity-0', 'pointer-events-none');
+            searchExpanded.classList.remove('opacity-0', 'pointer-events-none', 'w-0');
+            searchExpanded.classList.add('opacity-100', 'w-80');
+            setTimeout(() => ragSearchInput?.focus(), 150);
+        }
+
+        function collapseSearch() {
+            searchExpanded.classList.remove('opacity-100', 'w-80');
+            searchExpanded.classList.add('opacity-0', 'pointer-events-none', 'w-0');
+            searchToggle.classList.remove('opacity-0', 'pointer-events-none');
+            ragSearchInput.value = '';
+        }
+
+        searchToggle?.addEventListener('click', expandSearch);
 
         // Mobile search - open modal directly with input
         const mobileSearchToggle = document.getElementById('mobileSearchToggle');
@@ -1594,24 +1615,17 @@
             }
         });
 
-        searchClose?.addEventListener('click', () => {
-            searchExpanded.classList.add('hidden');
-            searchToggle.classList.remove('hidden');
-            ragSearchInput.value = '';
-        });
+        searchClose?.addEventListener('click', collapseSearch);
 
         // Keyboard shortcut: / to open search
         document.addEventListener('keydown', (e) => {
             if (e.key === '/' && !e.target.matches('input, textarea')) {
                 e.preventDefault();
-                searchExpanded?.classList.remove('hidden');
-                searchToggle?.classList.add('hidden');
-                ragSearchInput?.focus();
+                expandSearch();
             }
             // Escape to close
             if (e.key === 'Escape') {
-                searchExpanded?.classList.add('hidden');
-                searchToggle?.classList.remove('hidden');
+                collapseSearch();
                 searchResultsModal?.classList.add('hidden');
             }
         });
