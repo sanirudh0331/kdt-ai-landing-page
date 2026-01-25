@@ -275,28 +275,6 @@
         .card-animate:nth-child(6) { animation-delay: 0.3s; }
         .card-animate:nth-child(7) { animation-delay: 0.35s; }
 
-        /* Hero text entrance animation */
-        .hero-animate {
-            opacity: 0;
-            animation: heroReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .hero-animate-delay {
-            opacity: 0;
-            animation: heroReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
-        }
-        @keyframes heroReveal {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-                filter: blur(4px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-                filter: blur(0);
-            }
-        }
-
         /* Ticker pause on tap/hover */
         .ticker-paused .ticker-content {
             animation-play-state: paused;
@@ -539,10 +517,10 @@
         <!-- Floating Particles -->
         <div class="particles" id="particles"></div>
         <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4 hero-animate">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
                 Welcome to <span class="hero-gradient">KdT AI</span>
             </h1>
-            <p class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto hero-animate-delay">
+            <p class="text-base sm:text-lg text-dark-500 dark:text-dark-400 max-w-2xl mx-auto">
                 Your AI toolkit for venture
             </p>
         </div>
@@ -959,18 +937,6 @@
             }
         }
         createParticles();
-
-        // Hero animation - only on first visit per session
-        (function() {
-            if (sessionStorage.getItem('kdt-hero-seen')) {
-                document.querySelectorAll('.hero-animate, .hero-animate-delay').forEach(el => {
-                    el.style.opacity = '1';
-                    el.style.animation = 'none';
-                });
-            } else {
-                sessionStorage.setItem('kdt-hero-seen', '1');
-            }
-        })();
 
         // Feedback widget toggle
         const feedbackToggle = document.getElementById('feedbackToggle');
