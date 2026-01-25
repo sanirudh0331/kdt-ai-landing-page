@@ -261,6 +261,59 @@ async def rag_checkpoint():
         )
 
 
+@app.get("/api/rag-debug")
+async def rag_debug():
+    """Debug endpoint to check if embeddings are stored correctly."""
+    try:
+        try:
+            from embeddings import get_collection, COLLECTIONS
+        except ImportError:
+            from rag.embeddings import get_collection, COLLECTIONS
+
+        debug_info = {}
+        for source, name in COLLECTIONS.items():
+            try:
+                collection = get_collection(name)
+                count = collection.count()
+
+                if count > 0:
+                    # Get one document with embeddings to verify they exist
+                    sample = collection.get(
+                        limit=1,
+                        include=["embeddings", "documents", "metadatas"]
+                    )
+
+                    has_embeddings = (
+                        sample.get("embeddings") is not None
+                        and len(sample["embeddings"]) > 0
+                        and sample["embeddings"][0] is not None
+                    )
+
+                    embedding_dim = None
+                    if has_embeddings:
+                        embedding_dim = len(sample["embeddings"][0])
+
+                    debug_info[source] = {
+                        "count": count,
+                        "has_embeddings": has_embeddings,
+                        "embedding_dimensions": embedding_dim,
+                        "sample_id": sample["ids"][0] if sample["ids"] else None,
+                    }
+                else:
+                    debug_info[source] = {"count": 0, "has_embeddings": False}
+
+            except Exception as e:
+                debug_info[source] = {"error": str(e)}
+
+        return {"status": "ok", "collections": debug_info}
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("RAG_PORT", 8001))
