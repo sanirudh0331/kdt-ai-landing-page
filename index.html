@@ -140,6 +140,41 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* Chat bubble styles */
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            max-width: 80%;
+            margin-left: auto;
+        }
+        .chat-bubble-neo {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            max-width: 85%;
+        }
+        .dark .chat-bubble-neo {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #6366f1;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+
         /* Floating particles */
         .particles {
             position: absolute;
@@ -984,8 +1019,8 @@
     </div>
 
     <!-- RAG Search Results Modal -->
-    <div id="searchResultsModal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
-        <div class="w-full max-w-4xl bg-dark-50 dark:bg-dark-900 rounded-xl shadow-2xl border border-dark-200 dark:border-dark-700 max-h-[75vh] flex flex-col">
+    <div id="searchResultsModal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 md:p-8">
+        <div class="w-full max-w-5xl lg:max-w-6xl bg-dark-50 dark:bg-dark-900 rounded-xl shadow-2xl border border-dark-200 dark:border-dark-700 h-[90vh] sm:h-[85vh] max-h-[900px] flex flex-col">
             <!-- Header -->
             <div class="flex items-center justify-between px-4 py-3 border-b border-dark-200 dark:border-dark-700">
                 <div class="flex items-center gap-2">
@@ -1026,37 +1061,57 @@
             <div id="searchResultsList" class="flex-1 overflow-y-auto p-4">
                 <!-- Results populated by JavaScript -->
             </div>
-            <!-- AI Answer Panel -->
-            <div id="askResultsPanel" class="hidden flex-1 overflow-y-auto p-4 relative">
-                <!-- Model selector -->
-                <div class="flex items-center justify-end mb-3">
-                    <label class="text-xs text-dark-500 mr-2">Model:</label>
-                    <select id="modelSelector" class="text-xs bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-500 rounded px-2 py-1 text-dark-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                        <option value="claude-3-5-haiku-20241022">Haiku (Fast)</option>
-                        <option value="claude-sonnet-4-20250514">Sonnet</option>
-                        <option value="claude-opus-4-20250514">Opus (Best)</option>
-                    </select>
+            <!-- AI Chat Panel -->
+            <div id="askResultsPanel" class="hidden flex-1 flex flex-col overflow-hidden relative">
+                <!-- Model selector and clear chat button -->
+                <div class="flex items-center justify-between px-4 py-2 border-b border-dark-200 dark:border-dark-700">
+                    <button id="clearChat" class="text-xs text-dark-500 hover:text-dark-700 dark:hover:text-dark-300 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Clear chat
+                    </button>
+                    <div class="flex items-center">
+                        <label class="text-xs text-dark-500 mr-2">Model:</label>
+                        <select id="modelSelector" class="text-xs bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-500 rounded px-2 py-1 text-dark-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            <option value="claude-3-5-haiku-20241022">Haiku (Fast)</option>
+                            <option value="claude-sonnet-4-20250514">Sonnet</option>
+                            <option value="claude-opus-4-20250514">Opus (Best)</option>
+                        </select>
+                    </div>
                 </div>
                 <!-- Subtle background logo watermark -->
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] dark:opacity-[0.05] z-0">
                     <img src="static/kdt-logo.png" alt="" class="w-48 h-48 object-contain">
                 </div>
-                <!-- Empty state placeholder -->
-                <div id="askPlaceholder" class="flex flex-col items-center justify-center py-12 text-center relative z-10">
-                    <img src="static/kdt-logo.png" alt="KdT" class="w-16 h-16 mb-4 opacity-60">
-                    <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
-                    <p class="text-sm text-dark-500 dark:text-dark-400 max-w-xs">
-                        Neo is your personal analyst trained specifically on KdT AI's knowledge base.
-                    </p>
+                <!-- Chat messages area (scrollable) -->
+                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
+                    <!-- Welcome message shown when empty -->
+                    <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center">
+                        <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
+                        <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
+                        <p class="text-sm text-dark-400 max-w-xs">Ask Neo anything about KdT's knowledge base</p>
+                    </div>
                 </div>
-                <!-- Answer content (shown when response arrives) -->
-                <div id="askContent" class="hidden relative z-10">
-                    <div id="askAnswer" class="prose prose-sm dark:prose-invert max-w-none">
-                        <!-- AI answer populated by JavaScript -->
-                    </div>
-                    <div id="askSources" class="mt-4 pt-4 border-t border-dark-200 dark:border-dark-700">
-                        <!-- Sources list populated by JavaScript -->
-                    </div>
+                <!-- Sources area (shown after responses) -->
+                <div id="askSources" class="px-4 pb-2 hidden border-t border-dark-200 dark:border-dark-700 pt-3">
+                    <!-- Sources list populated by JavaScript -->
+                </div>
+                <!-- Chat input area -->
+                <div class="p-3 border-t border-dark-200 dark:border-dark-700 bg-dark-100/50 dark:bg-dark-800/50">
+                    <form id="chatInputForm" class="flex gap-2">
+                        <input type="text" id="chatInput"
+                               placeholder="Continue the conversation..."
+                               class="flex-1 px-4 py-2.5 rounded-lg bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-600 text-dark-800 dark:text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                               autocomplete="off">
+                        <button type="submit" id="chatSendBtn"
+                                class="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span>Send</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </button>
+                    </form>
                 </div>
             </div>
             <!-- Footer hint -->
@@ -1665,17 +1720,14 @@
             }
         });
 
-        // Search on input with debounce
+        // Clear results when input is emptied (no auto-search on typing)
         ragSearchInput?.addEventListener('input', (e) => {
             const query = e.target.value.trim();
             clearTimeout(searchTimeout);
 
             if (query.length < 2) {
                 searchResultsModal?.classList.add('hidden');
-                return;
             }
-
-            searchTimeout = setTimeout(() => performRAGSearch(query), 300);
         });
 
         // Enter to search immediately
@@ -1698,10 +1750,7 @@
         clearSearch?.addEventListener('click', () => {
             searchResultsList.innerHTML = '';
             searchResultsQuery.textContent = '';
-            askAnswer.innerHTML = '';
-            askSources.innerHTML = '';
-            askPlaceholder?.classList.remove('hidden');
-            askContent?.classList.add('hidden');
+            clearConversation();
             searchResultsModal?.classList.add('hidden');
             // Clear the search input too
             const heroSearchInput = document.querySelector('input[placeholder*="Search"]');
@@ -1709,14 +1758,10 @@
         });
 
         // Model selector change - rerun query with new model
+        // Model selector change - just note the selection for next query
+        // In chat mode, we don't re-run previous queries when model changes
         modelSelector?.addEventListener('change', () => {
-            const currentQuery = searchResultsQuery?.textContent?.trim();
-            if (currentQuery && currentQuery.length > 0) {
-                searchLoading?.classList.remove('hidden');
-                askAnswer.innerHTML = '';
-                askSources.innerHTML = '';
-                performAsk(currentQuery);
-            }
+            console.log('Model changed to:', modelSelector.value);
         });
 
         // Close modal on click outside
@@ -1730,15 +1775,186 @@
         const tabSearch = document.getElementById('tabSearch');
         const tabAsk = document.getElementById('tabAsk');
         const askResultsPanel = document.getElementById('askResultsPanel');
-        const askAnswer = document.getElementById('askAnswer');
         const askSources = document.getElementById('askSources');
-        const askPlaceholder = document.getElementById('askPlaceholder');
-        const askContent = document.getElementById('askContent');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatWelcome = document.getElementById('chatWelcome');
+        const clearChatBtn = document.getElementById('clearChat');
         const loadingText = document.getElementById('loadingText');
         const footerRight = document.getElementById('footerRight');
 
         // Current active tab
         let activeTab = 'search';
+
+        // Conversation state management
+        let conversationHistory = [];  // [{role: 'user'|'assistant', content: string}]
+        let conversationTopic = null;  // The original query that started this conversation
+        let lastSearchContext = null;  // Cache last retrieved context for sources display
+
+        // localStorage with 14-day expiry
+        function loadConversation() {
+            try {
+                const saved = localStorage.getItem('neo_chat');
+                if (saved) {
+                    const {messages, topic, timestamp} = JSON.parse(saved);
+                    const fourteenDays = 14 * 24 * 60 * 60 * 1000;
+                    if (Date.now() - timestamp < fourteenDays) {
+                        conversationTopic = topic || null;
+                        return messages;
+                    }
+                    // Expired, clear it
+                    localStorage.removeItem('neo_chat');
+                }
+            } catch (e) {
+                console.warn('Failed to load conversation:', e);
+            }
+            return [];
+        }
+
+        function saveConversation() {
+            try {
+                localStorage.setItem('neo_chat', JSON.stringify({
+                    messages: conversationHistory,
+                    topic: conversationTopic,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.warn('Failed to save conversation:', e);
+            }
+        }
+
+        // Smart follow-up detection
+        function isFollowUp(query) {
+            const q = query.toLowerCase().trim();
+            // No history = not a follow-up
+            if (conversationHistory.length === 0) return false;
+
+            // Pronouns and references to previous context
+            const followUpPatterns = [
+                /^(tell me more|more about|expand on|elaborate)/i,
+                /^(what about|how about|and what|and how)/i,
+                /\b(it|that|this|those|these|them)\b/,
+                /\b(the same|mentioned|above|previous)\b/,
+                /^(why|how come|can you explain)/i,
+                /^(also|additionally|furthermore)/i,
+            ];
+
+            // Short queries are likely follow-ups
+            if (q.split(' ').length <= 4) {
+                return true;
+            }
+
+            return followUpPatterns.some(p => p.test(q));
+        }
+
+        // Check if new query is related to existing conversation topic
+        function isSameTopic(newQuery) {
+            if (!conversationTopic) return false;
+
+            const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+            const topicWords = new Set(normalize(conversationTopic));
+            const queryWords = normalize(newQuery);
+
+            // Check for significant word overlap
+            const overlap = queryWords.filter(w => topicWords.has(w)).length;
+            const overlapRatio = overlap / Math.max(queryWords.length, 1);
+
+            // Consider same topic if >30% word overlap or any key terms match
+            return overlapRatio > 0.3 || overlap >= 2;
+        }
+
+        // Clear conversation and reset UI
+        function clearConversation() {
+            conversationHistory = [];
+            conversationTopic = null;
+            lastSearchContext = null;
+            localStorage.removeItem('neo_chat');
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center">
+                        <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
+                        <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
+                        <p class="text-sm text-dark-400 max-w-xs">Ask Neo anything about KdT's knowledge base</p>
+                    </div>
+                `;
+            }
+            if (askSources) {
+                askSources.innerHTML = '';
+                askSources.classList.add('hidden');
+            }
+        }
+
+        // Render a chat message bubble
+        function renderChatMessage(role, content, isTyping = false) {
+            // Hide welcome message when there are messages
+            if (chatWelcome) chatWelcome.classList.add('hidden');
+
+            const bubble = document.createElement('div');
+
+            if (role === 'user') {
+                bubble.className = 'chat-bubble-user px-4 py-3';
+                bubble.innerHTML = `<p class="text-sm">${escapeHtml(content)}</p>`;
+            } else {
+                bubble.className = 'chat-bubble-neo px-4 py-3 text-dark-800 dark:text-dark-200';
+                if (isTyping) {
+                    bubble.id = 'typingIndicator';
+                    bubble.innerHTML = `<div class="typing-indicator flex items-center gap-1 py-1"><span></span><span></span><span></span></div>`;
+                } else {
+                    bubble.innerHTML = `<div class="text-sm leading-relaxed">${formatMarkdown(content)}</div>`;
+                }
+            }
+
+            chatMessages?.appendChild(bubble);
+            // Auto-scroll to bottom
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            return bubble;
+        }
+
+        // Restore conversation on load
+        function restoreConversation() {
+            conversationHistory = loadConversation();
+            if (conversationHistory.length > 0 && chatMessages) {
+                // Hide welcome, render all messages
+                if (chatWelcome) chatWelcome.classList.add('hidden');
+                conversationHistory.forEach(msg => {
+                    renderChatMessage(msg.role, msg.content);
+                });
+            }
+        }
+
+        // Clear chat handler
+        clearChatBtn?.addEventListener('click', () => clearConversation());
+
+        // Initialize conversation on page load
+        restoreConversation();
+
+        // Chat input form handler
+        const chatInputForm = document.getElementById('chatInputForm');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+
+        chatInputForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = chatInput?.value?.trim();
+            if (!message) return;
+
+            // Clear input and disable while processing
+            chatInput.value = '';
+            chatSendBtn.disabled = true;
+
+            // Update the query display
+            const queryDisplay = document.getElementById('searchResultsQuery');
+            if (queryDisplay) queryDisplay.textContent = message;
+
+            // Run the ask
+            await performAsk(message);
+
+            // Re-enable input
+            chatSendBtn.disabled = false;
+            chatInput?.focus();
+        });
 
         // Tab switching
         function setActiveTab(tab) {
@@ -1758,11 +1974,6 @@
                 tabSearch?.classList.add('border-transparent', 'text-dark-500');
                 askResultsPanel?.classList.remove('hidden');
                 searchResultsList?.classList.add('hidden');
-                // Show placeholder if no answer yet
-                if (askAnswer && !askAnswer.innerHTML.trim()) {
-                    askPlaceholder?.classList.remove('hidden');
-                    askContent?.classList.add('hidden');
-                }
                 if (footerRight) footerRight.innerHTML = 'Powered by <span class="text-indigo-500">Claude</span>';
             }
         }
@@ -1770,9 +1981,11 @@
         tabSearch?.addEventListener('click', () => setActiveTab('search'));
         tabAsk?.addEventListener('click', () => {
             setActiveTab('ask');
-            // If there's a query, run it through Ask AI
+            // Focus the chat input
+            chatInput?.focus();
+            // If there's a query and no conversation yet, run it through Ask AI
             const currentQuery = document.getElementById('searchResultsQuery')?.textContent?.trim();
-            if (currentQuery && currentQuery.length > 0) {
+            if (currentQuery && currentQuery.length > 0 && conversationHistory.length === 0) {
                 performAsk(currentQuery);
             }
         });
@@ -1800,6 +2013,12 @@
                 return;
             }
 
+            // Smart topic detection: clear conversation if different topic
+            if (conversationHistory.length > 0 && !isSameTopic(query)) {
+                console.log('Different topic detected, clearing conversation');
+                clearConversation();
+            }
+
             // Auto-detect question and switch tabs
             const queryIsQuestion = isQuestion(query);
             console.log('Is question:', queryIsQuestion);
@@ -1813,6 +2032,10 @@
             if (queryIsQuestion) {
                 setActiveTab('ask');
                 if (loadingText) loadingText.textContent = 'Thinking...';
+                // Set topic if starting fresh
+                if (!conversationTopic) {
+                    conversationTopic = query;
+                }
                 await performAsk(query);
             } else {
                 setActiveTab('search');
@@ -1901,28 +2124,39 @@
             }
         }
 
-        // Perform AI Q&A
+        // Perform AI Q&A with chat mode
         async function performAsk(question, model = null) {
             const selectedModel = model || modelSelector?.value || 'claude-3-5-haiku-20241022';
             console.log('performAsk called with:', question, 'model:', selectedModel);
-            if (!askAnswer || !askSources) {
-                console.error('Ask elements not found');
-                return;
-            }
 
-            // Hide placeholder, show content area
-            askPlaceholder?.classList.add('hidden');
-            askContent?.classList.remove('hidden');
+            // Hide central loading spinner - we use typing indicator instead
+            searchLoading?.classList.add('hidden');
 
-            askAnswer.innerHTML = '';
-            askSources.innerHTML = '';
+            // Render user message as chat bubble
+            renderChatMessage('user', question);
+
+            // Add to conversation history
+            conversationHistory.push({ role: 'user', content: question });
+
+            // Show typing indicator
+            renderChatMessage('assistant', '', true);
+
+            // Determine if this is a follow-up question
+            const skipSearch = isFollowUp(question);
+            console.log('Is follow-up (skip search):', skipSearch);
 
             try {
                 console.log('Fetching /api/rag-ask...');
                 const response = await fetch('/api/rag-ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, n_context: 8, model: selectedModel })
+                    body: JSON.stringify({
+                        question,
+                        n_context: 8,
+                        model: selectedModel,
+                        messages: conversationHistory.slice(0, -1), // Exclude current question
+                        skip_search: skipSearch
+                    })
                 });
                 console.log('Response status:', response.status);
 
@@ -1931,26 +2165,25 @@
 
                 searchLoading?.classList.add('hidden');
 
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) typingIndicator.remove();
+
                 if (data.error) {
-                    askAnswer.innerHTML = `
-                        <div class="text-center py-8 text-dark-500">
-                            <p class="font-medium">AI Q&A unavailable</p>
-                            <p class="text-sm mt-1">${data.detail || data.error}</p>
-                        </div>
-                    `;
+                    renderChatMessage('assistant', `Error: ${data.detail || data.error}`);
                     return;
                 }
 
-                // Render answer with basic markdown formatting
-                const formattedAnswer = formatMarkdown(data.answer);
-                askAnswer.innerHTML = `
-                    <div class="text-dark-800 dark:text-dark-200 leading-relaxed">
-                        ${formattedAnswer}
-                    </div>
-                `;
+                // Render assistant response as chat bubble
+                renderChatMessage('assistant', data.answer);
 
-                // Render sources
-                if (data.sources && data.sources.length > 0) {
+                // Add to conversation history and save
+                conversationHistory.push({ role: 'assistant', content: data.answer });
+                saveConversation();
+
+                // Render sources (only if we searched)
+                if (!skipSearch && data.sources && data.sources.length > 0) {
+                    lastSearchContext = data.sources;
                     let sourcesHtml = `
                         <p class="text-xs font-semibold uppercase tracking-wider text-dark-400 mb-2">
                             Based on ${data.context_count} documents
@@ -1960,7 +2193,6 @@
 
                     data.sources.forEach(s => {
                         const sourceColor = sourceColors[s.source] || 'bg-gray-500';
-                        const label = sourceLabels[s.source] || s.source;
                         if (s.url) {
                             sourcesHtml += `
                                 <a href="${s.url}" target="_blank"
@@ -1980,18 +2212,21 @@
                     });
 
                     sourcesHtml += '</div>';
-                    askSources.innerHTML = sourcesHtml;
+                    if (askSources) {
+                        askSources.innerHTML = sourcesHtml;
+                        askSources.classList.remove('hidden');
+                    }
                 }
 
             } catch (error) {
                 console.error('Ask error:', error);
                 searchLoading?.classList.add('hidden');
-                askAnswer.innerHTML = `
-                    <div class="text-center py-8 text-dark-500">
-                        <p class="font-medium">AI Q&A failed</p>
-                        <p class="text-sm mt-1">Please try again</p>
-                    </div>
-                `;
+
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) typingIndicator.remove();
+
+                renderChatMessage('assistant', 'Sorry, something went wrong. Please try again.');
             }
         }
 

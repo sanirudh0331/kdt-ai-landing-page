@@ -67,6 +67,7 @@ def ask_with_context(
     context_docs: list,
     model: str = "claude-3-5-haiku-20241022",
     max_tokens: int = 1024,
+    messages: list = None,
 ) -> dict:
     """
     Answer a question using the provided context documents.
@@ -76,10 +77,13 @@ def ask_with_context(
         context_docs: List of search result documents
         model: Claude model to use (default: haiku for speed/cost)
         max_tokens: Maximum response length
+        messages: Conversation history as list of {role, content} dicts
 
     Returns:
         dict with 'answer', 'sources', 'context_count', 'model'
     """
+    if messages is None:
+        messages = []
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return {
@@ -90,7 +94,9 @@ def ask_with_context(
             "error": "missing_api_key"
         }
 
-    if not context_docs:
+    # For follow-up questions with conversation history, we can proceed without new context
+    # Only return early if no context AND no conversation history
+    if not context_docs and not messages:
         return {
             "answer": "I don't have any relevant documents in the knowledge base to answer this question. Try rephrasing or searching for related terms.",
             "sources": [],
@@ -98,27 +104,38 @@ def ask_with_context(
             "model": model,
         }
 
-    # Format context
-    context_str = format_context(context_docs)
-
-    # Build the prompt
-    user_message = f"""CONTEXT:
+    # Build the current message
+    if context_docs:
+        # Format context for new questions
+        context_str = format_context(context_docs)
+        current_message = f"""CONTEXT:
 {context_str}
 
 QUESTION: {question}
 
 Answer based ONLY on the context above. Cite sources by their document number [1], [2], etc."""
+    else:
+        # Follow-up question without new context - use conversation history
+        current_message = question
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
+
+        # Build messages array with conversation history
+        api_messages = []
+        for msg in messages:
+            api_messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        # Add current question
+        api_messages.append({"role": "user", "content": current_message})
 
         response = client.messages.create(
             model=model,
             max_tokens=max_tokens,
             system=SYSTEM_PROMPT,
-            messages=[
-                {"role": "user", "content": user_message}
-            ]
+            messages=api_messages
         )
 
         answer = response.content[0].text

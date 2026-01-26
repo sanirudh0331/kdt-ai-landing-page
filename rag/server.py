@@ -23,6 +23,8 @@ class AskRequest(BaseModel):
     question: str
     n_context: int = 5
     model: str = "claude-3-5-haiku-20241022"
+    messages: list = []  # Conversation history for chat mode
+    skip_search: bool = False  # Skip RAG search for follow-up questions
 
 
 app = FastAPI(
@@ -121,24 +123,27 @@ async def rag_ask(request: AskRequest):
             from rag.search import search_with_filters
             from rag.llm import ask_with_context
 
-        # First, search for relevant context
-        context_results = search_with_filters(
-            query=request.question,
-            sources=None,  # Search all sources
-            n_results=request.n_context,
-        )
-
-        # Convert search results to dicts for the LLM
+        # Skip search for follow-up questions that use existing context
         context_docs = []
-        for r in context_results:
-            doc = r.to_dict()
-            context_docs.append(doc)
+        if not request.skip_search:
+            # Search for relevant context
+            context_results = search_with_filters(
+                query=request.question,
+                sources=None,  # Search all sources
+                n_results=request.n_context,
+            )
 
-        # Get AI answer
+            # Convert search results to dicts for the LLM
+            for r in context_results:
+                doc = r.to_dict()
+                context_docs.append(doc)
+
+        # Get AI answer (with conversation history if provided)
         result = ask_with_context(
             question=request.question,
             context_docs=context_docs,
             model=request.model,
+            messages=request.messages,
         )
 
         return {
