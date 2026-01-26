@@ -202,9 +202,10 @@ def search_all(
         seen_docs.add(base_id)
         deduplicated.append(result)
 
-    # Rerank results using cross-encoder for better relevance
-    if len(deduplicated) > 1:
-        deduplicated = rerank_results(query, deduplicated, n_results)
+    # TODO: Re-enable reranking once model is pre-loaded on startup
+    # Disabled for now as it causes timeouts on first request
+    # if len(deduplicated) > 1:
+    #     deduplicated = rerank_results(query, deduplicated, n_results)
 
     return deduplicated[:n_results]
 
