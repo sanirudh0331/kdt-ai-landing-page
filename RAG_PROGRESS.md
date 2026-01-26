@@ -35,6 +35,23 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 - `c44a6ec` - Add Neo chat interface with conversation history and smart topic detection
 - `82b6cc3` - Fix stale DOM reference for chatWelcome element
 - `9bcaf6d` - Fix: check isFollowUp before adding question to history
+- `82426b3` - UX improvements (short query fix, Enter key, clear confirmation)
+- `244ad3c` - Chat animations (slide-in, shadows, glow pulse)
+- `8487283` - Pulsating logo + fun thinking messages
+- `1604914` - Remove background watermark for cleaner look
+
+### UX & Visual Polish (2026-01-26)
+
+| Improvement | Description |
+|-------------|-------------|
+| Short query fix | Require at least one full exchange before short-query follow-up detection |
+| Enter key support | Submit chat messages with Enter key |
+| Clear confirmation | Confirm before clearing conversation history |
+| Slide-in animation | Chat bubbles animate in smoothly |
+| Subtle shadows | Depth added to message bubbles |
+| Glow pulse | Neo bubble glows while thinking |
+| Thinking indicator | Pulsating logo + random fun messages ("Searching...", "Connecting the dots...") |
+| Clean design | Removed background watermark |
 
 ### Bug Fixes (2026-01-26)
 
