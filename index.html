@@ -190,6 +190,19 @@
             max-width: 80%;
             margin-left: auto;
             box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+            line-height: 1.5;
+        }
+        .chat-bubble-user p {
+            word-break: break-word;
+        }
+        .chat-bubble-user .user-link {
+            color: white;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            opacity: 0.9;
+        }
+        .chat-bubble-user .user-link:hover {
+            opacity: 1;
         }
         .chat-bubble-neo {
             background: rgba(99, 102, 241, 0.08);
@@ -2171,8 +2184,11 @@
 
             if (role === 'user') {
                 bubble.className = 'chat-bubble-user px-4 py-3';
+                // Escape HTML but auto-link URLs
+                const safeContent = escapeHtml(content)
+                    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="user-link">$1</a>');
                 bubble.innerHTML = `
-                    <p class="text-sm">${escapeHtml(content)}</p>
+                    <p class="text-sm">${safeContent}</p>
                     <div class="msg-timestamp text-right mt-1 text-indigo-200">${timestamp}</div>
                 `;
             } else {
