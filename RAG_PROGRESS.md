@@ -40,6 +40,7 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 - `8487283` - Pulsating logo + fun thinking messages
 - `1604914` - Remove background watermark for cleaner look
 - `e269fd7` - Custom themed scrollbar for chat and search panels
+- `75530ae` - Copy button, keyboard shortcut, timestamps, source chips, auto-links, expand/collapse
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -54,6 +55,12 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 | Thinking indicator | Pulsating logo + random fun messages ("Searching...", "Connecting the dots...") |
 | Clean design | Removed background watermark |
 | Custom scrollbar | Thin, themed indigo scrollbar for chat & search panels |
+| Copy button | Click to copy Neo's responses with checkmark feedback |
+| Keyboard shortcut | `Cmd/Ctrl+K` to focus search input from anywhere |
+| Message timestamps | Show time (HH:MM) on each message |
+| Source chips | Improved styling with hover effects and source type labels |
+| Auto-link URLs | URLs in responses are automatically clickable |
+| Expand/collapse | Long messages (800+ chars) show "Show more/less" button |
 
 ### Bug Fixes (2026-01-26)
 
