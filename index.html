@@ -458,6 +458,27 @@
             color: #f3f4f6;
         }
 
+        /* Scroll to bottom button */
+        .scroll-to-bottom {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 20;
+        }
+        .scroll-to-bottom:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+        }
+
         /* Typing effect cursor */
         .typing-cursor::after {
             content: '|';
@@ -1413,14 +1434,29 @@
                         </select>
                     </div>
                 </div>
+                <!-- Offline banner -->
+                <div id="offlineBanner" class="hidden px-4 py-2 bg-amber-100 dark:bg-amber-900/50 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span>You're offline - check your connection</span>
+                </div>
                 <!-- Chat messages area (scrollable) -->
-                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 custom-scrollbar">
-                    <!-- Welcome message shown when empty -->
-                    <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center px-4">
-                        <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
-                        <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
-                        <p class="text-sm text-dark-400 max-w-xs">Ask Neo anything about KdT's knowledge base</p>
+                <div id="chatMessagesWrapper" class="flex-1 overflow-hidden relative">
+                    <div id="chatMessages" class="h-full overflow-y-auto p-4 space-y-4 relative z-10 custom-scrollbar">
+                        <!-- Welcome message shown when empty -->
+                        <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center px-4">
+                            <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
+                            <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
+                            <p class="text-sm text-dark-400 max-w-xs">Ask Neo anything about KdT's knowledge base</p>
+                        </div>
                     </div>
+                    <!-- Scroll to bottom button -->
+                    <button id="scrollToBottom" class="scroll-to-bottom hidden" onclick="scrollChatToBottom()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                        </svg>
+                    </button>
                 </div>
                 <!-- Sources area (shown after responses) -->
                 <div id="askSources" class="px-4 pb-2 hidden border-t border-dark-200 dark:border-dark-700 pt-3">
@@ -2319,6 +2355,42 @@
 
         // Initialize conversation on page load
         restoreConversation();
+
+        // Offline/online detection
+        const offlineBanner = document.getElementById('offlineBanner');
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                offlineBanner?.classList.add('hidden');
+            } else {
+                offlineBanner?.classList.remove('hidden');
+            }
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus(); // Check initial state
+
+        // Scroll to bottom button
+        const scrollToBottomBtn = document.getElementById('scrollToBottom');
+        const chatMessagesEl = document.getElementById('chatMessages');
+
+        function scrollChatToBottom() {
+            if (chatMessagesEl) {
+                chatMessagesEl.scrollTo({ top: chatMessagesEl.scrollHeight, behavior: 'smooth' });
+            }
+        }
+
+        function checkScrollPosition() {
+            if (!chatMessagesEl || !scrollToBottomBtn) return;
+            // Show button if scrolled up more than 100px from bottom
+            const isScrolledUp = chatMessagesEl.scrollHeight - chatMessagesEl.scrollTop - chatMessagesEl.clientHeight > 100;
+            if (isScrolledUp) {
+                scrollToBottomBtn.classList.remove('hidden');
+            } else {
+                scrollToBottomBtn.classList.add('hidden');
+            }
+        }
+
+        chatMessagesEl?.addEventListener('scroll', checkScrollPosition);
 
         // Toggle sources expanded/collapsed
         function toggleSources() {

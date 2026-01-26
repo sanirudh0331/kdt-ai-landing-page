@@ -61,6 +61,8 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `a0de787` - CSS counters for numbered list continuity (fixes 1, 1 -> 1, 2)
 - `b50a3eb` - Inline timestamp for compact user messages
 - `19dc964` - Fix user bubble alignment (width: fit-content)
+- `aa2107d` - Update progress notes
+- `[new]` - Offline banner and scroll-to-bottom button
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -89,6 +91,8 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 | Reference links | [1], [2] in responses link to actual sources |
 | User message compact | Inline timestamp, fit-content width, right-aligned |
 | List numbering | CSS counters maintain 1, 2, 3 across bullet interruptions |
+| Offline banner | Yellow warning bar when connection lost |
+| Scroll to bottom | Centered floating button when scrolled up in chat |
 
 ### Bug Fixes (2026-01-26)
 
