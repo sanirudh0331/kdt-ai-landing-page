@@ -57,6 +57,8 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `38809b2` - Improve Neo response text formatting and typography
 - `f2c8063` - Improve user message styling (line-height, auto-link URLs)
 - `a2e9fc2` - Better list spacing, clickable reference links [1], [2]
+- `139e779` - Fix user message spacing
+- `a0de787` - CSS counters for numbered list continuity (fixes 1, 1 -> 1, 2)
 
 ### UX & Visual Polish (2026-01-26)
 
