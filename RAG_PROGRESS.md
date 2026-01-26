@@ -39,6 +39,7 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 - `244ad3c` - Chat animations (slide-in, shadows, glow pulse)
 - `8487283` - Pulsating logo + fun thinking messages
 - `1604914` - Remove background watermark for cleaner look
+- `e269fd7` - Custom themed scrollbar for chat and search panels
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -52,6 +53,7 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 | Glow pulse | Neo bubble glows while thinking |
 | Thinking indicator | Pulsating logo + random fun messages ("Searching...", "Connecting the dots...") |
 | Clean design | Removed background watermark |
+| Custom scrollbar | Thin, themed indigo scrollbar for chat & search panels |
 
 ### Bug Fixes (2026-01-26)
 
