@@ -22,7 +22,6 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 | Enlarged Modal | ✅ Done | 90% viewport height, responsive width |
 | Typing Effect | ✅ Done | Word-by-word response animation with cursor |
 | Voice Input | ✅ Done | Web Speech API microphone button for speech-to-text |
-| Suggested Questions | ✅ Done | Quick-start suggestions, hideable with localStorage |
 
 ### Files Changed
 - `index.html` - Chat UI, CSS, JavaScript for conversation management
@@ -41,11 +40,6 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - **Error Handling:** Alerts user if microphone access denied or browser unsupported
 - **UI Feedback:** Button turns red and pulses while recording
 
-### Suggested Questions
-- Pre-defined questions shown on welcome screen
-- User can hide suggestions (persists in localStorage)
-- Clicking a suggestion auto-submits to Neo
-
 ### Commits
 - `c44a6ec` - Add Neo chat interface with conversation history and smart topic detection
 - `82b6cc3` - Fix stale DOM reference for chatWelcome element
@@ -58,6 +52,7 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `75530ae` - Copy button, keyboard shortcut, timestamps, source chips, auto-links, expand/collapse
 - `ad176d8` - Typing effect, voice input, suggested questions, mobile improvements
 - `0ceaf59` - Collapsible sources section (minimizes on new question)
+- `612b50c` - Remove suggested questions feature
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -80,7 +75,6 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 | Expand/collapse | Long messages (800+ chars) show "Show more/less" button |
 | Typing effect | Responses appear word-by-word with blinking cursor animation |
 | Voice input | Microphone button uses Web Speech API for voice-to-text |
-| Suggested questions | Quick-start suggestions on welcome screen (can be hidden) |
 | Mobile improvements | Larger touch targets, iOS zoom prevention (16px inputs) |
 | Collapsible sources | Sources expand after response, collapse on new question |
 
