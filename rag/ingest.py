@@ -72,27 +72,50 @@ SERVICE_URLS = {
 }
 
 
-def chunk_text(text: str, max_chars: int = 2000) -> list[str]:
-    """Split text into chunks if it exceeds max_chars."""
+def chunk_text(text: str, max_chars: int = 1500, overlap: int = 200) -> list[dict]:
+    """Split text into overlapping chunks with position tracking.
+
+    Args:
+        text: The text to chunk
+        max_chars: Maximum characters per chunk (default 1500 for better context)
+        overlap: Characters to overlap between chunks (default 200)
+
+    Returns:
+        List of dicts with 'text', 'chunk_index', and 'total_chunks' keys
+    """
     if len(text) <= max_chars:
-        return [text]
+        return [{"text": text, "chunk_index": 0, "total_chunks": 1}]
 
-    sentences = text.replace(". ", ".|").split("|")
     chunks = []
-    current_chunk = ""
+    start = 0
+    chunk_index = 0
 
-    for sentence in sentences:
-        if len(current_chunk) + len(sentence) + 1 <= max_chars:
-            current_chunk += sentence + " "
-        else:
-            if current_chunk:
-                chunks.append(current_chunk.strip())
-            current_chunk = sentence + " "
+    while start < len(text):
+        end = min(start + max_chars, len(text))
 
-    if current_chunk:
-        chunks.append(current_chunk.strip())
+        # Find sentence boundary if not at end of text
+        if end < len(text):
+            # Look for sentence boundary in the latter half of the chunk
+            boundary = text.rfind('. ', start + max_chars // 2, end)
+            if boundary > start:
+                end = boundary + 1
 
-    return chunks if chunks else [text[:max_chars]]
+        chunk_text_content = text[start:end].strip()
+        if chunk_text_content:
+            chunks.append({
+                "text": chunk_text_content,
+                "chunk_index": chunk_index,
+            })
+            chunk_index += 1
+
+        # Move start position, accounting for overlap
+        start = end - overlap if end < len(text) else len(text)
+
+    # Add total_chunks to each chunk
+    for c in chunks:
+        c["total_chunks"] = len(chunks)
+
+    return chunks
 
 
 def fetch_from_api(source: str) -> list[dict]:
@@ -160,8 +183,9 @@ def ingest_patents(reset: bool = False, verbose: bool = True) -> int:
         document = " ".join(text_parts)
         chunks = chunk_text(document)
 
-        for i, chunk in enumerate(chunks):
-            chunk_id = f"{doc_id}_chunk{i}" if len(chunks) > 1 else doc_id
+        for chunk_data in chunks:
+            chunk_idx = chunk_data["chunk_index"]
+            chunk_id = f"{doc_id}_chunk{chunk_idx}" if chunk_data["total_chunks"] > 1 else doc_id
 
             metadata = {
                 "source": "patents",
@@ -171,10 +195,12 @@ def ingest_patents(reset: bool = False, verbose: bool = True) -> int:
                 "grant_date": patent.get("grant_date", ""),
                 "assignee": patent.get("primary_assignee", ""),
                 "cpc_codes": patent.get("cpc_codes", ""),
+                "chunk_index": chunk_idx,
+                "total_chunks": chunk_data["total_chunks"],
             }
 
             batch_ids.append(chunk_id)
-            batch_documents.append(chunk)
+            batch_documents.append(chunk_data["text"])
             batch_metadatas.append(metadata)
 
             if len(batch_ids) >= BATCH_SIZE:
@@ -260,8 +286,9 @@ def ingest_grants(reset: bool = False, verbose: bool = True) -> int:
         document = " ".join(text_parts)
         chunks = chunk_text(document)
 
-        for i, chunk in enumerate(chunks):
-            chunk_id = f"{doc_id}_chunk{i}" if len(chunks) > 1 else doc_id
+        for chunk_data in chunks:
+            chunk_idx = chunk_data["chunk_index"]
+            chunk_id = f"{doc_id}_chunk{chunk_idx}" if chunk_data["total_chunks"] > 1 else doc_id
 
             metadata = {
                 "source": "grants",
@@ -271,10 +298,12 @@ def ingest_grants(reset: bool = False, verbose: bool = True) -> int:
                 "mechanism": grant.get("mechanism", ""),
                 "total_cost": str(grant.get("total_cost", "")),
                 "award_date": grant.get("award_notice_date", ""),
+                "chunk_index": chunk_idx,
+                "total_chunks": chunk_data["total_chunks"],
             }
 
             batch_ids.append(chunk_id)
-            batch_documents.append(chunk)
+            batch_documents.append(chunk_data["text"])
             batch_metadatas.append(metadata)
 
             if len(batch_ids) >= BATCH_SIZE:
@@ -342,8 +371,9 @@ def ingest_policies(reset: bool = False, verbose: bool = True) -> int:
         document = " ".join(text_parts)
         chunks = chunk_text(document)
 
-        for i, chunk in enumerate(chunks):
-            chunk_id = f"{doc_id}_chunk{i}" if len(chunks) > 1 else doc_id
+        for chunk_data in chunks:
+            chunk_idx = chunk_data["chunk_index"]
+            chunk_id = f"{doc_id}_chunk{chunk_idx}" if chunk_data["total_chunks"] > 1 else doc_id
 
             metadata = {
                 "source": "policies",
@@ -352,10 +382,12 @@ def ingest_policies(reset: bool = False, verbose: bool = True) -> int:
                 "relevance_score": str(policy.get("relevance_score", "")),
                 "passage_likelihood": policy.get("passage_likelihood", ""),
                 "status": policy.get("status", ""),
+                "chunk_index": chunk_idx,
+                "total_chunks": chunk_data["total_chunks"],
             }
 
             batch_ids.append(chunk_id)
-            batch_documents.append(chunk)
+            batch_documents.append(chunk_data["text"])
             batch_metadatas.append(metadata)
 
             if len(batch_ids) >= BATCH_SIZE:

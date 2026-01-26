@@ -11,8 +11,8 @@ from chromadb.utils import embedding_functions
 _default_chroma_dir = Path(__file__).parent.parent / "data" / "chroma_db"
 CHROMA_PERSIST_DIR = Path(os.environ.get("CHROMA_PERSIST_DIR", str(_default_chroma_dir)))
 
-# Embedding model - using fast model for quick indexing
-EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+# Embedding model - using BGE for high-quality retrieval (768 dims)
+EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "BAAI/bge-base-en-v1.5")
 
 # Collection names for each data source
 COLLECTIONS = {

@@ -3,10 +3,24 @@
 from typing import Optional
 from dataclasses import dataclass, asdict
 
+from sentence_transformers import CrossEncoder
+
 try:
     from embeddings import get_collection, get_embedding_function, COLLECTIONS
 except ImportError:
     from rag.embeddings import get_collection, get_embedding_function, COLLECTIONS
+
+
+# Cross-encoder reranker (singleton)
+_reranker = None
+
+
+def get_reranker():
+    """Get or initialize the cross-encoder reranker (singleton)."""
+    global _reranker
+    if _reranker is None:
+        _reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+    return _reranker
 
 
 # Tool URLs (Railway deployments)
@@ -32,6 +46,22 @@ class SearchResult:
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+
+def rerank_results(query: str, results: list[SearchResult], top_k: int = 10) -> list[SearchResult]:
+    """Rerank search results using Cross-Encoder for better relevance."""
+    if not results or len(results) <= 1:
+        return results
+
+    reranker = get_reranker()
+    pairs = [(query, r.snippet + " " + r.title) for r in results]
+    scores = reranker.predict(pairs)
+
+    for i, result in enumerate(results):
+        result.score = float(scores[i])  # Replace embedding score with rerank score
+
+    results.sort(key=lambda x: x.score, reverse=True)
+    return results[:top_k]
 
 
 def generate_url(source: str, metadata: dict) -> str:
@@ -171,6 +201,10 @@ def search_all(
             continue
         seen_docs.add(base_id)
         deduplicated.append(result)
+
+    # Rerank results using cross-encoder for better relevance
+    if len(deduplicated) > 1:
+        deduplicated = rerank_results(query, deduplicated, n_results)
 
     return deduplicated[:n_results]
 
