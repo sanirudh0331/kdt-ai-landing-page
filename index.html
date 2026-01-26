@@ -1777,7 +1777,6 @@
         const askResultsPanel = document.getElementById('askResultsPanel');
         const askSources = document.getElementById('askSources');
         const chatMessages = document.getElementById('chatMessages');
-        const chatWelcome = document.getElementById('chatWelcome');
         const clearChatBtn = document.getElementById('clearChat');
         const loadingText = document.getElementById('loadingText');
         const footerRight = document.getElementById('footerRight');
@@ -1885,8 +1884,9 @@
 
         // Render a chat message bubble
         function renderChatMessage(role, content, isTyping = false) {
-            // Hide welcome message when there are messages
-            if (chatWelcome) chatWelcome.classList.add('hidden');
+            // Hide welcome message when there are messages (use fresh lookup in case element was recreated)
+            const welcomeEl = document.getElementById('chatWelcome');
+            if (welcomeEl) welcomeEl.classList.add('hidden');
 
             const bubble = document.createElement('div');
 
@@ -1917,7 +1917,8 @@
             conversationHistory = loadConversation();
             if (conversationHistory.length > 0 && chatMessages) {
                 // Hide welcome, render all messages
-                if (chatWelcome) chatWelcome.classList.add('hidden');
+                const welcomeEl = document.getElementById('chatWelcome');
+                if (welcomeEl) welcomeEl.classList.add('hidden');
                 conversationHistory.forEach(msg => {
                     renderChatMessage(msg.role, msg.content);
                 });
