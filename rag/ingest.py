@@ -411,8 +411,14 @@ def ingest_policies(reset: bool = False, verbose: bool = True) -> int:
 
 # ============ RESEARCHERS ============
 
-def ingest_researchers(reset: bool = False, verbose: bool = True) -> int:
-    """Ingest researchers from Talent Scout into ChromaDB."""
+def ingest_researchers(reset: bool = False, verbose: bool = True, limit: int = None) -> int:
+    """Ingest researchers from Talent Scout into ChromaDB.
+
+    Args:
+        reset: If True, reset collection before ingesting
+        verbose: If True, print progress messages
+        limit: Maximum number of NEW documents to index (skipped docs don't count)
+    """
     collection_name = COLLECTIONS["researchers"]
 
     if reset:
@@ -492,6 +498,16 @@ def ingest_researchers(reset: bool = False, verbose: bool = True) -> int:
                 if verbose:
                     print(f"    Indexed {total_indexed} researchers...")
                 batch_ids, batch_documents, batch_metadatas = [], [], []
+
+                # Check limit after each batch
+                if limit and total_indexed >= limit:
+                    if verbose:
+                        print(f"  Reached limit of {limit} documents")
+                    break
+
+        # Break outer loop if limit reached
+        if limit and total_indexed >= limit:
+            break
 
     if batch_ids:
         collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)

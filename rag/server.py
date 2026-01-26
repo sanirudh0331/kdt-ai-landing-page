@@ -191,8 +191,9 @@ async def rag_ingest(
     source: str = Query(None, description="Single source to ingest (patents, grants, researchers, policies, fda_calendar, portfolio). If not specified, ingests all."),
     reset: bool = Query(False, description="Reset all collections before ingesting"),
     resume: bool = Query(False, description="Resume from last checkpoint"),
+    limit: int = Query(None, description="Max number of NEW documents to index (for batched ingestion, e.g. limit=2000)"),
 ):
-    """Trigger data ingestion (protected endpoint). Use source param to ingest one collection at a time to avoid timeouts."""
+    """Trigger data ingestion (protected endpoint). Use source param to ingest one collection at a time to avoid timeouts. Use limit for batched ingestion."""
     import os
     expected_secret = os.environ.get("INGEST_SECRET", "")
 
@@ -227,7 +228,11 @@ async def rag_ingest(
             if source not in source_funcs:
                 return JSONResponse(status_code=400, content={"error": f"Unknown source: {source}. Valid: {list(source_funcs.keys())}"})
 
-            count = source_funcs[source](reset=reset, verbose=False)
+            # Pass limit to researchers (currently only researchers supports limit)
+            if source == "researchers" and limit:
+                count = ingest_researchers(reset=reset, verbose=False, limit=limit)
+            else:
+                count = source_funcs[source](reset=reset, verbose=False)
             results = {source: count}
         else:
             results = ingest_all(reset=reset, verbose=False)
