@@ -188,10 +188,11 @@ async def rag_stats():
 @app.post("/api/rag-ingest")
 async def rag_ingest(
     secret: str = Query(..., description="Ingest secret key"),
+    source: str = Query(None, description="Single source to ingest (patents, grants, researchers, policies, fda_calendar, portfolio). If not specified, ingests all."),
     reset: bool = Query(False, description="Reset all collections before ingesting"),
     resume: bool = Query(False, description="Resume from last checkpoint"),
 ):
-    """Trigger data ingestion (protected endpoint)."""
+    """Trigger data ingestion (protected endpoint). Use source param to ingest one collection at a time to avoid timeouts."""
     import os
     expected_secret = os.environ.get("INGEST_SECRET", "")
 
@@ -200,16 +201,37 @@ async def rag_ingest(
 
     try:
         try:
-            from ingest import ingest_all, get_collection_stats, load_checkpoint
+            from ingest import (ingest_all, get_collection_stats, load_checkpoint,
+                               ingest_patents, ingest_grants, ingest_researchers,
+                               ingest_policies, ingest_fda_calendar, ingest_portfolio)
         except ImportError:
-            from rag.ingest import ingest_all, get_collection_stats, load_checkpoint
+            from rag.ingest import (ingest_all, get_collection_stats, load_checkpoint,
+                                    ingest_patents, ingest_grants, ingest_researchers,
+                                    ingest_policies, ingest_fda_calendar, ingest_portfolio)
 
         # If resume requested, get checkpoint info
         checkpoint_info = None
         if resume:
             checkpoint_info = load_checkpoint()
 
-        results = ingest_all(reset=reset, verbose=False)
+        # If source specified, only ingest that source
+        if source:
+            source_funcs = {
+                "patents": ingest_patents,
+                "grants": ingest_grants,
+                "researchers": ingest_researchers,
+                "policies": ingest_policies,
+                "fda_calendar": ingest_fda_calendar,
+                "portfolio": ingest_portfolio,
+            }
+            if source not in source_funcs:
+                return JSONResponse(status_code=400, content={"error": f"Unknown source: {source}. Valid: {list(source_funcs.keys())}"})
+
+            count = source_funcs[source](reset=reset, verbose=False)
+            results = {source: count}
+        else:
+            results = ingest_all(reset=reset, verbose=False)
+
         stats = get_collection_stats()
         return {
             "status": "complete",
