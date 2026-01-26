@@ -59,6 +59,8 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `a2e9fc2` - Better list spacing, clickable reference links [1], [2]
 - `139e779` - Fix user message spacing
 - `a0de787` - CSS counters for numbered list continuity (fixes 1, 1 -> 1, 2)
+- `b50a3eb` - Inline timestamp for compact user messages
+- `19dc964` - Fix user bubble alignment (width: fit-content)
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -85,7 +87,8 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 | Collapsible sources | Sources expand after response, collapse on new question |
 | Neo text formatting | Proper lists, paragraphs, code blocks, bold/italic |
 | Reference links | [1], [2] in responses link to actual sources |
-| User message polish | Better line-height, auto-linked URLs |
+| User message compact | Inline timestamp, fit-content width, right-aligned |
+| List numbering | CSS counters maintain 1, 2, 3 across bullet interruptions |
 
 ### Bug Fixes (2026-01-26)
 
