@@ -57,6 +57,7 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `e269fd7` - Custom themed scrollbar for chat and search panels
 - `75530ae` - Copy button, keyboard shortcut, timestamps, source chips, auto-links, expand/collapse
 - `ad176d8` - Typing effect, voice input, suggested questions, mobile improvements
+- `0ceaf59` - Collapsible sources section (minimizes on new question)
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -81,6 +82,7 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 | Voice input | Microphone button uses Web Speech API for voice-to-text |
 | Suggested questions | Quick-start suggestions on welcome screen (can be hidden) |
 | Mobile improvements | Larger touch targets, iOS zoom prevention (16px inputs) |
+| Collapsible sources | Sources expand after response, collapse on new question |
 
 ### Bug Fixes (2026-01-26)
 
