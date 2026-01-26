@@ -22,6 +22,7 @@ class AskRequest(BaseModel):
     """Request body for the ask endpoint."""
     question: str
     n_context: int = 5
+    model: str = "claude-3-5-haiku-20241022"
 
 
 app = FastAPI(
@@ -137,6 +138,7 @@ async def rag_ask(request: AskRequest):
         result = ask_with_context(
             question=request.question,
             context_docs=context_docs,
+            model=request.model,
         )
 
         return {
