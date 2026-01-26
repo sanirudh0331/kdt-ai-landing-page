@@ -69,6 +69,7 @@ SERVICE_URLS = {
     "patents": os.environ.get("PATENT_SERVICE_URL", "https://patentwarrior.up.railway.app"),
     "grants": os.environ.get("GRANTS_SERVICE_URL", "https://grants-tracker-production.up.railway.app"),
     "policies": os.environ.get("POLICY_SERVICE_URL", "https://policywatch.up.railway.app"),
+    "researchers": os.environ.get("RESEARCHERS_SERVICE_URL", "https://kdttalentscout.up.railway.app"),
 }
 
 
@@ -407,6 +408,100 @@ def ingest_policies(reset: bool = False, verbose: bool = True) -> int:
     return total_indexed
 
 
+# ============ RESEARCHERS ============
+
+def ingest_researchers(reset: bool = False, verbose: bool = True) -> int:
+    """Ingest researchers from Talent Scout into ChromaDB."""
+    collection_name = COLLECTIONS["researchers"]
+
+    if reset:
+        if verbose:
+            print(f"Resetting collection: {collection_name}")
+        collection = reset_collection(collection_name)
+    else:
+        collection = get_collection(collection_name)
+
+    existing_ids = set()
+    if not reset:
+        try:
+            existing = collection.get()
+            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            if verbose:
+                print(f"  Found {len(existing_ids)} existing documents")
+        except Exception:
+            pass
+
+    researchers = fetch_from_api("researchers")
+    if not researchers:
+        if verbose:
+            print("  No researchers fetched")
+        return 0
+
+    batch_ids, batch_documents, batch_metadatas = [], [], []
+    total_indexed, skipped = 0, 0
+
+    for researcher in researchers:
+        doc_id = f"researcher_{researcher['id']}"
+
+        if doc_id in existing_ids:
+            skipped += 1
+            continue
+
+        # Build searchable text from researcher data
+        text_parts = [researcher.get("name", "")]
+        if researcher.get("affiliation"):
+            text_parts.append(researcher["affiliation"])
+        if researcher.get("research_interests"):
+            interests = researcher["research_interests"]
+            if isinstance(interests, list):
+                text_parts.extend(interests)
+            else:
+                text_parts.append(interests)
+        if researcher.get("bio"):
+            text_parts.append(researcher["bio"])
+
+        document = " ".join(filter(None, text_parts))
+        if not document.strip():
+            continue
+
+        chunks = chunk_text(document)
+
+        for chunk_data in chunks:
+            chunk_idx = chunk_data["chunk_index"]
+            chunk_id = f"{doc_id}_chunk{chunk_idx}" if chunk_data["total_chunks"] > 1 else doc_id
+
+            metadata = {
+                "source": "researchers",
+                "researcher_id": str(researcher["id"]),
+                "name": researcher.get("name", ""),
+                "affiliation": researcher.get("affiliation", ""),
+                "h_index": str(researcher.get("h_index", "")),
+                "citations": str(researcher.get("citations", "")),
+                "chunk_index": chunk_idx,
+                "total_chunks": chunk_data["total_chunks"],
+            }
+
+            batch_ids.append(chunk_id)
+            batch_documents.append(chunk_data["text"])
+            batch_metadatas.append(metadata)
+
+            if len(batch_ids) >= BATCH_SIZE:
+                collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
+                total_indexed += len(batch_ids)
+                if verbose:
+                    print(f"    Indexed {total_indexed} researchers...")
+                batch_ids, batch_documents, batch_metadatas = [], [], []
+
+    if batch_ids:
+        collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
+        total_indexed += len(batch_ids)
+
+    if verbose:
+        print(f"  Researchers: {total_indexed} indexed, {skipped} skipped")
+
+    return total_indexed
+
+
 # ============ FDA CALENDAR ============
 
 def ingest_fda_calendar(reset: bool = False, verbose: bool = True) -> int:
@@ -527,6 +622,9 @@ def ingest_all(reset: bool = False, verbose: bool = True) -> dict:
     print("\nIngesting policies...")
     results["policies"] = ingest_policies(reset=reset, verbose=verbose)
 
+    print("\nIngesting researchers...")
+    results["researchers"] = ingest_researchers(reset=reset, verbose=verbose)
+
     print("\nIngesting FDA calendar...")
     results["fda_calendar"] = ingest_fda_calendar(reset=reset, verbose=verbose)
 
@@ -567,5 +665,7 @@ if __name__ == "__main__":
         ingest_grants(reset=args.reset)
     elif args.source == "policies":
         ingest_policies(reset=args.reset)
+    elif args.source == "researchers":
+        ingest_researchers(reset=args.reset)
     elif args.source == "fda_calendar":
         ingest_fda_calendar(reset=args.reset)
