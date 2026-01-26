@@ -363,6 +363,14 @@
             transform: translateY(-1px);
         }
 
+        /* Sources collapse/expand */
+        #sourcesList.collapsed {
+            display: none;
+        }
+        #sourcesChevron.collapsed {
+            transform: rotate(-90deg);
+        }
+
         /* Mobile improvements */
         @media (max-width: 640px) {
             .chat-bubble-user, .chat-bubble-neo {
@@ -1307,7 +1315,15 @@
                 </div>
                 <!-- Sources area (shown after responses) -->
                 <div id="askSources" class="px-4 pb-2 hidden border-t border-dark-200 dark:border-dark-700 pt-3">
-                    <!-- Sources list populated by JavaScript -->
+                    <button id="sourcesToggle" onclick="toggleSources()" class="flex items-center gap-2 text-xs text-dark-500 hover:text-dark-700 dark:hover:text-dark-300 mb-2">
+                        <svg id="sourcesChevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                        <span id="sourcesLabel">Based on <span id="sourcesCount">0</span> documents</span>
+                    </button>
+                    <div id="sourcesList" class="flex flex-wrap gap-2">
+                        <!-- Sources list populated by JavaScript -->
+                    </div>
                 </div>
                 <!-- Chat input area -->
                 <div class="p-3 border-t border-dark-200 dark:border-dark-700 bg-dark-100/50 dark:bg-dark-800/50">
@@ -2111,7 +2127,8 @@
                 `;
             }
             if (askSources) {
-                askSources.innerHTML = '';
+                const sourcesList = document.getElementById('sourcesList');
+                if (sourcesList) sourcesList.innerHTML = '';
                 askSources.classList.add('hidden');
             }
         }
@@ -2241,6 +2258,36 @@
             if (suggestions) {
                 suggestions.classList.remove('hidden');
                 localStorage.removeItem('neo_suggestions_hidden');
+            }
+        }
+
+        // Toggle sources expanded/collapsed
+        function toggleSources() {
+            const sourcesList = document.getElementById('sourcesList');
+            const chevron = document.getElementById('sourcesChevron');
+            if (sourcesList && chevron) {
+                sourcesList.classList.toggle('collapsed');
+                chevron.classList.toggle('collapsed');
+            }
+        }
+
+        // Collapse sources (called when new question is asked)
+        function collapseSources() {
+            const sourcesList = document.getElementById('sourcesList');
+            const chevron = document.getElementById('sourcesChevron');
+            if (sourcesList && chevron) {
+                sourcesList.classList.add('collapsed');
+                chevron.classList.add('collapsed');
+            }
+        }
+
+        // Expand sources (called after new response)
+        function expandSources() {
+            const sourcesList = document.getElementById('sourcesList');
+            const chevron = document.getElementById('sourcesChevron');
+            if (sourcesList && chevron) {
+                sourcesList.classList.remove('collapsed');
+                chevron.classList.remove('collapsed');
             }
         }
 
@@ -2619,6 +2666,9 @@
             const skipSearch = isFollowUp(question);
             console.log('Is follow-up (skip search):', skipSearch);
 
+            // Collapse sources from previous response
+            collapseSources();
+
             // Render user message as chat bubble
             renderChatMessage('user', question);
 
@@ -2667,13 +2717,13 @@
                 // Render sources (only if we searched)
                 if (!skipSearch && data.sources && data.sources.length > 0) {
                     lastSearchContext = data.sources;
-                    let sourcesHtml = `
-                        <p class="text-xs font-semibold uppercase tracking-wider text-dark-400 mb-2">
-                            Based on ${data.context_count} documents
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                    `;
 
+                    // Update the sources count
+                    const sourcesCount = document.getElementById('sourcesCount');
+                    if (sourcesCount) sourcesCount.textContent = data.context_count;
+
+                    // Build sources chips HTML
+                    let sourcesHtml = '';
                     data.sources.forEach(s => {
                         const sourceColor = sourceColors[s.source] || 'bg-gray-500';
                         const sourceLabel = sourceLabels[s.source] || s.source;
@@ -2697,11 +2747,13 @@
                         }
                     });
 
-                    sourcesHtml += '</div>';
-                    if (askSources) {
-                        askSources.innerHTML = sourcesHtml;
-                        askSources.classList.remove('hidden');
-                    }
+                    // Put chips in the sourcesList div
+                    const sourcesList = document.getElementById('sourcesList');
+                    if (sourcesList) sourcesList.innerHTML = sourcesHtml;
+
+                    // Show sources section and expand it
+                    if (askSources) askSources.classList.remove('hidden');
+                    expandSources();
                 }
 
             } catch (error) {
