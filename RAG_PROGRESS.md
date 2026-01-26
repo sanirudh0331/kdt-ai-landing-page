@@ -1,6 +1,42 @@
 # RAG Embedding Quality Improvement - Progress Notes
 
-**Date:** 2026-01-25
+**Last Updated:** 2026-01-26
+
+---
+
+## Neo Chat Interface (2026-01-26)
+
+### Summary
+Converted Neo from single Q&A to a full chat interface with conversation history and smart topic detection.
+
+### Features Implemented
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Chat UI | ✅ Done | Message bubbles, typing indicator, scrollable history |
+| Conversation History | ✅ Done | Backend accepts messages array, includes in Claude context |
+| localStorage Persistence | ✅ Done | 14-day expiry, auto-loads on page refresh |
+| Smart Follow-up Detection | ✅ Done | Skips RAG search for follow-ups (cost savings) |
+| Topic Detection | ✅ Done | Auto-clears conversation when topic changes |
+| Chat Input Field | ✅ Done | Continue conversation without using search bar |
+| Enlarged Modal | ✅ Done | 90% viewport height, responsive width |
+
+### Files Changed
+- `index.html` - Chat UI, CSS, JavaScript for conversation management
+- `rag/server.py` - Added `messages` and `skip_search` params to AskRequest
+- `rag/llm.py` - Updated `ask_with_context()` to include conversation history
+
+### Cost Optimization
+- Follow-up questions skip RAG search (reuse existing context)
+- Topic changes clear history (shorter context = fewer tokens)
+- All detection logic is client-side (no API calls)
+
+### Commit
+- `c44a6ec` - Add Neo chat interface with conversation history and smart topic detection
+
+---
+
+## Previous Progress (2026-01-25)
 
 ---
 
