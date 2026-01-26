@@ -208,6 +208,31 @@
                 opacity: 1;
             }
         }
+        /* Neo thinking logo and text */
+        .neo-thinking-logo {
+            animation: logoPulse 1.5s infinite ease-in-out;
+        }
+        @keyframes logoPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+        .neo-thinking-text {
+            color: #6366f1;
+            animation: textFade 2s infinite ease-in-out;
+        }
+        .dark .neo-thinking-text {
+            color: #818cf8;
+        }
+        @keyframes textFade {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
 
         /* Floating particles */
         .particles {
@@ -1933,7 +1958,24 @@
                 if (isTyping) {
                     bubble.id = 'typingIndicator';
                     bubble.classList.add('thinking');
-                    bubble.innerHTML = `<div class="typing-indicator flex items-center gap-1 py-1"><span></span><span></span><span></span></div>`;
+                    const thinkingMessages = [
+                        "Searching the knowledge base...",
+                        "Analyzing patents and grants...",
+                        "Connecting the dots...",
+                        "Reviewing the literature...",
+                        "Synthesizing insights...",
+                        "Almost there...",
+                    ];
+                    const randomMsg = thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)];
+                    bubble.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="static/kdt-logo.png" class="w-6 h-6 neo-thinking-logo" alt="">
+                            <div>
+                                <span class="text-sm neo-thinking-text">${randomMsg}</span>
+                                <div class="typing-indicator flex items-center gap-1 mt-1"><span></span><span></span><span></span></div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     bubble.innerHTML = `<div class="text-sm leading-relaxed">${formatMarkdown(content)}</div>`;
                 }
