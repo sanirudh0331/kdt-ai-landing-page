@@ -1725,7 +1725,14 @@
         }
 
         tabSearch?.addEventListener('click', () => setActiveTab('search'));
-        tabAsk?.addEventListener('click', () => setActiveTab('ask'));
+        tabAsk?.addEventListener('click', () => {
+            setActiveTab('ask');
+            // If there's a query, run it through Ask AI
+            const currentQuery = document.getElementById('searchResultsQuery')?.textContent?.trim();
+            if (currentQuery && currentQuery.length > 0) {
+                performAsk(currentQuery);
+            }
+        });
 
         // Detect if query is a question
         function isQuestion(query) {
