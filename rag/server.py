@@ -228,9 +228,9 @@ async def rag_ingest(
             if source not in source_funcs:
                 return JSONResponse(status_code=400, content={"error": f"Unknown source: {source}. Valid: {list(source_funcs.keys())}"})
 
-            # Pass limit to researchers (currently only researchers supports limit)
-            if source == "researchers" and limit:
-                count = ingest_researchers(reset=reset, verbose=False, limit=limit)
+            # Pass limit to sources that support it
+            if source in ("researchers", "patents", "grants") and limit:
+                count = source_funcs[source](reset=reset, verbose=False, limit=limit)
             else:
                 count = source_funcs[source](reset=reset, verbose=False)
             results = {source: count}

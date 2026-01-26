@@ -141,8 +141,14 @@ def fetch_from_api(source: str) -> list[dict]:
 
 # ============ PATENTS ============
 
-def ingest_patents(reset: bool = False, verbose: bool = True) -> int:
-    """Ingest patents into ChromaDB."""
+def ingest_patents(reset: bool = False, verbose: bool = True, limit: int = None) -> int:
+    """Ingest patents into ChromaDB.
+
+    Args:
+        reset: If True, reset collection before ingesting
+        verbose: If True, print progress messages
+        limit: Maximum number of NEW documents to index (skipped docs don't count)
+    """
     collection_name = COLLECTIONS["patents"]
 
     if reset:
@@ -221,6 +227,16 @@ def ingest_patents(reset: bool = False, verbose: bool = True) -> int:
                     raise
                 batch_ids, batch_documents, batch_metadatas = [], [], []
 
+                # Check limit after each batch
+                if limit and total_indexed >= limit:
+                    if verbose:
+                        print(f"  Reached limit of {limit} documents")
+                    break
+
+        # Break outer loop if limit reached
+        if limit and total_indexed >= limit:
+            break
+
     if batch_ids:
         try:
             collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
@@ -244,8 +260,14 @@ def ingest_patents(reset: bool = False, verbose: bool = True) -> int:
 
 # ============ GRANTS ============
 
-def ingest_grants(reset: bool = False, verbose: bool = True) -> int:
-    """Ingest grants into ChromaDB."""
+def ingest_grants(reset: bool = False, verbose: bool = True, limit: int = None) -> int:
+    """Ingest grants into ChromaDB.
+
+    Args:
+        reset: If True, reset collection before ingesting
+        verbose: If True, print progress messages
+        limit: Maximum number of NEW documents to index (skipped docs don't count)
+    """
     collection_name = COLLECTIONS["grants"]
 
     if reset:
@@ -314,6 +336,16 @@ def ingest_grants(reset: bool = False, verbose: bool = True) -> int:
                 if verbose:
                     print(f"    Indexed {total_indexed} grants...")
                 batch_ids, batch_documents, batch_metadatas = [], [], []
+
+                # Check limit after each batch
+                if limit and total_indexed >= limit:
+                    if verbose:
+                        print(f"  Reached limit of {limit} documents")
+                    break
+
+        # Break outer loop if limit reached
+        if limit and total_indexed >= limit:
+            break
 
     if batch_ids:
         collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
