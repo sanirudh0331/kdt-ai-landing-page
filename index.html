@@ -322,6 +322,72 @@
             box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
         }
 
+        /* Neo response typography */
+        .chat-bubble-neo .neo-paragraph {
+            margin: 0;
+            line-height: 1.6;
+        }
+        .chat-bubble-neo .neo-paragraph + .neo-paragraph {
+            margin-top: 0.5rem;
+        }
+        .chat-bubble-neo .neo-paragraph-break {
+            height: 0.75rem;
+        }
+        .chat-bubble-neo .neo-list {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            line-height: 1.6;
+        }
+        .chat-bubble-neo .neo-list-numbered {
+            list-style-type: decimal;
+        }
+        .chat-bubble-neo .neo-list-bullet {
+            list-style-type: disc;
+        }
+        .chat-bubble-neo .neo-list li {
+            margin: 0.25rem 0;
+            padding-left: 0.25rem;
+        }
+        .chat-bubble-neo .neo-list li::marker {
+            color: #6366f1;
+        }
+        .dark .chat-bubble-neo .neo-list li::marker {
+            color: #818cf8;
+        }
+        .chat-bubble-neo .neo-code {
+            font-family: ui-monospace, monospace;
+            font-size: 0.85em;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.25rem;
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+        }
+        .dark .chat-bubble-neo .neo-code {
+            background: rgba(129, 140, 248, 0.15);
+            color: #a5b4fc;
+        }
+        .chat-bubble-neo .neo-link {
+            color: #6366f1;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .chat-bubble-neo .neo-link:hover {
+            color: #4f46e5;
+        }
+        .dark .chat-bubble-neo .neo-link {
+            color: #818cf8;
+        }
+        .dark .chat-bubble-neo .neo-link:hover {
+            color: #a5b4fc;
+        }
+        .chat-bubble-neo strong {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .dark .chat-bubble-neo strong {
+            color: #f3f4f6;
+        }
+
         /* Typing effect cursor */
         .typing-cursor::after {
             content: '|';
@@ -2708,23 +2774,73 @@
         // Simple markdown formatter
         function formatMarkdown(text) {
             if (!text) return '';
+
+            // Split into lines for processing
+            const lines = text.split('\n');
+            let html = '';
+            let inList = false;
+            let listType = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+
+                // Check for numbered list
+                const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+                // Check for bullet list
+                const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+
+                if (numberedMatch) {
+                    if (!inList || listType !== 'ol') {
+                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
+                        html += '<ol class="neo-list neo-list-numbered">';
+                        inList = true;
+                        listType = 'ol';
+                    }
+                    html += `<li>${formatInline(numberedMatch[2])}</li>`;
+                } else if (bulletMatch) {
+                    if (!inList || listType !== 'ul') {
+                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
+                        html += '<ul class="neo-list neo-list-bullet">';
+                        inList = true;
+                        listType = 'ul';
+                    }
+                    html += `<li>${formatInline(bulletMatch[1])}</li>`;
+                } else {
+                    // Close any open list
+                    if (inList) {
+                        html += listType === 'ul' ? '</ul>' : '</ol>';
+                        inList = false;
+                        listType = null;
+                    }
+
+                    // Empty line = paragraph break
+                    if (line.trim() === '') {
+                        html += '<div class="neo-paragraph-break"></div>';
+                    } else {
+                        html += `<p class="neo-paragraph">${formatInline(line)}</p>`;
+                    }
+                }
+            }
+
+            // Close any remaining list
+            if (inList) {
+                html += listType === 'ul' ? '</ul>' : '</ol>';
+            }
+
+            return html;
+        }
+
+        // Format inline elements (bold, italic, links, code)
+        function formatInline(text) {
             return text
-                // Auto-link URLs (before other formatting)
-                .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="text-indigo-500 hover:text-indigo-600 underline">$1</a>')
+                // Code (backticks)
+                .replace(/`([^`]+)`/g, '<code class="neo-code">$1</code>')
                 // Bold
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 // Italic
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                // Numbered lists
-                .replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
-                // Bullet lists
-                .replace(/^[-*]\s+(.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
-                // Line breaks
-                .replace(/\n\n/g, '</p><p class="mt-3">')
-                .replace(/\n/g, '<br>')
-                // Wrap in paragraph
-                .replace(/^/, '<p>')
-                .replace(/$/, '</p>');
+                // Auto-link URLs
+                .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="neo-link">$1</a>');
         }
 
         // Escape HTML to prevent XSS
