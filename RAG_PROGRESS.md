@@ -53,6 +53,10 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `ad176d8` - Typing effect, voice input, suggested questions, mobile improvements
 - `0ceaf59` - Collapsible sources section (minimizes on new question)
 - `612b50c` - Remove suggested questions feature
+- `2b46717` - Keep long messages expanded until next question
+- `38809b2` - Improve Neo response text formatting and typography
+- `f2c8063` - Improve user message styling (line-height, auto-link URLs)
+- `a2e9fc2` - Better list spacing, clickable reference links [1], [2]
 
 ### UX & Visual Polish (2026-01-26)
 
@@ -77,6 +81,9 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 | Voice input | Microphone button uses Web Speech API for voice-to-text |
 | Mobile improvements | Larger touch targets, iOS zoom prevention (16px inputs) |
 | Collapsible sources | Sources expand after response, collapse on new question |
+| Neo text formatting | Proper lists, paragraphs, code blocks, bold/italic |
+| Reference links | [1], [2] in responses link to actual sources |
+| User message polish | Better line-height, auto-linked URLs |
 
 ### Bug Fixes (2026-01-26)
 

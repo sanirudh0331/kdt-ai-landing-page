@@ -190,10 +190,16 @@
             max-width: 80%;
             margin-left: auto;
             box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
-            line-height: 1.5;
         }
         .chat-bubble-user p {
             word-break: break-word;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .chat-bubble-user .msg-timestamp {
+            margin-top: 0.5rem;
+            font-size: 0.65rem;
+            opacity: 0.7;
         }
         .chat-bubble-user .user-link {
             color: white;
@@ -2214,13 +2220,13 @@
             const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             if (role === 'user') {
-                bubble.className = 'chat-bubble-user px-4 py-3';
+                bubble.className = 'chat-bubble-user px-4 py-2.5';
                 // Escape HTML but auto-link URLs
                 const safeContent = escapeHtml(content)
                     .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="user-link">$1</a>');
                 bubble.innerHTML = `
                     <p class="text-sm">${safeContent}</p>
-                    <div class="msg-timestamp text-right mt-1 text-indigo-200">${timestamp}</div>
+                    <div class="msg-timestamp text-right">${timestamp}</div>
                 `;
             } else {
                 bubble.className = 'chat-bubble-neo px-4 py-3 text-dark-800 dark:text-dark-200';
