@@ -2133,6 +2133,10 @@
             // Hide central loading spinner - we use typing indicator instead
             searchLoading?.classList.add('hidden');
 
+            // Determine if this is a follow-up question BEFORE adding to history
+            const skipSearch = isFollowUp(question);
+            console.log('Is follow-up (skip search):', skipSearch);
+
             // Render user message as chat bubble
             renderChatMessage('user', question);
 
@@ -2141,10 +2145,6 @@
 
             // Show typing indicator
             renderChatMessage('assistant', '', true);
-
-            // Determine if this is a follow-up question
-            const skipSearch = isFollowUp(question);
-            console.log('Is follow-up (skip search):', skipSearch);
 
             try {
                 console.log('Fetching /api/rag-ask...');
