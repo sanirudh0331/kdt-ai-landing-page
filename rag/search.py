@@ -27,9 +27,10 @@ def get_reranker():
 TOOL_URLS = {
     "patents": "https://patentwarrior.up.railway.app",
     "grants": "https://grants-tracker-production.up.railway.app",
-    "researchers": "https://h-index-tracker-production.up.railway.app",
-    "policies": "https://policy-tracker-production.up.railway.app",
+    "researchers": "https://kdttalentscout.up.railway.app",
+    "policies": "https://policywatch.up.railway.app",
     "fda_calendar": "#fda",  # Anchor on landing page
+    "portfolio": "https://web-production-a9d068.up.railway.app",
 }
 
 
@@ -83,6 +84,9 @@ def generate_url(source: str, metadata: dict) -> str:
         return f"{base_url}/bill/{bill_id or policy_id}"
     elif source == "fda_calendar":
         return "#fda"
+    elif source == "portfolio":
+        update_id = metadata.get("update_id", "")
+        return f"{base_url}/update/{update_id}" if update_id else base_url
 
     return base_url
 
@@ -103,6 +107,10 @@ def get_display_title(source: str, metadata: dict) -> str:
         company = metadata.get("company", "")
         drug = metadata.get("drug", "")
         return f"{company} - {drug}" if drug else company
+    elif source == "portfolio":
+        title = metadata.get("title", "")
+        company = metadata.get("company_name", "")
+        return f"{company}: {title}" if company and title else (title or company or "Portfolio Update")
 
     return metadata.get("title", "Untitled")
 
