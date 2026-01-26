@@ -20,6 +20,9 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 | Topic Detection | ✅ Done | Auto-clears conversation when topic changes |
 | Chat Input Field | ✅ Done | Continue conversation without using search bar |
 | Enlarged Modal | ✅ Done | 90% viewport height, responsive width |
+| Typing Effect | ✅ Done | Word-by-word response animation with cursor |
+| Voice Input | ✅ Done | Web Speech API microphone button for speech-to-text |
+| Suggested Questions | ✅ Done | Quick-start suggestions, hideable with localStorage |
 
 ### Files Changed
 - `index.html` - Chat UI, CSS, JavaScript for conversation management
@@ -30,6 +33,18 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 - Follow-up questions skip RAG search (reuse existing context)
 - Topic changes clear history (shorter context = fewer tokens)
 - All detection logic is client-side (no API calls)
+
+### Voice Input Implementation
+Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
+- **Browser Support:** Chrome, Edge, Safari (partial). Not supported in Firefox.
+- **Features:** Interim results show as you speak, auto-stops on silence
+- **Error Handling:** Alerts user if microphone access denied or browser unsupported
+- **UI Feedback:** Button turns red and pulses while recording
+
+### Suggested Questions
+- Pre-defined questions shown on welcome screen
+- User can hide suggestions (persists in localStorage)
+- Clicking a suggestion auto-submits to Neo
 
 ### Commits
 - `c44a6ec` - Add Neo chat interface with conversation history and smart topic detection
@@ -61,6 +76,10 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 | Source chips | Improved styling with hover effects and source type labels |
 | Auto-link URLs | URLs in responses are automatically clickable |
 | Expand/collapse | Long messages (800+ chars) show "Show more/less" button |
+| Typing effect | Responses appear word-by-word with blinking cursor animation |
+| Voice input | Microphone button uses Web Speech API for voice-to-text |
+| Suggested questions | Quick-start suggestions on welcome screen (can be hidden) |
+| Mobile improvements | Larger touch targets, iOS zoom prevention (16px inputs) |
 
 ### Bug Fixes (2026-01-26)
 
