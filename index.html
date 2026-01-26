@@ -263,6 +263,65 @@
             50% { opacity: 1; }
         }
 
+        /* Copy button */
+        .copy-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .chat-bubble-neo:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-btn:hover {
+            color: #6366f1;
+        }
+        .copy-btn.copied {
+            color: #22c55e;
+        }
+
+        /* Message timestamp */
+        .msg-timestamp {
+            font-size: 0.65rem;
+            opacity: 0.5;
+        }
+
+        /* Expand/collapse for long messages */
+        .msg-collapsed {
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        .msg-collapsed::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, rgba(99, 102, 241, 0.1));
+        }
+        .dark .msg-collapsed::after {
+            background: linear-gradient(transparent, rgba(99, 102, 241, 0.15));
+        }
+        .expand-btn {
+            color: #6366f1;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .expand-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Source chips improved styling */
+        .source-chip {
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .source-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+        }
+
         /* Floating particles */
         .particles {
             position: absolute;
@@ -1975,9 +2034,14 @@
 
             const bubble = document.createElement('div');
 
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
             if (role === 'user') {
                 bubble.className = 'chat-bubble-user px-4 py-3';
-                bubble.innerHTML = `<p class="text-sm">${escapeHtml(content)}</p>`;
+                bubble.innerHTML = `
+                    <p class="text-sm">${escapeHtml(content)}</p>
+                    <div class="msg-timestamp text-right mt-1 text-indigo-200">${timestamp}</div>
+                `;
             } else {
                 bubble.className = 'chat-bubble-neo px-4 py-3 text-dark-800 dark:text-dark-200';
                 if (isTyping) {
@@ -2002,7 +2066,20 @@
                         </div>
                     `;
                 } else {
-                    bubble.innerHTML = `<div class="text-sm leading-relaxed">${formatMarkdown(content)}</div>`;
+                    const isLongMessage = content.length > 800;
+                    const messageId = 'msg-' + Date.now();
+                    bubble.innerHTML = `
+                        <div class="flex justify-between items-start gap-2">
+                            <div id="${messageId}" class="text-sm leading-relaxed flex-1 ${isLongMessage ? 'msg-collapsed' : ''}">${formatMarkdown(content)}</div>
+                            <button class="copy-btn p-1 text-dark-400 hover:text-indigo-500" title="Copy response" onclick="copyToClipboard(this, '${messageId}')">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        ${isLongMessage ? `<button class="expand-btn mt-2" onclick="toggleExpand('${messageId}', this)">Show more</button>` : ''}
+                        <div class="msg-timestamp mt-2 text-dark-400">${timestamp}</div>
+                    `;
                 }
             }
 
@@ -2315,19 +2392,22 @@
 
                     data.sources.forEach(s => {
                         const sourceColor = sourceColors[s.source] || 'bg-gray-500';
+                        const sourceLabel = sourceLabels[s.source] || s.source;
                         if (s.url) {
                             sourcesHtml += `
                                 <a href="${s.url}" target="_blank"
-                                   class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors text-xs">
-                                    <span class="w-1.5 h-1.5 rounded-full ${sourceColor}"></span>
-                                    <span class="text-dark-600 dark:text-dark-300">${escapeHtml(s.title?.substring(0, 40))}${s.title?.length > 40 ? '...' : ''}</span>
+                                   class="source-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-100 dark:bg-dark-800 text-xs group">
+                                    <span class="w-2 h-2 rounded-full ${sourceColor}"></span>
+                                    <span class="text-dark-600 dark:text-dark-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">${escapeHtml(s.title?.substring(0, 35))}${s.title?.length > 35 ? '...' : ''}</span>
+                                    <span class="text-dark-400 text-[0.65rem] uppercase">${sourceLabel}</span>
                                 </a>
                             `;
                         } else {
                             sourcesHtml += `
-                                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-dark-100 dark:bg-dark-800 text-xs">
-                                    <span class="w-1.5 h-1.5 rounded-full ${sourceColor}"></span>
-                                    <span class="text-dark-600 dark:text-dark-300">${escapeHtml(s.title?.substring(0, 40))}${s.title?.length > 40 ? '...' : ''}</span>
+                                <span class="source-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-100 dark:bg-dark-800 text-xs">
+                                    <span class="w-2 h-2 rounded-full ${sourceColor}"></span>
+                                    <span class="text-dark-600 dark:text-dark-300">${escapeHtml(s.title?.substring(0, 35))}${s.title?.length > 35 ? '...' : ''}</span>
+                                    <span class="text-dark-400 text-[0.65rem] uppercase">${sourceLabel}</span>
                                 </span>
                             `;
                         }
@@ -2356,6 +2436,8 @@
         function formatMarkdown(text) {
             if (!text) return '';
             return text
+                // Auto-link URLs (before other formatting)
+                .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="text-indigo-500 hover:text-indigo-600 underline">$1</a>')
                 // Bold
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 // Italic
@@ -2378,6 +2460,54 @@
             div.textContent = text || '';
             return div.innerHTML;
         }
+
+        // Copy to clipboard function
+        function copyToClipboard(btn, messageId) {
+            const msgEl = document.getElementById(messageId);
+            if (!msgEl) return;
+            const text = msgEl.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add('copied');
+                btn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                `;
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    `;
+                }, 2000);
+            });
+        }
+
+        // Toggle expand/collapse for long messages
+        function toggleExpand(messageId, btn) {
+            const msgEl = document.getElementById(messageId);
+            if (!msgEl) return;
+            if (msgEl.classList.contains('msg-collapsed')) {
+                msgEl.classList.remove('msg-collapsed');
+                btn.textContent = 'Show less';
+            } else {
+                msgEl.classList.add('msg-collapsed');
+                btn.textContent = 'Show more';
+            }
+        }
+
+        // Keyboard shortcut: Cmd/Ctrl+K to open search
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('input[placeholder*="Search"]');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
     </script>
 
     <!-- Cloudflare Web Analytics -->
