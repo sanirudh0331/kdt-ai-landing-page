@@ -347,25 +347,56 @@
             height: 0.75rem;
         }
         .chat-bubble-neo .neo-list {
-            margin: 0.5rem 0;
-            padding-left: 1.5rem;
-            line-height: 1.6;
+            margin: 0.75rem 0;
+            padding-left: 1.25rem;
+            line-height: 1.7;
         }
         .chat-bubble-neo .neo-list-numbered {
             list-style-type: decimal;
+            list-style-position: outside;
         }
         .chat-bubble-neo .neo-list-bullet {
             list-style-type: disc;
+            list-style-position: outside;
         }
         .chat-bubble-neo .neo-list li {
-            margin: 0.25rem 0;
-            padding-left: 0.25rem;
+            margin: 0.4rem 0;
+            padding-left: 0.35rem;
         }
         .chat-bubble-neo .neo-list li::marker {
             color: #6366f1;
+            font-weight: 600;
         }
         .dark .chat-bubble-neo .neo-list li::marker {
             color: #818cf8;
+        }
+        /* Reference links in text */
+        .chat-bubble-neo .neo-ref {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0 0.25rem;
+            margin: 0 0.1rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.15);
+            color: #4f46e5;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            vertical-align: super;
+            line-height: 1;
+        }
+        .chat-bubble-neo .neo-ref:hover {
+            background: rgba(99, 102, 241, 0.25);
+        }
+        .dark .chat-bubble-neo .neo-ref {
+            background: rgba(129, 140, 248, 0.2);
+            color: #a5b4fc;
+        }
+        .dark .chat-bubble-neo .neo-ref:hover {
+            background: rgba(129, 140, 248, 0.35);
         }
         .chat-bubble-neo .neo-code {
             font-family: ui-monospace, monospace;
@@ -2396,7 +2427,7 @@
         });
 
         // Typing effect for Neo's responses - renders words progressively
-        async function renderChatMessageWithTyping(content, wordsPerChunk = 3, delay = 30) {
+        async function renderChatMessageWithTyping(content, sources = [], wordsPerChunk = 3, delay = 30) {
             const welcomeEl = document.getElementById('chatWelcome');
             if (welcomeEl) welcomeEl.classList.add('hidden');
 
@@ -2425,8 +2456,8 @@
             const contentEl = document.getElementById(messageId);
             if (!contentEl) return bubble;
 
-            // Format the content first
-            const formattedContent = formatMarkdown(content);
+            // Format the content first (pass sources for reference linking)
+            const formattedContent = formatMarkdown(content, sources);
 
             // Split into words while preserving HTML tags
             const words = formattedContent.split(/(\s+)/);
@@ -2726,8 +2757,8 @@
                     return;
                 }
 
-                // Render assistant response with typing effect
-                await renderChatMessageWithTyping(data.answer);
+                // Render assistant response with typing effect (pass sources for reference linking)
+                await renderChatMessageWithTyping(data.answer, data.sources || []);
 
                 // Add to conversation history and save
                 conversationHistory.push({ role: 'assistant', content: data.answer });
@@ -2788,7 +2819,7 @@
         }
 
         // Simple markdown formatter
-        function formatMarkdown(text) {
+        function formatMarkdown(text, sources = []) {
             if (!text) return '';
 
             // Split into lines for processing
@@ -2812,7 +2843,7 @@
                         inList = true;
                         listType = 'ol';
                     }
-                    html += `<li>${formatInline(numberedMatch[2])}</li>`;
+                    html += `<li>${formatInline(numberedMatch[2], sources)}</li>`;
                 } else if (bulletMatch) {
                     if (!inList || listType !== 'ul') {
                         if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
@@ -2820,7 +2851,7 @@
                         inList = true;
                         listType = 'ul';
                     }
-                    html += `<li>${formatInline(bulletMatch[1])}</li>`;
+                    html += `<li>${formatInline(bulletMatch[1], sources)}</li>`;
                 } else {
                     // Close any open list
                     if (inList) {
@@ -2833,7 +2864,7 @@
                     if (line.trim() === '') {
                         html += '<div class="neo-paragraph-break"></div>';
                     } else {
-                        html += `<p class="neo-paragraph">${formatInline(line)}</p>`;
+                        html += `<p class="neo-paragraph">${formatInline(line, sources)}</p>`;
                     }
                 }
             }
@@ -2846,9 +2877,9 @@
             return html;
         }
 
-        // Format inline elements (bold, italic, links, code)
-        function formatInline(text) {
-            return text
+        // Format inline elements (bold, italic, links, code, references)
+        function formatInline(text, sources = []) {
+            let result = text
                 // Code (backticks)
                 .replace(/`([^`]+)`/g, '<code class="neo-code">$1</code>')
                 // Bold
@@ -2857,6 +2888,19 @@
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
                 // Auto-link URLs
                 .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="neo-link">$1</a>');
+
+            // Convert reference numbers [1], [2], etc. to clickable links
+            if (sources.length > 0) {
+                result = result.replace(/\[(\d+)\]/g, (match, num) => {
+                    const index = parseInt(num) - 1; // References are 1-indexed
+                    if (index >= 0 && index < sources.length && sources[index].url) {
+                        return `<a href="${sources[index].url}" target="_blank" class="neo-ref" title="${escapeHtml(sources[index].title || '')}">${num}</a>`;
+                    }
+                    return match; // Keep original if no matching source
+                });
+            }
+
+            return result;
         }
 
         // Escape HTML to prevent XSS
