@@ -2214,6 +2214,19 @@
             }
         }
 
+        // Collapse previous long messages (called when new question is asked)
+        function collapseLongMessages() {
+            const longMessages = document.querySelectorAll('[data-long-message="true"]');
+            longMessages.forEach(msgEl => {
+                if (!msgEl.classList.contains('msg-collapsed')) {
+                    msgEl.classList.add('msg-collapsed');
+                    // Update the button text
+                    const expandBtn = msgEl.parentElement?.parentElement?.querySelector('.expand-btn');
+                    if (expandBtn) expandBtn.textContent = 'Show more';
+                }
+            });
+        }
+
         // Voice input functionality
         let recognition = null;
         let isRecording = false;
@@ -2358,12 +2371,12 @@
             // Remove typing cursor
             contentEl.classList.remove('typing-cursor');
 
-            // Add expand/collapse if long message
+            // Add expand/collapse button if long message (but keep expanded until next question)
             if (isLongMessage) {
-                contentEl.classList.add('msg-collapsed');
+                contentEl.setAttribute('data-long-message', 'true');
                 const expandBtn = document.createElement('button');
                 expandBtn.className = 'expand-btn mt-2';
-                expandBtn.textContent = 'Show more';
+                expandBtn.textContent = 'Show less';
                 expandBtn.onclick = () => toggleExpand(messageId, expandBtn);
                 contentEl.parentElement.parentElement.insertBefore(expandBtn, bubble.querySelector('.msg-timestamp'));
             }
@@ -2589,8 +2602,9 @@
             const skipSearch = isFollowUp(question);
             console.log('Is follow-up (skip search):', skipSearch);
 
-            // Collapse sources from previous response
+            // Collapse sources and long messages from previous response
             collapseSources();
+            collapseLongMessages();
 
             // Render user message as chat bubble
             renderChatMessage('user', question);
