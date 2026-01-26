@@ -74,6 +74,35 @@
         body { font-family: 'Inter', system-ui, sans-serif; }
         * { transition: background-color 200ms, border-color 200ms, color 200ms; }
 
+        /* Custom scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(129, 140, 248, 0.3);
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(129, 140, 248, 0.5);
+        }
+        /* Firefox scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+        }
+        .dark .custom-scrollbar {
+            scrollbar-color: rgba(129, 140, 248, 0.3) transparent;
+        }
+
         /* Background effects */
         .bg-glow {
             position: fixed;
@@ -1117,7 +1146,7 @@
                 <p id="loadingText" class="text-sm text-dark-500 mt-3">Searching across all tools...</p>
             </div>
             <!-- Search Results Panel -->
-            <div id="searchResultsList" class="flex-1 overflow-y-auto p-4">
+            <div id="searchResultsList" class="flex-1 overflow-y-auto p-4 custom-scrollbar">
                 <!-- Results populated by JavaScript -->
             </div>
             <!-- AI Chat Panel -->
@@ -1140,7 +1169,7 @@
                     </div>
                 </div>
                 <!-- Chat messages area (scrollable) -->
-                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
+                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 custom-scrollbar">
                     <!-- Welcome message shown when empty -->
                     <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center">
                         <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
