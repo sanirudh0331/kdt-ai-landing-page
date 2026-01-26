@@ -349,20 +349,6 @@
             50% { transform: scale(1.1); }
         }
 
-        /* Suggested questions */
-        .suggested-questions {
-            transition: all 0.3s ease;
-        }
-        .suggestion-chip {
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .suggestion-chip:hover {
-            background: rgba(99, 102, 241, 0.15);
-            border-color: rgba(99, 102, 241, 0.4);
-            transform: translateY(-1px);
-        }
-
         /* Sources collapse/expand */
         #sourcesList.collapsed {
             display: none;
@@ -1297,20 +1283,7 @@
                     <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center px-4">
                         <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
                         <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
-                        <p class="text-sm text-dark-400 max-w-xs mb-4">Ask Neo anything about KdT's knowledge base</p>
-                        <!-- Suggested questions -->
-                        <div id="suggestedQuestions" class="suggested-questions w-full max-w-md">
-                            <div class="flex items-center justify-center gap-2 mb-3">
-                                <span class="text-xs text-dark-400">Try asking</span>
-                                <button onclick="hideSuggestions()" class="text-xs text-dark-400 hover:text-dark-600 dark:hover:text-dark-300">(hide)</button>
-                            </div>
-                            <div class="flex flex-wrap justify-center gap-2">
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">What CRISPR patents exist?</button>
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">Latest FDA approvals</button>
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">Gene therapy grants</button>
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">Oncology research trends</button>
-                            </div>
-                        </div>
+                        <p class="text-sm text-dark-400 max-w-xs">Ask Neo anything about KdT's knowledge base</p>
                     </div>
                 </div>
                 <!-- Sources area (shown after responses) -->
@@ -2105,24 +2078,11 @@
             lastSearchContext = null;
             localStorage.removeItem('neo_chat');
             if (chatMessages) {
-                const suggestionsHidden = localStorage.getItem('neo_suggestions_hidden') === 'true';
                 chatMessages.innerHTML = `
                     <div id="chatWelcome" class="flex flex-col items-center justify-center h-full text-center px-4">
                         <img src="static/kdt-logo.png" class="w-12 h-12 mb-3 opacity-60">
                         <h3 class="text-lg font-semibold text-dark-700 dark:text-dark-300 mb-2">KdT Neo</h3>
-                        <p class="text-sm text-dark-400 max-w-xs mb-4">Ask Neo anything about KdT's knowledge base</p>
-                        <div id="suggestedQuestions" class="suggested-questions w-full max-w-md ${suggestionsHidden ? 'hidden' : ''}">
-                            <div class="flex items-center justify-center gap-2 mb-3">
-                                <span class="text-xs text-dark-400">Try asking</span>
-                                <button onclick="hideSuggestions()" class="text-xs text-dark-400 hover:text-dark-600 dark:hover:text-dark-300">(hide)</button>
-                            </div>
-                            <div class="flex flex-wrap justify-center gap-2">
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">What CRISPR patents exist?</button>
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">Latest FDA approvals</button>
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">Gene therapy grants</button>
-                                <button onclick="askSuggestion(this)" class="suggestion-chip px-3 py-1.5 text-xs rounded-full border border-dark-300 dark:border-dark-600 text-dark-600 dark:text-dark-300 bg-white dark:bg-dark-800">Oncology research trends</button>
-                            </div>
-                        </div>
+                        <p class="text-sm text-dark-400 max-w-xs">Ask Neo anything about KdT's knowledge base</p>
                     </div>
                 `;
             }
@@ -2223,43 +2183,6 @@
 
         // Initialize conversation on page load
         restoreConversation();
-
-        // Check if suggestions should be hidden on initial load
-        if (localStorage.getItem('neo_suggestions_hidden') === 'true') {
-            document.getElementById('suggestedQuestions')?.classList.add('hidden');
-        }
-
-        // Suggested questions functionality
-        function askSuggestion(btn) {
-            const question = btn.textContent.trim();
-            if (!question) return;
-
-            // Update query display
-            const queryDisplay = document.getElementById('searchResultsQuery');
-            if (queryDisplay) queryDisplay.textContent = question;
-
-            // Switch to Ask tab if not already
-            setActiveTab('ask');
-
-            // Run the question
-            performAsk(question);
-        }
-
-        function hideSuggestions() {
-            const suggestions = document.getElementById('suggestedQuestions');
-            if (suggestions) {
-                suggestions.classList.add('hidden');
-                localStorage.setItem('neo_suggestions_hidden', 'true');
-            }
-        }
-
-        function showSuggestions() {
-            const suggestions = document.getElementById('suggestedQuestions');
-            if (suggestions) {
-                suggestions.classList.remove('hidden');
-                localStorage.removeItem('neo_suggestions_hidden');
-            }
-        }
 
         // Toggle sources expanded/collapsed
         function toggleSources() {
