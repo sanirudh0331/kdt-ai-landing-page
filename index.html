@@ -1837,8 +1837,9 @@
                 /^(also|additionally|furthermore)/i,
             ];
 
-            // Short queries are likely follow-ups
-            if (q.split(' ').length <= 4) {
+            // Short queries are likely follow-ups, but only after at least one full exchange
+            // (need both a user message and assistant response in history)
+            if (conversationHistory.length >= 2 && q.split(' ').length <= 4) {
                 return true;
             }
 
@@ -1926,7 +1927,13 @@
         }
 
         // Clear chat handler
-        clearChatBtn?.addEventListener('click', () => clearConversation());
+        clearChatBtn?.addEventListener('click', () => {
+            // Only confirm if there's actually a conversation to clear
+            if (conversationHistory.length === 0) return;
+            if (confirm('Clear conversation history?')) {
+                clearConversation();
+            }
+        });
 
         // Initialize conversation on page load
         restoreConversation();
@@ -1936,10 +1943,9 @@
         const chatInput = document.getElementById('chatInput');
         const chatSendBtn = document.getElementById('chatSendBtn');
 
-        chatInputForm?.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function submitChatMessage() {
             const message = chatInput?.value?.trim();
-            if (!message) return;
+            if (!message || chatSendBtn?.disabled) return;
 
             // Clear input and disable while processing
             chatInput.value = '';
@@ -1955,6 +1961,19 @@
             // Re-enable input
             chatSendBtn.disabled = false;
             chatInput?.focus();
+        }
+
+        chatInputForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitChatMessage();
+        });
+
+        // Also handle Enter key explicitly
+        chatInput?.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                await submitChatMessage();
+            }
         });
 
         // Tab switching
