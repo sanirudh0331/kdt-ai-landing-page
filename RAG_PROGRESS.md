@@ -56,6 +56,7 @@ Uses the Web Speech API (`SpeechRecognition`/`webkitSpeechRecognition`):
 - `1604914` - Remove background watermark for cleaner look
 - `e269fd7` - Custom themed scrollbar for chat and search panels
 - `75530ae` - Copy button, keyboard shortcut, timestamps, source chips, auto-links, expand/collapse
+- `ad176d8` - Typing effect, voice input, suggested questions, mobile improvements
 
 ### UX & Visual Polish (2026-01-26)
 
