@@ -11,7 +11,7 @@ except ImportError:
 
 # Tool URLs (Railway deployments)
 TOOL_URLS = {
-    "patents": "https://patent-warrior-production.up.railway.app",
+    "patents": "https://patentwarrior.up.railway.app",
     "grants": "https://grants-tracker-production.up.railway.app",
     "researchers": "https://h-index-tracker-production.up.railway.app",
     "policies": "https://policy-tracker-production.up.railway.app",
