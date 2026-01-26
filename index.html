@@ -197,7 +197,7 @@
             margin: 0;
         }
         .chat-bubble-user .msg-timestamp {
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
             font-size: 0.65rem;
             opacity: 0.7;
         }
@@ -352,29 +352,45 @@
         .chat-bubble-neo .neo-paragraph-break {
             height: 0.75rem;
         }
+        /* Reset counter at the message level to maintain numbering across lists */
+        .chat-bubble-neo > div {
+            counter-reset: neo-numbered-list;
+        }
         .chat-bubble-neo .neo-list {
             margin: 0.75rem 0;
-            padding-left: 1.25rem;
+            padding-left: 1.5rem;
             line-height: 1.7;
         }
         .chat-bubble-neo .neo-list-numbered {
-            list-style-type: decimal;
-            list-style-position: outside;
+            list-style: none;
+        }
+        .chat-bubble-neo .neo-list-numbered > li {
+            counter-increment: neo-numbered-list;
+            position: relative;
+        }
+        .chat-bubble-neo .neo-list-numbered > li::before {
+            content: counter(neo-numbered-list) ".";
+            position: absolute;
+            left: -1.5rem;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .dark .chat-bubble-neo .neo-list-numbered > li::before {
+            color: #818cf8;
         }
         .chat-bubble-neo .neo-list-bullet {
             list-style-type: disc;
             list-style-position: outside;
         }
+        .chat-bubble-neo .neo-list-bullet li::marker {
+            color: #6366f1;
+        }
+        .dark .chat-bubble-neo .neo-list-bullet li::marker {
+            color: #818cf8;
+        }
         .chat-bubble-neo .neo-list li {
             margin: 0.4rem 0;
-            padding-left: 0.35rem;
-        }
-        .chat-bubble-neo .neo-list li::marker {
-            color: #6366f1;
-            font-weight: 600;
-        }
-        .dark .chat-bubble-neo .neo-list li::marker {
-            color: #818cf8;
+            padding-left: 0.25rem;
         }
         /* Reference links in text */
         .chat-bubble-neo .neo-ref {
