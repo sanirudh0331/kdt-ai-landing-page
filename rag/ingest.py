@@ -70,6 +70,7 @@ SERVICE_URLS = {
     "grants": os.environ.get("GRANTS_SERVICE_URL", "https://grants-tracker-production.up.railway.app"),
     "policies": os.environ.get("POLICY_SERVICE_URL", "https://policywatch.up.railway.app"),
     "researchers": os.environ.get("RESEARCHERS_SERVICE_URL", "https://kdttalentscout.up.railway.app"),
+    "portfolio": os.environ.get("PORTFOLIO_SERVICE_URL", "https://web-production-a9d068.up.railway.app"),
 }
 
 
@@ -473,10 +474,10 @@ def ingest_researchers(reset: bool = False, verbose: bool = True) -> int:
             metadata = {
                 "source": "researchers",
                 "researcher_id": str(researcher["id"]),
-                "name": researcher.get("name", ""),
-                "affiliation": researcher.get("affiliation", ""),
-                "h_index": str(researcher.get("h_index", "")),
-                "citations": str(researcher.get("citations", "")),
+                "name": researcher.get("name") or "",
+                "affiliation": researcher.get("affiliation") or "",
+                "h_index": str(researcher.get("h_index") or ""),
+                "citations": str(researcher.get("cited_by_count") or researcher.get("citations") or ""),
                 "chunk_index": chunk_idx,
                 "total_chunks": chunk_data["total_chunks"],
             }
@@ -590,6 +591,99 @@ def ingest_fda_calendar(reset: bool = False, verbose: bool = True) -> int:
     return total_indexed
 
 
+# ============ PORTFOLIO ============
+
+def ingest_portfolio(reset: bool = False, verbose: bool = True) -> int:
+    """Ingest portfolio updates from Portfolio Tracker History into ChromaDB."""
+    collection_name = COLLECTIONS["portfolio"]
+
+    if reset:
+        if verbose:
+            print(f"Resetting collection: {collection_name}")
+        collection = reset_collection(collection_name)
+    else:
+        collection = get_collection(collection_name)
+
+    existing_ids = set()
+    if not reset:
+        try:
+            existing = collection.get()
+            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            if verbose:
+                print(f"  Found {len(existing_ids)} existing documents")
+        except Exception:
+            pass
+
+    updates = fetch_from_api("portfolio")
+    if not updates:
+        if verbose:
+            print("  No portfolio updates fetched")
+        return 0
+
+    batch_ids, batch_documents, batch_metadatas = [], [], []
+    total_indexed, skipped = 0, 0
+
+    for update in updates:
+        doc_id = f"portfolio_{update['id']}"
+
+        if doc_id in existing_ids:
+            skipped += 1
+            continue
+
+        # Build searchable text from update data
+        text_parts = []
+        if update.get("title"):
+            text_parts.append(update["title"])
+        if update.get("content"):
+            text_parts.append(update["content"])
+        if update.get("company_name"):
+            text_parts.append(update["company_name"])
+
+        document = " ".join(filter(None, text_parts))
+        if not document.strip():
+            continue
+
+        chunks = chunk_text(document)
+
+        for chunk_data in chunks:
+            chunk_idx = chunk_data["chunk_index"]
+            chunk_id = f"{doc_id}_chunk{chunk_idx}" if chunk_data["total_chunks"] > 1 else doc_id
+
+            metadata = {
+                "source": "portfolio",
+                "update_id": str(update["id"]),
+                "title": (update.get("title") or "")[:500],
+                "company_name": update.get("company_name") or "",
+                "ticker": update.get("ticker") or "",
+                "impact_score": str(update.get("impact_score") or ""),
+                "position_status": update.get("position_status") or "",
+                "source_type": update.get("source_type") or "",
+                "published_at": update.get("published_at") or "",
+                "chunk_index": chunk_idx,
+                "total_chunks": chunk_data["total_chunks"],
+            }
+
+            batch_ids.append(chunk_id)
+            batch_documents.append(chunk_data["text"])
+            batch_metadatas.append(metadata)
+
+            if len(batch_ids) >= BATCH_SIZE:
+                collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
+                total_indexed += len(batch_ids)
+                if verbose:
+                    print(f"    Indexed {total_indexed} portfolio updates...")
+                batch_ids, batch_documents, batch_metadatas = [], [], []
+
+    if batch_ids:
+        collection.add(ids=batch_ids, documents=batch_documents, metadatas=batch_metadatas)
+        total_indexed += len(batch_ids)
+
+    if verbose:
+        print(f"  Portfolio: {total_indexed} indexed, {skipped} skipped")
+
+    return total_indexed
+
+
 # ============ MAIN INGESTION ============
 
 def get_collection_stats() -> dict:
@@ -627,6 +721,9 @@ def ingest_all(reset: bool = False, verbose: bool = True) -> dict:
 
     print("\nIngesting FDA calendar...")
     results["fda_calendar"] = ingest_fda_calendar(reset=reset, verbose=verbose)
+
+    print("\nIngesting portfolio...")
+    results["portfolio"] = ingest_portfolio(reset=reset, verbose=verbose)
 
     if verbose:
         print("\n" + "=" * 50)
@@ -669,3 +766,5 @@ if __name__ == "__main__":
         ingest_researchers(reset=args.reset)
     elif args.source == "fda_calendar":
         ingest_fda_calendar(reset=args.reset)
+    elif args.source == "portfolio":
+        ingest_portfolio(reset=args.reset)

@@ -21,6 +21,7 @@ COLLECTIONS = {
     "researchers": "researchers",
     "policies": "policies",
     "fda_calendar": "fda_calendar",
+    "portfolio": "portfolio",
 }
 
 # Singleton instances
