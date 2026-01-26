@@ -74,6 +74,19 @@ SERVICE_URLS = {
 }
 
 
+def extract_base_id(chunk_id: str) -> str:
+    """Extract base document ID from a chunk ID.
+
+    Examples:
+        'patent_123' -> 'patent_123'
+        'patent_123_chunk0' -> 'patent_123'
+        'grant_ABC-01_chunk2' -> 'grant_ABC-01'
+    """
+    if "_chunk" in chunk_id:
+        return chunk_id.rsplit("_chunk", 1)[0]
+    return chunk_id
+
+
 def chunk_text(text: str, max_chars: int = 1500, overlap: int = 200) -> list[dict]:
     """Split text into overlapping chunks with position tracking.
 
@@ -158,13 +171,14 @@ def ingest_patents(reset: bool = False, verbose: bool = True, limit: int = None)
     else:
         collection = get_collection(collection_name)
 
-    existing_ids = set()
+    existing_base_ids = set()
     if not reset:
         try:
             existing = collection.get()
-            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            # Extract base IDs from chunk IDs to properly skip already-indexed docs
+            existing_base_ids = set(extract_base_id(id) for id in (existing["ids"] or []))
             if verbose:
-                print(f"  Found {len(existing_ids)} existing documents")
+                print(f"  Found {len(existing_base_ids)} existing base documents")
         except Exception:
             pass
 
@@ -180,7 +194,7 @@ def ingest_patents(reset: bool = False, verbose: bool = True, limit: int = None)
     for patent in patents:
         doc_id = f"patent_{patent['id']}"
 
-        if doc_id in existing_ids:
+        if doc_id in existing_base_ids:
             skipped += 1
             continue
 
@@ -277,13 +291,14 @@ def ingest_grants(reset: bool = False, verbose: bool = True, limit: int = None) 
     else:
         collection = get_collection(collection_name)
 
-    existing_ids = set()
+    existing_base_ids = set()
     if not reset:
         try:
             existing = collection.get()
-            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            # Extract base IDs from chunk IDs to properly skip already-indexed docs
+            existing_base_ids = set(extract_base_id(id) for id in (existing["ids"] or []))
             if verbose:
-                print(f"  Found {len(existing_ids)} existing documents")
+                print(f"  Found {len(existing_base_ids)} existing base documents")
         except Exception:
             pass
 
@@ -299,7 +314,7 @@ def ingest_grants(reset: bool = False, verbose: bool = True, limit: int = None) 
     for grant in grants:
         doc_id = f"grant_{grant['id']}"
 
-        if doc_id in existing_ids:
+        if doc_id in existing_base_ids:
             skipped += 1
             continue
 
@@ -370,13 +385,13 @@ def ingest_policies(reset: bool = False, verbose: bool = True) -> int:
     else:
         collection = get_collection(collection_name)
 
-    existing_ids = set()
+    existing_base_ids = set()
     if not reset:
         try:
             existing = collection.get()
-            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            existing_base_ids = set(extract_base_id(id) for id in (existing["ids"] or []))
             if verbose:
-                print(f"  Found {len(existing_ids)} existing documents")
+                print(f"  Found {len(existing_base_ids)} existing base documents")
         except Exception:
             pass
 
@@ -392,7 +407,7 @@ def ingest_policies(reset: bool = False, verbose: bool = True) -> int:
     for policy in policies:
         doc_id = f"policy_{policy['id']}"
 
-        if doc_id in existing_ids:
+        if doc_id in existing_base_ids:
             skipped += 1
             continue
 
@@ -460,13 +475,14 @@ def ingest_researchers(reset: bool = False, verbose: bool = True, limit: int = N
     else:
         collection = get_collection(collection_name)
 
-    existing_ids = set()
+    existing_base_ids = set()
     if not reset:
         try:
             existing = collection.get()
-            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            # Extract base IDs from chunk IDs to properly skip already-indexed docs
+            existing_base_ids = set(extract_base_id(id) for id in (existing["ids"] or []))
             if verbose:
-                print(f"  Found {len(existing_ids)} existing documents")
+                print(f"  Found {len(existing_base_ids)} existing base documents")
         except Exception:
             pass
 
@@ -482,7 +498,7 @@ def ingest_researchers(reset: bool = False, verbose: bool = True, limit: int = N
     for researcher in researchers:
         doc_id = f"researcher_{researcher['id']}"
 
-        if doc_id in existing_ids:
+        if doc_id in existing_base_ids:
             skipped += 1
             continue
 
@@ -576,13 +592,13 @@ def ingest_fda_calendar(reset: bool = False, verbose: bool = True) -> int:
 
     events = data.get("events", [])
 
-    existing_ids = set()
+    existing_base_ids = set()
     if not reset:
         try:
             existing = collection.get()
-            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            existing_base_ids = set(extract_base_id(id) for id in (existing["ids"] or []))
             if verbose:
-                print(f"  Found {len(existing_ids)} existing documents")
+                print(f"  Found {len(existing_base_ids)} existing base documents")
         except Exception:
             pass
 
@@ -592,7 +608,7 @@ def ingest_fda_calendar(reset: bool = False, verbose: bool = True) -> int:
     for i, event in enumerate(events):
         doc_id = f"fda_{i}"
 
-        if doc_id in existing_ids:
+        if doc_id in existing_base_ids:
             skipped += 1
             continue
 
@@ -652,13 +668,13 @@ def ingest_portfolio(reset: bool = False, verbose: bool = True) -> int:
     else:
         collection = get_collection(collection_name)
 
-    existing_ids = set()
+    existing_base_ids = set()
     if not reset:
         try:
             existing = collection.get()
-            existing_ids = set(existing["ids"]) if existing["ids"] else set()
+            existing_base_ids = set(extract_base_id(id) for id in (existing["ids"] or []))
             if verbose:
-                print(f"  Found {len(existing_ids)} existing documents")
+                print(f"  Found {len(existing_base_ids)} existing base documents")
         except Exception:
             pass
 
@@ -674,7 +690,7 @@ def ingest_portfolio(reset: bool = False, verbose: bool = True) -> int:
     for update in updates:
         doc_id = f"portfolio_{update['id']}"
 
-        if doc_id in existing_ids:
+        if doc_id in existing_base_ids:
             skipped += 1
             continue
 
