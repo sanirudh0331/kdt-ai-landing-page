@@ -31,8 +31,24 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 - Topic changes clear history (shorter context = fewer tokens)
 - All detection logic is client-side (no API calls)
 
-### Commit
+### Commits
 - `c44a6ec` - Add Neo chat interface with conversation history and smart topic detection
+- `82b6cc3` - Fix stale DOM reference for chatWelcome element
+- `9bcaf6d` - Fix: check isFollowUp before adding question to history
+
+### Bug Fixes (2026-01-26)
+
+**Issue:** First question returned "I don't have any relevant documents" error
+
+**Root Cause:**
+- `isFollowUp()` was checked AFTER adding the question to conversation history
+- This caused `conversationHistory.length > 0` even for first questions
+- Short queries (≤4 words) were incorrectly flagged as follow-ups
+- `skip_search=true` was sent, causing RAG search to be skipped
+
+**Fix:** Move `isFollowUp()` check BEFORE adding question to history
+
+**Also Fixed:** Stale DOM reference for `chatWelcome` element after `clearConversation()` replaced innerHTML
 
 ---
 
