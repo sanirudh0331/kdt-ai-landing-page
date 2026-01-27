@@ -48,7 +48,7 @@ def execute_query(db_name: str, query: str, limit: int = 100) -> dict:
         query = f"{query.rstrip(';')} LIMIT {limit}"
 
     try:
-        with httpx.Client(timeout=30) as client:
+        with httpx.Client(timeout=90) as client:  # 90s for large table queries
             response = client.post(
                 url,
                 json={"query": query, "secret": NEO_SQL_SECRET},
