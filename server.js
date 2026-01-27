@@ -626,6 +626,78 @@ app.post('/api/neo-analyze', async (req, res) => {
     }
 });
 
+// Neo SQL Agent streaming proxy - Server-Sent Events for real-time status
+app.post('/api/neo-analyze-stream', async (req, res) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 180000); // 3 minute timeout for streaming
+
+    try {
+        const response = await fetch(`${RAG_SERVICE_URL}/api/neo-analyze-stream`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream'
+            },
+            body: JSON.stringify(req.body),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'Neo agent error' }));
+            return res.status(response.status).json(error);
+        }
+
+        // Set SSE headers
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+
+        // Pipe the stream through
+        const reader = response.body.getReader();
+
+        const pump = async () => {
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        res.end();
+                        break;
+                    }
+                    res.write(value);
+                }
+            } catch (error) {
+                console.error('Stream pump error:', error.message);
+                res.end();
+            }
+        };
+
+        pump();
+
+        // Handle client disconnect
+        req.on('close', () => {
+            reader.cancel();
+        });
+
+    } catch (error) {
+        clearTimeout(timeout);
+        console.error('Neo streaming proxy error:', error.message);
+
+        if (error.name === 'AbortError') {
+            res.status(504).json({
+                error: 'Request timeout',
+                detail: 'The analysis took too long. Try a simpler question.'
+            });
+        } else {
+            res.status(503).json({
+                error: 'Neo SQL agent unavailable',
+                detail: 'The database service is not running.'
+            });
+        }
+    }
+});
+
 app.get('/api/rag-stats', async (req, res) => {
     try {
         const response = await fetch(`${RAG_SERVICE_URL}/api/rag-stats`, {
