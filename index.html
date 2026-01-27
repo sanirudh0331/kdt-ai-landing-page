@@ -1076,7 +1076,7 @@
                     </svg>
                     <input id="ragSearchInput"
                            type="text"
-                           placeholder="Search or ask Neo a question..."
+                           placeholder="Ask Neo a question or search..."
                            class="flex-1 px-3 py-2 text-sm bg-transparent border-none focus:outline-none focus:ring-0 text-dark-800 dark:text-dark-200 placeholder-dark-400 min-w-0"
                            autocomplete="off">
                     <button id="searchClose" class="p-2 mr-1 text-dark-400 hover:text-dark-600 dark:hover:text-dark-200 rounded-full hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors flex-shrink-0">
@@ -1566,11 +1566,11 @@
             </div>
             <!-- Tabs -->
             <div class="flex border-b border-dark-200 dark:border-dark-700 px-4">
-                <button id="tabSearch" class="px-4 py-2 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 -mb-px">
-                    Search Results
-                </button>
-                <button id="tabAsk" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-dark-500 hover:text-dark-700 dark:hover:text-dark-300 -mb-px">
+                <button id="tabAsk" class="px-4 py-2 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 -mb-px">
                     Ask Neo
+                </button>
+                <button id="tabSearch" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-dark-500 hover:text-dark-700 dark:hover:text-dark-300 -mb-px">
+                    Search Results
                 </button>
             </div>
             <!-- Loading -->
@@ -1579,11 +1579,11 @@
                 <p id="loadingText" class="text-sm text-dark-500 mt-3">Searching across all tools...</p>
             </div>
             <!-- Search Results Panel -->
-            <div id="searchResultsList" class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div id="searchResultsList" class="hidden flex-1 overflow-y-auto p-4 custom-scrollbar">
                 <!-- Results populated by JavaScript -->
             </div>
-            <!-- AI Chat Panel -->
-            <div id="askResultsPanel" class="hidden flex-1 flex flex-col overflow-hidden relative">
+            <!-- AI Chat Panel (default visible) -->
+            <div id="askResultsPanel" class="flex-1 flex flex-col overflow-hidden relative">
                 <!-- Model selector and clear chat button -->
                 <div class="flex items-center justify-between px-4 py-2 border-b border-dark-200 dark:border-dark-700">
                     <button id="clearChat" class="text-xs text-dark-500 hover:text-dark-700 dark:hover:text-dark-300 flex items-center gap-1">
@@ -1658,7 +1658,7 @@
             <!-- Footer hint -->
             <div class="px-4 py-2 border-t border-dark-200 dark:border-dark-700 text-xs text-dark-400 flex items-center justify-between">
                 <span>Press <kbd class="px-1.5 py-0.5 bg-dark-200 dark:bg-dark-700 rounded">Esc</kbd> to close</span>
-                <span id="footerRight">Press <kbd class="px-1.5 py-0.5 bg-dark-200 dark:bg-dark-700 rounded">/</kbd> to search</span>
+                <span id="footerRight">Powered by <span class="text-indigo-500">Claude</span></span>
             </div>
         </div>
     </div>
@@ -2341,8 +2341,8 @@
         const loadingText = document.getElementById('loadingText');
         const footerRight = document.getElementById('footerRight');
 
-        // Current active tab
-        let activeTab = 'search';
+        // Current active tab (default to Ask Neo)
+        let activeTab = 'ask';
 
         // Conversation state management
         let conversationHistory = [];  // [{role: 'user'|'assistant', content: string}]
