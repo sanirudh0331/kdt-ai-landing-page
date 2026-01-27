@@ -278,6 +278,7 @@ def run_agent(
                 "answer": routed["answer"],
                 "tool_calls": [],
                 "insights": [],
+                "entities": routed.get("entities", []),
                 "model": None,
                 "turns_used": 0,
                 "tier": routed["tier"],

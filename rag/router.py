@@ -9,12 +9,88 @@ Tier 3 (full agent): Complex multi-DB reasoning requiring Claude
 
 import re
 import json
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 try:
     from db import execute_query, list_tables
 except ImportError:
     from rag.db import execute_query, list_tables
+
+# Service URLs for entity links (same as agent.py)
+ENTITY_URLS = {
+    "researchers": "https://kdttalentscout.up.railway.app/researcher",
+    "patents": "https://patentwarrior.up.railway.app/patent",
+    "grants": "https://grants-tracker-production.up.railway.app/grant",
+    "policies": "https://policywatch.up.railway.app/bill",
+    "portfolio": "https://web-production-a9d068.up.railway.app/company",
+}
+
+
+def extract_entities_from_rows(db: str, rows: list) -> List[dict]:
+    """Extract linkable entities from query result rows."""
+    entities = []
+    base_url = ENTITY_URLS.get(db, "")
+
+    for row in rows[:10]:  # Limit to first 10
+        entity = None
+
+        if db == "researchers":
+            if row.get("id") and row.get("name"):
+                entity = {
+                    "type": "researcher",
+                    "id": row["id"],
+                    "name": row["name"],
+                    "url": f"{base_url}/{row['id']}",
+                    "meta": f"h-index: {row.get('h_index', '?')}"
+                }
+        elif db == "patents":
+            patent_id = row.get("id") or row.get("patent_id")
+            if patent_id:
+                title = row.get("title", "Untitled Patent")
+                entity = {
+                    "type": "patent",
+                    "id": patent_id,
+                    "name": title[:60] + "..." if len(title) > 60 else title,
+                    "url": f"{base_url}/{patent_id}",
+                    "meta": row.get("patent_number", "")
+                }
+        elif db == "grants":
+            grant_id = row.get("id") or row.get("grant_id")
+            if grant_id:
+                title = row.get("title", "Untitled Grant")
+                entity = {
+                    "type": "grant",
+                    "id": grant_id,
+                    "name": title[:60] + "..." if len(title) > 60 else title,
+                    "url": f"{base_url}/{grant_id}",
+                    "meta": f"${row.get('total_cost', 0):,.0f}" if row.get('total_cost') else ""
+                }
+        elif db == "policies":
+            bill_id = row.get("id") or row.get("bill_id")
+            if bill_id:
+                title = row.get("title", "Untitled Bill")
+                entity = {
+                    "type": "policy",
+                    "id": bill_id,
+                    "name": title[:60] + "..." if len(title) > 60 else title,
+                    "url": f"{base_url}/{bill_id}",
+                    "meta": row.get("status", "")
+                }
+        elif db == "portfolio":
+            company_id = row.get("id") or row.get("company_id")
+            if company_id:
+                entity = {
+                    "type": "company",
+                    "id": company_id,
+                    "name": row.get("name", "Unknown"),
+                    "url": f"{base_url}/{company_id}",
+                    "meta": row.get("modality", "")
+                }
+
+        if entity:
+            entities.append(entity)
+
+    return entities
 
 
 # Tier 1: Direct lookups (instant, no LLM)
@@ -163,10 +239,13 @@ def classify_question(question: str) -> Tuple[int, Optional[dict]]:
                 result = execute_query(db, query)
 
                 if result["rows"]:
+                    # Extract entities for linking
+                    entities = extract_entities_from_rows(db, result["rows"])
                     return (2, {
                         "answer": format_tier2_response(result, db),
                         "data": result["rows"],
                         "query": query.strip(),
+                        "entities": entities,
                     })
             except Exception as e:
                 return (3, None)  # Fall back to agent
@@ -251,6 +330,7 @@ def route_question(question: str) -> dict:
             "answer": result["answer"],
             "data": result["data"],
             "query": result.get("query"),
+            "entities": result.get("entities", []),
             "needs_agent": False,
         }
     else:
