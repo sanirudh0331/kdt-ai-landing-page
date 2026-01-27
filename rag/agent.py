@@ -438,6 +438,226 @@ def run_agent(
     }
 
 
+# Friendly status messages for each tool
+TOOL_STATUS_MESSAGES = {
+    "query_researchers": "Searching researchers database...",
+    "query_patents": "Searching patents database...",
+    "query_grants": "Searching grants database...",
+    "query_policies": "Searching policies database...",
+    "query_portfolio": "Searching portfolio database...",
+    "list_tables": "Exploring database schema...",
+    "describe_table": "Examining table structure...",
+    "append_insight": "Recording insight...",
+}
+
+
+def run_agent_streaming(
+    question: str,
+    model: str = None,
+    max_turns: int = None,
+    conversation_history: list = None,
+    skip_cache: bool = False,
+    skip_router: bool = False,
+):
+    """
+    Streaming version of run_agent that yields status updates.
+
+    Yields:
+        dict events: {"type": "status"|"tool"|"complete", ...}
+    """
+    # STEP 1: Check question router (Tier 1/2 questions don't need LLM)
+    if not skip_router and not conversation_history:
+        yield {"type": "status", "message": "Checking if I can answer instantly..."}
+        routed = route_question(question)
+        if not routed["needs_agent"]:
+            yield {"type": "complete", "data": {
+                "answer": routed["answer"],
+                "tool_calls": [],
+                "insights": [],
+                "entities": routed.get("entities", []),
+                "model": None,
+                "turns_used": 0,
+                "tier": routed["tier"],
+                "tier_name": routed["tier_name"],
+                "routed": True,
+            }}
+            return
+
+    # STEP 2: Check semantic cache for similar questions
+    if not skip_cache and not conversation_history:
+        yield {"type": "status", "message": "Checking memory for similar questions..."}
+        cached = get_cached_response(question)
+        if cached:
+            yield {"type": "complete", "data": {
+                "answer": cached["answer"],
+                "tool_calls": cached.get("tool_calls", []),
+                "insights": cached.get("insights", []),
+                "entities": cached.get("entities", []),
+                "model": None,
+                "turns_used": 0,
+                "cached": True,
+                "similarity": cached.get("similarity"),
+                "original_question": cached.get("original_question"),
+            }}
+            return
+
+    # STEP 3: Full agent (Tier 3)
+    yield {"type": "status", "message": "Starting analysis..."}
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        yield {"type": "complete", "data": {
+            "answer": "Neo SQL agent is not configured. Please set ANTHROPIC_API_KEY.",
+            "tool_calls": [],
+            "insights": [],
+            "model": None,
+            "error": "missing_api_key"
+        }}
+        return
+
+    model = model or DEFAULT_MODEL
+    max_turns = max_turns or MAX_TURNS
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    # Build messages
+    messages = []
+    if conversation_history:
+        messages.extend(conversation_history)
+    messages.append({"role": "user", "content": question})
+
+    # Track tool calls, insights, and entities
+    all_tool_calls = []
+    insights = []
+    entities = []
+    turns_used = 0
+
+    # Agentic loop
+    while turns_used < max_turns:
+        turns_used += 1
+
+        yield {"type": "status", "message": f"Thinking... (step {turns_used})"}
+
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=4096,
+                system=AGENT_SYSTEM_PROMPT,
+                tools=TOOLS,
+                messages=messages,
+            )
+        except anthropic.APIError as e:
+            yield {"type": "complete", "data": {
+                "answer": f"API error: {str(e)}",
+                "tool_calls": all_tool_calls,
+                "insights": insights,
+                "model": model,
+                "turns_used": turns_used,
+                "error": "api_error"
+            }}
+            return
+
+        # Check stop reason
+        if response.stop_reason == "end_turn":
+            # Model is done - extract final text
+            yield {"type": "status", "message": "Composing response..."}
+
+            final_text = ""
+            for block in response.content:
+                if hasattr(block, "text"):
+                    final_text += block.text
+
+            # Deduplicate entities
+            unique_entities = deduplicate_entities(entities)
+
+            # Cache successful response for future similar questions
+            if not skip_cache and not conversation_history and final_text:
+                cache_response(question, final_text, all_tool_calls, insights, unique_entities)
+
+            yield {"type": "complete", "data": {
+                "answer": final_text,
+                "tool_calls": all_tool_calls,
+                "insights": insights,
+                "entities": unique_entities,
+                "model": model,
+                "turns_used": turns_used,
+                "tier": 3,
+                "tier_name": "agent",
+            }}
+            return
+
+        elif response.stop_reason == "tool_use":
+            # Model wants to use tools
+            tool_results = []
+
+            for block in response.content:
+                if block.type == "tool_use":
+                    tool_name = block.name
+                    tool_input = block.input
+                    tool_id = block.id
+
+                    # Emit status update for this tool
+                    status_msg = TOOL_STATUS_MESSAGES.get(tool_name, f"Running {tool_name}...")
+                    yield {"type": "tool", "tool": tool_name, "message": status_msg}
+
+                    # Execute the tool
+                    result = execute_tool(tool_name, tool_input, insights, entities)
+
+                    # Parse result to get row count for status
+                    try:
+                        result_data = json.loads(result)
+                        if "rows" in result_data:
+                            row_count = len(result_data["rows"])
+                            yield {"type": "tool_result", "tool": tool_name, "rows": row_count}
+                    except:
+                        pass
+
+                    # Track for debugging
+                    all_tool_calls.append({
+                        "tool": tool_name,
+                        "input": tool_input,
+                        "result_preview": result[:500] if len(result) > 500 else result,
+                    })
+
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": tool_id,
+                        "content": result,
+                    })
+
+            # Add assistant response and tool results to messages
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append({"role": "user", "content": tool_results})
+
+        else:
+            # Unexpected stop reason
+            final_text = ""
+            for block in response.content:
+                if hasattr(block, "text"):
+                    final_text += block.text
+
+            yield {"type": "complete", "data": {
+                "answer": final_text or f"Unexpected stop reason: {response.stop_reason}",
+                "tool_calls": all_tool_calls,
+                "insights": insights,
+                "entities": deduplicate_entities(entities),
+                "model": model,
+                "turns_used": turns_used,
+            }}
+            return
+
+    # Exceeded max turns
+    yield {"type": "complete", "data": {
+        "answer": "I've reached the maximum number of analysis steps. Here's what I found so far based on my queries.",
+        "tool_calls": all_tool_calls,
+        "insights": insights,
+        "entities": deduplicate_entities(entities),
+        "model": model,
+        "turns_used": turns_used,
+        "warning": "max_turns_exceeded"
+    }}
+
+
 if __name__ == "__main__":
     # Quick test
     import sys

@@ -2465,20 +2465,12 @@
                 if (isTyping) {
                     bubble.id = 'typingIndicator';
                     bubble.classList.add('thinking');
-                    const thinkingMessages = [
-                        "Searching the knowledge base...",
-                        "Analyzing patents and grants...",
-                        "Connecting the dots...",
-                        "Reviewing the literature...",
-                        "Synthesizing insights...",
-                        "Almost there...",
-                    ];
-                    const randomMsg = thinkingMessages[Math.floor(Math.random() * thinkingMessages.length)];
+                    // Initial message - will be updated by streaming status
                     bubble.innerHTML = `
                         <div class="flex items-center gap-3">
                             <img src="static/kdt-logo.png" class="w-6 h-6 neo-thinking-logo" alt="">
                             <div>
-                                <span class="text-sm neo-thinking-text">${randomMsg}</span>
+                                <span class="text-sm neo-thinking-text">Starting analysis...</span>
                                 <div class="typing-indicator flex items-center gap-1 mt-1"><span></span><span></span><span></span></div>
                             </div>
                         </div>
@@ -2964,7 +2956,15 @@
             }
         }
 
-        // Perform AI Q&A with Neo SQL Agent (direct database access)
+        // Update the thinking indicator text
+        function updateThinkingText(message) {
+            const thinkingText = document.querySelector('#typingIndicator .neo-thinking-text');
+            if (thinkingText) {
+                thinkingText.textContent = message;
+            }
+        }
+
+        // Perform AI Q&A with Neo SQL Agent (direct database access) - with streaming status
         async function performAsk(question, model = null) {
             const selectedModel = model || modelSelector?.value || 'claude-sonnet-4-20250514';
             console.log('performAsk called with:', question, 'model:', selectedModel);
@@ -2986,8 +2986,10 @@
             renderChatMessage('assistant', '', true);
 
             try {
-                console.log('Fetching /api/neo-analyze...');
-                const response = await fetch('/api/neo-analyze', {
+                console.log('Fetching /api/neo-analyze-stream...');
+
+                // Use streaming endpoint for real-time status updates
+                const response = await fetch('/api/neo-analyze-stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2997,9 +2999,52 @@
                         messages: conversationHistory.slice(0, -1) // Exclude current question
                     })
                 });
-                console.log('Response status:', response.status);
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                // Parse SSE stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let data = null;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Process complete SSE events (data: {...}\n\n)
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop() || ''; // Keep incomplete event in buffer
+
+                    for (const event of events) {
+                        if (event.startsWith('data: ')) {
+                            try {
+                                const eventData = JSON.parse(event.slice(6));
+                                console.log('SSE event:', eventData);
+
+                                if (eventData.type === 'status') {
+                                    updateThinkingText(eventData.message);
+                                } else if (eventData.type === 'tool') {
+                                    updateThinkingText(eventData.message);
+                                } else if (eventData.type === 'tool_result') {
+                                    const rowMsg = eventData.rows === 1 ? '1 result' : `${eventData.rows} results`;
+                                    updateThinkingText(`Found ${rowMsg}, analyzing...`);
+                                } else if (eventData.type === 'complete') {
+                                    data = eventData.data;
+                                } else if (eventData.type === 'error') {
+                                    throw new Error(eventData.message);
+                                }
+                            } catch (e) {
+                                console.warn('Failed to parse SSE event:', event, e);
+                            }
+                        }
+                    }
+                }
+
                 console.log('Neo analysis data:', data);
 
                 searchLoading?.classList.add('hidden');
@@ -3007,6 +3052,11 @@
                 // Remove typing indicator
                 const typingIndicator = document.getElementById('typingIndicator');
                 if (typingIndicator) typingIndicator.remove();
+
+                if (!data) {
+                    renderChatMessage('assistant', 'No response received. Please try again.');
+                    return;
+                }
 
                 if (data.error) {
                     renderChatMessage('assistant', `Error: ${data.detail || data.error}`);

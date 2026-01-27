@@ -12,9 +12,10 @@ if current_dir not in sys.path:
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
+import json
 from fastapi import FastAPI, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 
@@ -416,6 +417,61 @@ async def neo_analyze(request: NeoAnalyzeRequest):
         return JSONResponse(
             status_code=500,
             content={"error": "Analysis failed", "detail": str(e)}
+        )
+
+
+@app.post("/api/neo-analyze-stream")
+async def neo_analyze_stream(request: NeoAnalyzeRequest):
+    """
+    Streaming version of Neo SQL Agent - returns Server-Sent Events.
+
+    Events:
+    - {"type": "status", "message": "..."} - Status updates
+    - {"type": "tool", "tool": "...", "message": "..."} - Tool being executed
+    - {"type": "tool_result", "tool": "...", "rows": N} - Tool result summary
+    - {"type": "complete", "data": {...}} - Final result
+    """
+    try:
+        try:
+            from agent import run_agent_streaming
+        except ImportError:
+            from rag.agent import run_agent_streaming
+
+        def event_generator():
+            try:
+                for event in run_agent_streaming(
+                    question=request.question,
+                    model=request.model,
+                    max_turns=request.max_turns,
+                    conversation_history=request.messages if request.messages else None,
+                ):
+                    # Format as SSE
+                    yield f"data: {json.dumps(event)}\n\n"
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",  # Disable nginx buffering
+            }
+        )
+
+    except ImportError as e:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "Neo SQL agent streaming not available",
+                "detail": str(e),
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Streaming failed", "detail": str(e)}
         )
 
 
