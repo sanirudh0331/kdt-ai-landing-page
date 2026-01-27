@@ -4,6 +4,47 @@
 
 ---
 
+## Rename: rag → neo_mcp (2026-01-27)
+
+### Summary
+Renamed the entire RAG module to Neo MCP to better reflect its current purpose (SQL agent + MCP-style database access rather than vector-based RAG).
+
+### Changes Made
+
+| Change | Old | New |
+|--------|-----|-----|
+| Folder | `rag/` | `neo_mcp/` |
+| Progress file | `RAG_PROGRESS.md` | `NEO_PROGRESS.md` |
+| Railway service | `kdtrag` | `kdtneo` (neo_mcp service) |
+| Service URL | `https://kdtrag.up.railway.app` | `https://kdtneo.up.railway.app` |
+| Env variable | `RAG_SERVICE_URL` | `NEO_SERVICE_URL` |
+
+### API Endpoints Renamed
+
+| Old | New |
+|-----|-----|
+| `/api/rag-search` | `/api/neo-search` |
+| `/api/rag-ask` | `/api/neo-ask` |
+| `/api/rag-stats` | `/api/neo-stats` |
+| `/api/rag-ingest` | `/api/neo-ingest` |
+| `/api/rag-checkpoint` | `/api/neo-checkpoint` |
+| `/api/rag-debug` | `/api/neo-debug` |
+
+### Files Updated
+- All Python files in `neo_mcp/` - Updated imports from `rag.*` to `neo_mcp.*`
+- `server.js` - Updated proxy endpoints and `NEO_SERVICE_URL`
+- `index.html` - Updated API endpoint calls
+- Documentation files - Updated paths and URLs
+
+### Railway Configuration
+- **neo_mcp service**: Root directory set to `neo_mcp`
+- **Landing page**: `NEO_SERVICE_URL=https://kdtneo.up.railway.app`
+
+### Commit
+- `f6cc50b` - Rename rag/ to neo_mcp/ and update all API endpoints
+
+---
+
 ## Neo Agent v2: Streaming, Entity Linking & Smart Routing (2026-01-27)
 
 ### Summary
