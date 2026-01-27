@@ -393,8 +393,13 @@ async def neo_analyze(request: NeoAnalyzeRequest):
             "answer": result["answer"],
             "tool_calls": result.get("tool_calls", []),
             "insights": result.get("insights", []),
+            "entities": result.get("entities", []),
             "model": result.get("model"),
             "turns_used": result.get("turns_used", 0),
+            "tier": result.get("tier"),
+            "tier_name": result.get("tier_name"),
+            "cached": result.get("cached", False),
+            "routed": result.get("routed", False),
             "warning": result.get("warning"),
             "error": result.get("error"),
         }
