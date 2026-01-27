@@ -77,11 +77,12 @@ Tables:
 Examples: Epana (T-cell Engager, CD38/CD19, autoimmune), Montara (mTOR, LRRK2, Parkinson's), Skeletalis (bone-targeting), etc.
 
 ## QUERY OPTIMIZATION RULES
-1. ALWAYS use LIMIT (10-50) - these are large tables
-2. Use indexed columns in WHERE/ORDER BY when possible
-3. For text search: LIKE '%term%' works but is slow on large tables
-4. For aggregations on large tables (grants), use specific filters first
-5. If a query times out, simplify it or add more restrictive WHERE clauses
+1. ALWAYS include `id` column in SELECT when querying entities (researchers, patents, grants, bills, companies) - this enables clickable source links
+2. ALWAYS use LIMIT (10-50) - these are large tables
+3. Use indexed columns in WHERE/ORDER BY when possible
+4. For text search: LIKE '%term%' works but is slow on large tables
+5. For aggregations on large tables (grants), use specific filters first
+6. If a query times out, simplify it or add more restrictive WHERE clauses
 
 ## CROSS-DATABASE WORKFLOW EXAMPLE
 To find researchers for a portfolio company:
@@ -94,11 +95,12 @@ To find researchers for a portfolio company:
 - Support with specific numbers from queries
 - Use markdown tables for structured data (| Column | Column |)
 - Use headers (## and ###) to organize sections
+- When mentioning specific researchers, patents, grants, or companies, include their name naturally in the text
 - End with actionable next steps
 
 Be DIRECT. Execute queries efficiently. Synthesize insights across databases.
 
-NOTE: Do NOT include a Sources section - the system will automatically generate clickable source links from your query results."""
+NOTE: Do NOT include a Sources section - the system will automatically generate clickable source links from your query results. The UI will link entity names to their detail pages."""
 
 
 # Default model for SQL agent (Sonnet for balance of quality/cost)

@@ -468,6 +468,11 @@
         .dark .chat-bubble-neo .neo-link:hover {
             color: #a5b4fc;
         }
+        /* Entity links (auto-linked names) */
+        .chat-bubble-neo .entity-link {
+            font-weight: 500;
+            text-decoration-style: dotted;
+        }
         .chat-bubble-neo strong {
             font-weight: 600;
             color: #1f2937;
@@ -2956,15 +2961,16 @@
                     return;
                 }
 
-                // Render assistant response with typing effect
-                await renderChatMessageWithTyping(data.answer, []);
+                // Show entities as clickable sources
+                const entities = data.entities || [];
+
+                // Render assistant response with typing effect (pass entities for inline linking)
+                await renderChatMessageWithTyping(data.answer, entities);
 
                 // Add to conversation history and save
                 conversationHistory.push({ role: 'assistant', content: data.answer });
                 saveConversation();
 
-                // Show entities as clickable sources
-                const entities = data.entities || [];
                 const toolCalls = data.tool_calls || [];
 
                 if (entities.length > 0 || toolCalls.length > 0) {
@@ -3188,7 +3194,7 @@
         }
 
         // Format inline elements (bold, italic, links, code, references)
-        function formatInline(text, sources = []) {
+        function formatInline(text, entities = []) {
             let result = text
                 // Code (backticks)
                 .replace(/`([^`]+)`/g, '<code class="neo-code">$1</code>')
@@ -3200,14 +3206,29 @@
                 .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" class="neo-link">$1</a>');
 
             // Convert reference numbers [1], [2], etc. to clickable links
-            if (sources.length > 0) {
+            if (entities.length > 0) {
                 result = result.replace(/\[(\d+)\]/g, (match, num) => {
                     const index = parseInt(num) - 1; // References are 1-indexed
-                    if (index >= 0 && index < sources.length && sources[index].url) {
-                        return `<a href="${sources[index].url}" target="_blank" class="neo-ref" title="${escapeHtml(sources[index].title || '')}">${num}</a>`;
+                    if (index >= 0 && index < entities.length && entities[index].url) {
+                        return `<a href="${entities[index].url}" target="_blank" class="neo-ref" title="${escapeHtml(entities[index].name || '')}">${num}</a>`;
                     }
                     return match; // Keep original if no matching source
                 });
+
+                // Auto-link entity names in text (for researchers, patents, grants, etc.)
+                // Sort by name length descending to match longer names first
+                const sortedEntities = [...entities].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+                for (const entity of sortedEntities) {
+                    if (entity.name && entity.url) {
+                        // Escape special regex characters in name
+                        const escapedName = entity.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        // Match whole words/phrases, case insensitive, but not inside HTML tags
+                        const regex = new RegExp(`(?<!<[^>]*)\\b(${escapedName})\\b(?![^<]*>)`, 'gi');
+                        result = result.replace(regex, (match) => {
+                            return `<a href="${entity.url}" target="_blank" class="neo-link entity-link" title="${escapeHtml(entity.type || '')}: ${escapeHtml(entity.meta || '')}">${match}</a>`;
+                        });
+                    }
+                }
             }
 
             return result;
