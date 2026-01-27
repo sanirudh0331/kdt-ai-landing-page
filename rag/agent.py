@@ -96,47 +96,125 @@ To find researchers for a portfolio company:
 - Use headers (## and ###) to organize sections
 - End with actionable next steps
 
-## IMPORTANT: Source References
-When citing data from queries, use numbered references like [1], [2], etc.
-At the END of your response, include a "---" separator followed by a Sources section:
+Be DIRECT. Execute queries efficiently. Synthesize insights across databases.
 
----
-**Sources:**
-[1] researchers: Top T-cell researchers by h-index
-[2] grants: NIH funding for autoimmune research
-[3] patents: Recent bispecific antibody filings
-
-This helps users verify where the information came from.
-
-Be DIRECT. Execute queries efficiently. Synthesize insights across databases."""
+NOTE: Do NOT include a Sources section - the system will automatically generate clickable source links from your query results."""
 
 
 # Default model for SQL agent (Sonnet for balance of quality/cost)
 DEFAULT_MODEL = os.environ.get("NEO_AGENT_MODEL", "claude-sonnet-4-20250514")
 MAX_TURNS = int(os.environ.get("NEO_MAX_TURNS", "25"))
 
+# Service URLs for entity links
+ENTITY_URLS = {
+    "researchers": "https://kdttalentscout.up.railway.app/researcher",
+    "patents": "https://patentwarrior.up.railway.app/patent",
+    "grants": "https://grants-tracker-production.up.railway.app/grant",
+    "policies": "https://policywatch.up.railway.app/bill",
+    "portfolio": "https://web-production-a9d068.up.railway.app/company",
+}
 
-def execute_tool(tool_name: str, tool_input: dict, insights: list) -> str:
+
+def extract_entities(tool_name: str, result: dict) -> list:
+    """Extract linkable entities from query results."""
+    entities = []
+    rows = result.get("rows", [])
+
+    if not rows:
+        return entities
+
+    if tool_name == "query_researchers":
+        for row in rows[:10]:  # Limit to first 10
+            if row.get("id") and row.get("name"):
+                entities.append({
+                    "type": "researcher",
+                    "id": row["id"],
+                    "name": row["name"],
+                    "url": f"{ENTITY_URLS['researchers']}/{row['id']}",
+                    "meta": f"h-index: {row.get('h_index', '?')}"
+                })
+
+    elif tool_name == "query_patents":
+        for row in rows[:10]:
+            patent_id = row.get("id") or row.get("patent_id")
+            title = row.get("title", "Untitled Patent")
+            if patent_id:
+                entities.append({
+                    "type": "patent",
+                    "id": patent_id,
+                    "name": title[:60] + "..." if len(title) > 60 else title,
+                    "url": f"{ENTITY_URLS['patents']}/{patent_id}",
+                    "meta": row.get("patent_number", "")
+                })
+
+    elif tool_name == "query_grants":
+        for row in rows[:10]:
+            grant_id = row.get("id") or row.get("grant_id")
+            title = row.get("title", "Untitled Grant")
+            if grant_id:
+                entities.append({
+                    "type": "grant",
+                    "id": grant_id,
+                    "name": title[:60] + "..." if len(title) > 60 else title,
+                    "url": f"{ENTITY_URLS['grants']}/{grant_id}",
+                    "meta": f"${row.get('total_cost', 0):,.0f}" if row.get('total_cost') else ""
+                })
+
+    elif tool_name == "query_policies":
+        for row in rows[:10]:
+            bill_id = row.get("id") or row.get("bill_id")
+            title = row.get("title", "Untitled Bill")
+            if bill_id:
+                entities.append({
+                    "type": "policy",
+                    "id": bill_id,
+                    "name": title[:60] + "..." if len(title) > 60 else title,
+                    "url": f"{ENTITY_URLS['policies']}/{bill_id}",
+                    "meta": row.get("status", "")
+                })
+
+    elif tool_name == "query_portfolio":
+        for row in rows[:10]:
+            company_id = row.get("id") or row.get("company_id")
+            name = row.get("name", "Unknown Company")
+            if company_id:
+                entities.append({
+                    "type": "company",
+                    "id": company_id,
+                    "name": name,
+                    "url": f"{ENTITY_URLS['portfolio']}/{company_id}",
+                    "meta": row.get("modality", "")
+                })
+
+    return entities
+
+
+def execute_tool(tool_name: str, tool_input: dict, insights: list, entities: list) -> str:
     """Execute a tool and return the result as a string."""
     try:
         if tool_name == "query_researchers":
             result = execute_query("researchers", tool_input["query"])
+            entities.extend(extract_entities(tool_name, result))
             return json.dumps(result, indent=2, default=str)
 
         elif tool_name == "query_patents":
             result = execute_query("patents", tool_input["query"])
+            entities.extend(extract_entities(tool_name, result))
             return json.dumps(result, indent=2, default=str)
 
         elif tool_name == "query_grants":
             result = execute_query("grants", tool_input["query"])
+            entities.extend(extract_entities(tool_name, result))
             return json.dumps(result, indent=2, default=str)
 
         elif tool_name == "query_policies":
             result = execute_query("policies", tool_input["query"])
+            entities.extend(extract_entities(tool_name, result))
             return json.dumps(result, indent=2, default=str)
 
         elif tool_name == "query_portfolio":
             result = execute_query("portfolio", tool_input["query"])
+            entities.extend(extract_entities(tool_name, result))
             return json.dumps(result, indent=2, default=str)
 
         elif tool_name == "list_tables":
@@ -156,6 +234,18 @@ def execute_tool(tool_name: str, tool_input: dict, insights: list) -> str:
 
     except Exception as e:
         return json.dumps({"error": str(e)})
+
+
+def deduplicate_entities(entities: list) -> list:
+    """Remove duplicate entities, keeping first occurrence."""
+    seen = set()
+    unique = []
+    for entity in entities:
+        key = (entity["type"], entity["id"])
+        if key not in seen:
+            seen.add(key)
+            unique.append(entity)
+    return unique
 
 
 def run_agent(
@@ -232,9 +322,10 @@ def run_agent(
         messages.extend(conversation_history)
     messages.append({"role": "user", "content": question})
 
-    # Track tool calls and insights
+    # Track tool calls, insights, and entities
     all_tool_calls = []
     insights = []
+    entities = []
     turns_used = 0
 
     # Agentic loop
@@ -267,6 +358,9 @@ def run_agent(
                 if hasattr(block, "text"):
                     final_text += block.text
 
+            # Deduplicate entities
+            unique_entities = deduplicate_entities(entities)
+
             # Cache successful response for future similar questions
             if not skip_cache and not conversation_history and final_text:
                 cache_response(question, final_text, all_tool_calls, insights)
@@ -275,6 +369,7 @@ def run_agent(
                 "answer": final_text,
                 "tool_calls": all_tool_calls,
                 "insights": insights,
+                "entities": unique_entities,
                 "model": model,
                 "turns_used": turns_used,
                 "tier": 3,
@@ -292,7 +387,7 @@ def run_agent(
                     tool_id = block.id
 
                     # Execute the tool
-                    result = execute_tool(tool_name, tool_input, insights)
+                    result = execute_tool(tool_name, tool_input, insights, entities)
 
                     # Track for debugging
                     all_tool_calls.append({
@@ -322,6 +417,7 @@ def run_agent(
                 "answer": final_text or f"Unexpected stop reason: {response.stop_reason}",
                 "tool_calls": all_tool_calls,
                 "insights": insights,
+                "entities": deduplicate_entities(entities),
                 "model": model,
                 "turns_used": turns_used,
             }
@@ -331,6 +427,7 @@ def run_agent(
         "answer": "I've reached the maximum number of analysis steps. Here's what I found so far based on my queries.",
         "tool_calls": all_tool_calls,
         "insights": insights,
+        "entities": deduplicate_entities(entities),
         "model": model,
         "turns_used": turns_used,
         "warning": "max_turns_exceeded"
