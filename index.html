@@ -457,6 +457,117 @@
         .dark .chat-bubble-neo strong {
             color: #f3f4f6;
         }
+        /* Headings */
+        .chat-bubble-neo .neo-h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 1rem 0 0.5rem 0;
+            color: #1f2937;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+            padding-bottom: 0.25rem;
+        }
+        .dark .chat-bubble-neo .neo-h1 {
+            color: #f3f4f6;
+            border-bottom-color: rgba(129, 140, 248, 0.3);
+        }
+        .chat-bubble-neo .neo-h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0.75rem 0 0.4rem 0;
+            color: #374151;
+        }
+        .dark .chat-bubble-neo .neo-h2 {
+            color: #e5e7eb;
+        }
+        .chat-bubble-neo .neo-h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.5rem 0 0.3rem 0;
+            color: #4b5563;
+        }
+        .dark .chat-bubble-neo .neo-h3 {
+            color: #d1d5db;
+        }
+        /* Tables */
+        .chat-bubble-neo .neo-table {
+            width: 100%;
+            margin: 0.75rem 0;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        .chat-bubble-neo .neo-table th {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #4f46e5;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+        }
+        .dark .chat-bubble-neo .neo-table th {
+            background: rgba(129, 140, 248, 0.15);
+            color: #a5b4fc;
+            border-bottom-color: rgba(129, 140, 248, 0.2);
+        }
+        .chat-bubble-neo .neo-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .dark .chat-bubble-neo .neo-table td {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+        .chat-bubble-neo .neo-table tr:last-child td {
+            border-bottom: none;
+        }
+        .chat-bubble-neo .neo-table tr:hover td {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        .dark .chat-bubble-neo .neo-table tr:hover td {
+            background: rgba(129, 140, 248, 0.1);
+        }
+        /* Horizontal rule */
+        .chat-bubble-neo .neo-hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.3), transparent);
+            margin: 1rem 0;
+        }
+        .dark .chat-bubble-neo .neo-hr {
+            background: linear-gradient(to right, transparent, rgba(129, 140, 248, 0.3), transparent);
+        }
+        /* Sources section */
+        .chat-bubble-neo .neo-sources {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed rgba(99, 102, 241, 0.3);
+            font-size: 0.8rem;
+        }
+        .chat-bubble-neo .neo-sources-title {
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+        }
+        .dark .chat-bubble-neo .neo-sources-title {
+            color: #818cf8;
+        }
+        .chat-bubble-neo .neo-source-item {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.25rem 0;
+            color: #6b7280;
+        }
+        .dark .chat-bubble-neo .neo-source-item {
+            color: #9ca3af;
+        }
+        .chat-bubble-neo .neo-source-num {
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .dark .chat-bubble-neo .neo-source-num {
+            color: #818cf8;
+        }
 
         /* Scroll to bottom button */
         .scroll-to-bottom {
@@ -1434,13 +1545,6 @@
                         </select>
                     </div>
                 </div>
-                <!-- Offline banner -->
-                <div id="offlineBanner" class="hidden px-4 py-2 bg-amber-100 dark:bg-amber-900/50 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <span>You're offline - check your connection</span>
-                </div>
                 <!-- Chat messages area (scrollable) -->
                 <div id="chatMessagesWrapper" class="flex-1 overflow-hidden relative">
                     <div id="chatMessages" class="h-full overflow-y-auto p-4 space-y-4 relative z-10 custom-scrollbar">
@@ -2356,19 +2460,6 @@
         // Initialize conversation on page load
         restoreConversation();
 
-        // Offline/online detection
-        const offlineBanner = document.getElementById('offlineBanner');
-        function updateOnlineStatus() {
-            if (navigator.onLine) {
-                offlineBanner?.classList.add('hidden');
-            } else {
-                offlineBanner?.classList.remove('hidden');
-            }
-        }
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        updateOnlineStatus(); // Check initial state
-
         // Scroll to bottom button
         const scrollToBottomBtn = document.getElementById('scrollToBottom');
         const chatMessagesEl = document.getElementById('chatMessages');
@@ -2908,7 +2999,7 @@
             }
         }
 
-        // Simple markdown formatter
+        // Enhanced markdown formatter with tables, headers, and better formatting
         function formatMarkdown(text, sources = []) {
             if (!text) return '';
 
@@ -2917,41 +3008,104 @@
             let html = '';
             let inList = false;
             let listType = null;
+            let inTable = false;
+            let tableHeaders = [];
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i];
+                const trimmedLine = line.trim();
+
+                // Check for headers (# ## ###)
+                const h1Match = trimmedLine.match(/^#\s+(.+)$/);
+                const h2Match = trimmedLine.match(/^##\s+(.+)$/);
+                const h3Match = trimmedLine.match(/^###\s+(.+)$/);
+
+                // Check for horizontal rule
+                const hrMatch = trimmedLine.match(/^(-{3,}|_{3,}|\*{3,})$/);
+
+                // Check for table row (starts and ends with |)
+                const tableMatch = trimmedLine.match(/^\|(.+)\|$/);
+                const tableSeparator = trimmedLine.match(/^\|[-:\s|]+\|$/);
 
                 // Check for numbered list
-                const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+                const numberedMatch = trimmedLine.match(/^(\d+)\.\s+(.+)$/);
                 // Check for bullet list
-                const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+                const bulletMatch = trimmedLine.match(/^[-*]\s+(.+)$/);
 
-                if (numberedMatch) {
+                // Close list if we hit non-list content
+                if (inList && !numberedMatch && !bulletMatch) {
+                    html += listType === 'ul' ? '</ul>' : '</ol>';
+                    inList = false;
+                    listType = null;
+                }
+
+                // Handle headers
+                if (h3Match) {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
+                    html += `<h4 class="neo-h3">${formatInline(h3Match[1], sources)}</h4>`;
+                } else if (h2Match) {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
+                    html += `<h3 class="neo-h2">${formatInline(h2Match[1], sources)}</h3>`;
+                } else if (h1Match) {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
+                    html += `<h2 class="neo-h1">${formatInline(h1Match[1], sources)}</h2>`;
+                }
+                // Handle horizontal rule
+                else if (hrMatch) {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
+                    html += '<hr class="neo-hr">';
+                }
+                // Handle table separator (skip it, just styling indicator)
+                else if (tableSeparator) {
+                    // Skip - this is just the |---|---| line
+                }
+                // Handle table row
+                else if (tableMatch) {
+                    const cells = tableMatch[1].split('|').map(c => c.trim());
+
+                    if (!inTable) {
+                        // Start new table, this row is the header
+                        html += '<table class="neo-table"><thead><tr>';
+                        cells.forEach(cell => {
+                            html += `<th>${formatInline(cell, sources)}</th>`;
+                        });
+                        html += '</tr></thead><tbody>';
+                        inTable = true;
+                        tableHeaders = cells;
+                    } else {
+                        // Data row
+                        html += '<tr>';
+                        cells.forEach(cell => {
+                            html += `<td>${formatInline(cell, sources)}</td>`;
+                        });
+                        html += '</tr>';
+                    }
+                }
+                // Handle numbered list
+                else if (numberedMatch) {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
                     if (!inList || listType !== 'ol') {
-                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
                         html += '<ol class="neo-list neo-list-numbered">';
                         inList = true;
                         listType = 'ol';
                     }
                     html += `<li>${formatInline(numberedMatch[2], sources)}</li>`;
-                } else if (bulletMatch) {
+                }
+                // Handle bullet list
+                else if (bulletMatch) {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
                     if (!inList || listType !== 'ul') {
-                        if (inList) html += listType === 'ul' ? '</ul>' : '</ol>';
                         html += '<ul class="neo-list neo-list-bullet">';
                         inList = true;
                         listType = 'ul';
                     }
                     html += `<li>${formatInline(bulletMatch[1], sources)}</li>`;
-                } else {
-                    // Close any open list
-                    if (inList) {
-                        html += listType === 'ul' ? '</ul>' : '</ol>';
-                        inList = false;
-                        listType = null;
-                    }
+                }
+                // Handle regular text
+                else {
+                    if (inTable) { html += '</tbody></table>'; inTable = false; }
 
-                    // Empty line = paragraph break
-                    if (line.trim() === '') {
+                    if (trimmedLine === '') {
                         html += '<div class="neo-paragraph-break"></div>';
                     } else {
                         html += `<p class="neo-paragraph">${formatInline(line, sources)}</p>`;
@@ -2959,9 +3113,12 @@
                 }
             }
 
-            // Close any remaining list
+            // Close any remaining open tags
             if (inList) {
                 html += listType === 'ul' ? '</ul>' : '</ol>';
+            }
+            if (inTable) {
+                html += '</tbody></table>';
             }
 
             return html;

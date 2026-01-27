@@ -92,8 +92,21 @@ To find researchers for a portfolio company:
 ## Response Style
 - Lead with the key finding/recommendation
 - Support with specific numbers from queries
-- Use markdown tables for structured data
+- Use markdown tables for structured data (| Column | Column |)
+- Use headers (## and ###) to organize sections
 - End with actionable next steps
+
+## IMPORTANT: Source References
+When citing data from queries, use numbered references like [1], [2], etc.
+At the END of your response, include a "---" separator followed by a Sources section:
+
+---
+**Sources:**
+[1] researchers: Top T-cell researchers by h-index
+[2] grants: NIH funding for autoimmune research
+[3] patents: Recent bispecific antibody filings
+
+This helps users verify where the information came from.
 
 Be DIRECT. Execute queries efficiently. Synthesize insights across databases."""
 
