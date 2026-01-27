@@ -1428,9 +1428,9 @@
                     <div class="flex items-center">
                         <label class="text-xs text-dark-500 mr-2">Model:</label>
                         <select id="modelSelector" class="text-xs bg-white dark:bg-dark-700 border border-dark-300 dark:border-dark-500 rounded px-2 py-1 text-dark-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                            <option value="claude-3-5-haiku-20241022">Haiku (Fast)</option>
-                            <option value="claude-sonnet-4-20250514">Sonnet</option>
+                            <option value="claude-sonnet-4-20250514" selected>Sonnet (Recommended)</option>
                             <option value="claude-opus-4-20250514">Opus (Best)</option>
+                            <option value="claude-3-5-haiku-20241022">Haiku (Fast)</option>
                         </select>
                     </div>
                 </div>
@@ -1464,7 +1464,7 @@
                         <svg id="sourcesChevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-                        <span id="sourcesLabel">Based on <span id="sourcesCount">0</span> documents</span>
+                        <span id="sourcesLabel">Ran <span id="sourcesCount">0</span> queries</span>
                     </button>
                     <div id="sourcesList" class="flex flex-wrap gap-2">
                         <!-- Sources list populated by JavaScript -->
@@ -2798,17 +2798,13 @@
             }
         }
 
-        // Perform AI Q&A with chat mode
+        // Perform AI Q&A with Neo SQL Agent (direct database access)
         async function performAsk(question, model = null) {
-            const selectedModel = model || modelSelector?.value || 'claude-3-5-haiku-20241022';
+            const selectedModel = model || modelSelector?.value || 'claude-sonnet-4-20250514';
             console.log('performAsk called with:', question, 'model:', selectedModel);
 
             // Hide central loading spinner - we use typing indicator instead
             searchLoading?.classList.add('hidden');
-
-            // Determine if this is a follow-up question BEFORE adding to history
-            const skipSearch = isFollowUp(question);
-            console.log('Is follow-up (skip search):', skipSearch);
 
             // Collapse sources and long messages from previous response
             collapseSources();
@@ -2824,22 +2820,21 @@
             renderChatMessage('assistant', '', true);
 
             try {
-                console.log('Fetching /api/rag-ask...');
-                const response = await fetch('/api/rag-ask', {
+                console.log('Fetching /api/neo-analyze...');
+                const response = await fetch('/api/neo-analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question,
-                        n_context: 8,
                         model: selectedModel,
-                        messages: conversationHistory.slice(0, -1), // Exclude current question
-                        skip_search: skipSearch
+                        max_turns: 15,
+                        messages: conversationHistory.slice(0, -1) // Exclude current question
                     })
                 });
                 console.log('Response status:', response.status);
 
                 const data = await response.json();
-                console.log('Ask data:', data);
+                console.log('Neo analysis data:', data);
 
                 searchLoading?.classList.add('hidden');
 
@@ -2852,51 +2847,51 @@
                     return;
                 }
 
-                // Render assistant response with typing effect (pass sources for reference linking)
-                await renderChatMessageWithTyping(data.answer, data.sources || []);
+                // Render assistant response with typing effect
+                await renderChatMessageWithTyping(data.answer, []);
 
                 // Add to conversation history and save
                 conversationHistory.push({ role: 'assistant', content: data.answer });
                 saveConversation();
 
-                // Render sources (only if we searched)
-                if (!skipSearch && data.sources && data.sources.length > 0) {
-                    lastSearchContext = data.sources;
-
-                    // Update the sources count
+                // Show query stats if available (for debugging/transparency)
+                if (data.tool_calls && data.tool_calls.length > 0) {
                     const sourcesCount = document.getElementById('sourcesCount');
-                    if (sourcesCount) sourcesCount.textContent = data.context_count;
+                    if (sourcesCount) sourcesCount.textContent = data.tool_calls.length;
 
-                    // Build sources chips HTML
-                    let sourcesHtml = '';
-                    data.sources.forEach(s => {
-                        const sourceColor = sourceColors[s.source] || 'bg-gray-500';
-                        const sourceLabel = sourceLabels[s.source] || s.source;
-                        if (s.url) {
-                            sourcesHtml += `
-                                <a href="${s.url}" target="_blank"
-                                   class="source-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-100 dark:bg-dark-800 text-xs group">
-                                    <span class="w-2 h-2 rounded-full ${sourceColor}"></span>
-                                    <span class="text-dark-600 dark:text-dark-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">${escapeHtml(s.title?.substring(0, 35))}${s.title?.length > 35 ? '...' : ''}</span>
-                                    <span class="text-dark-400 text-[0.65rem] uppercase">${sourceLabel}</span>
-                                </a>
-                            `;
-                        } else {
-                            sourcesHtml += `
-                                <span class="source-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-100 dark:bg-dark-800 text-xs">
-                                    <span class="w-2 h-2 rounded-full ${sourceColor}"></span>
-                                    <span class="text-dark-600 dark:text-dark-300">${escapeHtml(s.title?.substring(0, 35))}${s.title?.length > 35 ? '...' : ''}</span>
-                                    <span class="text-dark-400 text-[0.65rem] uppercase">${sourceLabel}</span>
-                                </span>
-                            `;
-                        }
+                    // Build tool calls summary
+                    let toolsHtml = '';
+                    const dbColors = {
+                        'query_researchers': 'bg-purple-500',
+                        'query_patents': 'bg-blue-500',
+                        'query_grants': 'bg-green-500',
+                        'query_policies': 'bg-amber-500',
+                        'query_portfolio': 'bg-rose-500',
+                        'list_tables': 'bg-gray-500',
+                        'describe_table': 'bg-gray-500'
+                    };
+
+                    data.tool_calls.slice(0, 8).forEach(tc => {
+                        const color = dbColors[tc.tool] || 'bg-gray-500';
+                        const label = tc.tool.replace('query_', '').replace('_', ' ');
+                        toolsHtml += `
+                            <span class="source-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-dark-100 dark:bg-dark-800 text-xs">
+                                <span class="w-2 h-2 rounded-full ${color}"></span>
+                                <span class="text-dark-600 dark:text-dark-300">${escapeHtml(label)}</span>
+                            </span>
+                        `;
                     });
 
-                    // Put chips in the sourcesList div
-                    const sourcesList = document.getElementById('sourcesList');
-                    if (sourcesList) sourcesList.innerHTML = sourcesHtml;
+                    if (data.tool_calls.length > 8) {
+                        toolsHtml += `<span class="text-xs text-dark-400">+${data.tool_calls.length - 8} more</span>`;
+                    }
 
-                    // Show sources section and expand it
+                    // Show turns used
+                    toolsHtml += `<span class="text-xs text-dark-400 ml-2">${data.turns_used} turns</span>`;
+
+                    const sourcesList = document.getElementById('sourcesList');
+                    if (sourcesList) sourcesList.innerHTML = toolsHtml;
+
                     if (askSources) askSources.classList.remove('hidden');
                     expandSources();
                 }

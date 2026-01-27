@@ -27,6 +27,14 @@ class AskRequest(BaseModel):
     skip_search: bool = False  # Skip RAG search for follow-up questions
 
 
+class NeoAnalyzeRequest(BaseModel):
+    """Request body for the Neo SQL agent endpoint."""
+    question: str
+    model: str = "claude-sonnet-4-20250514"  # Sonnet for quality analysis
+    max_turns: int = 15  # Maximum tool use iterations
+    messages: list = []  # Conversation history for follow-ups
+
+
 app = FastAPI(
     title="KdT AI RAG Search",
     description="Semantic search across all KdT AI tools",
@@ -341,6 +349,113 @@ async def rag_debug():
 
         return {"status": "ok", "collections": debug_info}
 
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+
+# ============ NEO SQL AGENT ENDPOINTS ============
+# These replicate MCP functionality - direct SQL access with agentic reasoning
+
+@app.post("/api/neo-analyze")
+async def neo_analyze(request: NeoAnalyzeRequest):
+    """
+    Neo SQL Agent - Direct database access with agentic reasoning.
+
+    This replicates the MCP experience:
+    - Claude has direct SQL access to all databases
+    - Multi-step reasoning (query -> analyze -> query again)
+    - Uses Sonnet/Opus for high-quality analysis
+    """
+    try:
+        try:
+            from agent import run_agent
+        except ImportError:
+            from rag.agent import run_agent
+
+        result = run_agent(
+            question=request.question,
+            model=request.model,
+            max_turns=request.max_turns,
+            conversation_history=request.messages if request.messages else None,
+        )
+
+        return {
+            "question": request.question,
+            "answer": result["answer"],
+            "tool_calls": result.get("tool_calls", []),
+            "insights": result.get("insights", []),
+            "model": result.get("model"),
+            "turns_used": result.get("turns_used", 0),
+            "warning": result.get("warning"),
+            "error": result.get("error"),
+        }
+
+    except ImportError as e:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "Neo SQL agent not available",
+                "detail": str(e),
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Analysis failed", "detail": str(e)}
+        )
+
+
+@app.get("/api/neo-db-stats")
+async def neo_db_stats():
+    """Get statistics about available SQL databases."""
+    try:
+        try:
+            from db import get_database_stats
+        except ImportError:
+            from rag.db import get_database_stats
+
+        return {"databases": get_database_stats()}
+
+    except ImportError as e:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Database module not available", "detail": str(e)}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+
+@app.get("/api/neo-query")
+async def neo_query(
+    database: str = Query(..., description="Database to query (researchers, patents, grants, policies, portfolio)"),
+    query: str = Query(..., description="SQL SELECT query"),
+):
+    """Direct SQL query endpoint (for testing/debugging)."""
+    try:
+        try:
+            from db import execute_query
+        except ImportError:
+            from rag.db import execute_query
+
+        result = execute_query(database, query)
+        return result
+
+    except ValueError as e:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(e)}
+        )
+    except FileNotFoundError as e:
+        return JSONResponse(
+            status_code=404,
+            content={"error": str(e)}
+        )
     except Exception as e:
         return JSONResponse(
             status_code=500,
