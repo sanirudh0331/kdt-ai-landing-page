@@ -57,10 +57,16 @@ def _get_db():
             answer TEXT NOT NULL,
             tool_calls TEXT,
             insights TEXT,
+            entities TEXT,
             cached_at REAL NOT NULL
         )
     """)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_cached_at ON cache(cached_at)")
+    # Migration: add entities column if missing (for existing DBs)
+    try:
+        conn.execute("ALTER TABLE cache ADD COLUMN entities TEXT")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
     conn.commit()
     return conn
 
@@ -120,6 +126,7 @@ def get_cached_response(question: str) -> Optional[dict]:
             "answer": best_match["answer"],
             "tool_calls": json.loads(best_match["tool_calls"] or "[]"),
             "insights": json.loads(best_match["insights"] or "[]"),
+            "entities": json.loads(best_match["entities"] or "[]"),
             "cached": True,
             "similarity": round(best_similarity, 3),
             "original_question": best_match["question"],
@@ -130,7 +137,7 @@ def get_cached_response(question: str) -> Optional[dict]:
         return None
 
 
-def cache_response(question: str, answer: str, tool_calls: list, insights: list):
+def cache_response(question: str, answer: str, tool_calls: list, insights: list, entities: list = None):
     """
     Cache a question-response pair for future similarity matching.
     """
@@ -151,8 +158,8 @@ def cache_response(question: str, answer: str, tool_calls: list, insights: list)
 
         # Upsert
         conn.execute("""
-            INSERT OR REPLACE INTO cache (id, question, embedding, answer, tool_calls, insights, cached_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO cache (id, question, embedding, answer, tool_calls, insights, entities, cached_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             question_id,
             question,
@@ -160,6 +167,7 @@ def cache_response(question: str, answer: str, tool_calls: list, insights: list)
             answer[:10000],  # Limit answer size
             json.dumps(tool_calls[:20]),
             json.dumps(insights[:10]),
+            json.dumps((entities or [])[:20]),
             time.time(),
         ))
         conn.commit()

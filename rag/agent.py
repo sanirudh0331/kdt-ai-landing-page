@@ -294,6 +294,7 @@ def run_agent(
                 "answer": cached["answer"],
                 "tool_calls": cached.get("tool_calls", []),
                 "insights": cached.get("insights", []),
+                "entities": cached.get("entities", []),
                 "model": None,
                 "turns_used": 0,
                 "cached": True,
@@ -364,7 +365,7 @@ def run_agent(
 
             # Cache successful response for future similar questions
             if not skip_cache and not conversation_history and final_text:
-                cache_response(question, final_text, all_tool_calls, insights)
+                cache_response(question, final_text, all_tool_calls, insights, unique_entities)
 
             return {
                 "answer": final_text,
