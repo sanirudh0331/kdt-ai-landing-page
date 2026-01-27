@@ -1,6 +1,78 @@
-# RAG Embedding Quality Improvement - Progress Notes
+# Neo MCP - Progress Notes
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-01-27
+
+---
+
+## Neo Agent v2: Streaming, Entity Linking & Smart Routing (2026-01-27)
+
+### Summary
+Major overhaul of Neo agent backend: added real-time streaming updates, clickable entity sources, question routing with semantic caching, and various UX improvements.
+
+### Features Implemented
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Streaming Status Updates | ✅ Done | Real-time SSE streaming shows what Neo is doing ("Searching patents...", "Running SQL...") |
+| SSE Proxy | ✅ Done | Node.js proxy forwards SSE events from Python backend |
+| Question Router | ✅ Done | Routes questions to Tier 1 (RAG) or Tier 2 (SQL agent) based on complexity |
+| Semantic Cache | ✅ Done | SQLite-based cache for similar questions (faster, cheaper than ChromaDB) |
+| Clickable Entity Sources | ✅ Done | Responses include linked patents/grants/researchers that open in side panel |
+| Entity Extraction | ✅ Done | Parses Neo responses to find and link entity references |
+| Entity Caching | ✅ Done | Cached responses include their entity links |
+| Fullscreen Toggle | ✅ Done | Expand Neo chat modal to full viewport |
+| Default Tab Change | ✅ Done | "Ask Neo" is now the default tab instead of Search |
+
+### Architecture Changes
+
+**Question Routing (Tier System):**
+- **Tier 1 (RAG):** Simple factual questions → fast vector search + LLM
+- **Tier 2 (SQL Agent):** Complex/analytical questions → multi-turn SQL agent with tool use
+- Router uses Claude to classify incoming questions
+
+**Semantic Cache:**
+- Switched from ChromaDB to SQLite for simplicity
+- Stores question embeddings + responses
+- Similarity threshold determines cache hits
+- Reduces API costs for repeated/similar questions
+
+**Streaming Implementation:**
+- Python backend streams SSE events with status updates
+- Node.js server proxies `/api/neo-stream` to Python service
+- Frontend shows real-time progress indicators
+
+### Files Changed
+- `server.js` - Added SSE proxy endpoint `/api/neo-stream`
+- `neo_mcp/server.py` - Streaming endpoint, question router, entity extraction
+- `neo_mcp/semantic_cache.py` - SQLite semantic cache implementation
+- `index.html` - Streaming UI, entity linking, fullscreen, default tab
+
+### Commits
+- `28c6520` - Add Neo SQL agent proxy endpoint to Node.js server
+- `1a5958b` - Point to deployed kdtrag service for Neo SQL agent
+- `78f3d1f` - Optimize Neo agent: add schemas to prompt, increase max turns to 25
+- `959e9d4` - Switch Neo to direct Railway SQL calls (like MCP)
+- `ed2f670` - Increase SQL query timeout to 90s for large tables
+- `b9894b9` - Improve Neo agent reliability for production
+- `918b7ed` - Add question router and semantic cache for Neo agent
+- `66b1046` - Simplify semantic cache: SQLite instead of ChromaDB
+- `1eab6ae` - Improve Neo chat UI and add source references
+- `f2d2dd6` - Add clickable entity sources to Neo responses
+- `8078ebc` - Fix: Return entities from /api/neo-analyze endpoint
+- `c0023c6` - Add entity extraction for Tier 2 routed queries
+- `f4ad707` - Add entity caching for cached responses
+- `a70b360` - Add empty entities array to Tier 1 responses for consistency
+- `b88405a` - Fix: Add id column to Tier 2 queries for entity linking
+- `65635f4` - Add automatic entity linking in Neo responses
+- `330c9e7` - Add fullscreen toggle for Neo chat modal
+- `419891f` - Make Ask Neo the default tab instead of Search
+- `a67fb5f` - Add real-time streaming status updates for Neo
+- `d392f4c` - Add streaming proxy for Neo SSE endpoint
+
+### Bug Fixes
+- Entity linking required `id` column in Tier 2 SQL queries
+- Empty entities array needed for Tier 1 responses (frontend consistency)
+- Cached responses weren't returning entity data
 
 ---
 
@@ -25,8 +97,8 @@ Converted Neo from single Q&A to a full chat interface with conversation history
 
 ### Files Changed
 - `index.html` - Chat UI, CSS, JavaScript for conversation management
-- `rag/server.py` - Added `messages` and `skip_search` params to AskRequest
-- `rag/llm.py` - Updated `ask_with_context()` to include conversation history
+- `neo_mcp/server.py` - Added `messages` and `skip_search` params to AskRequest
+- `neo_mcp/llm.py` - Updated `ask_with_context()` to include conversation history
 
 ### Cost Optimization
 - Follow-up questions skip RAG search (reuse existing context)

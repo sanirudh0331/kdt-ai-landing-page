@@ -515,40 +515,40 @@ app.get('/api/fda-calendar', async (req, res) => {
     }
 });
 
-// RAG Search proxy - forwards to Python FastAPI service
-const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || 'https://kdtrag.up.railway.app';
+// Neo MCP proxy - forwards to Python FastAPI service
+const NEO_SERVICE_URL = process.env.NEO_SERVICE_URL || 'https://kdtneo.up.railway.app';
 
-app.get('/api/rag-search', async (req, res) => {
+app.get('/api/neo-search', async (req, res) => {
     try {
         const queryParams = new URLSearchParams(req.query).toString();
-        const response = await fetch(`${RAG_SERVICE_URL}/api/rag-search?${queryParams}`, {
+        const response = await fetch(`${NEO_SERVICE_URL}/api/neo-search?${queryParams}`, {
             headers: { 'Accept': 'application/json' },
             timeout: 30000
         });
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: 'RAG service error' }));
+            const error = await response.json().catch(() => ({ error: 'Neo service error' }));
             return res.status(response.status).json(error);
         }
 
         const data = await response.json();
         res.json(data);
     } catch (error) {
-        console.error('RAG search proxy error:', error.message);
+        console.error('Neo search proxy error:', error.message);
         res.status(503).json({
-            error: 'RAG search unavailable',
-            detail: 'The search service is not running. Start it with: python rag/server.py'
+            error: 'Neo search unavailable',
+            detail: 'The search service is not running. Start it with: python neo_mcp/server.py'
         });
     }
 });
 
-// RAG Ask proxy - AI-powered Q&A (POST with longer timeout for LLM)
-app.post('/api/rag-ask', async (req, res) => {
+// Neo Ask proxy - AI-powered Q&A (POST with longer timeout for LLM)
+app.post('/api/neo-ask', async (req, res) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000); // 60 second timeout for LLM
 
     try {
-        const response = await fetch(`${RAG_SERVICE_URL}/api/rag-ask`, {
+        const response = await fetch(`${NEO_SERVICE_URL}/api/neo-ask`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -560,7 +560,7 @@ app.post('/api/rag-ask', async (req, res) => {
         clearTimeout(timeout);
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: 'RAG service error' }));
+            const error = await response.json().catch(() => ({ error: 'Neo service error' }));
             return res.status(response.status).json(error);
         }
 
@@ -568,7 +568,7 @@ app.post('/api/rag-ask', async (req, res) => {
         res.json(data);
     } catch (error) {
         clearTimeout(timeout);
-        console.error('RAG ask proxy error:', error.message);
+        console.error('Neo ask proxy error:', error.message);
 
         if (error.name === 'AbortError') {
             res.status(504).json({
@@ -578,7 +578,7 @@ app.post('/api/rag-ask', async (req, res) => {
         } else {
             res.status(503).json({
                 error: 'AI Q&A unavailable',
-                detail: 'The RAG service is not running. Start it with: python rag/server.py'
+                detail: 'The Neo service is not running. Start it with: python neo_mcp/server.py'
             });
         }
     }
@@ -590,7 +590,7 @@ app.post('/api/neo-analyze', async (req, res) => {
     const timeout = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for multi-step analysis
 
     try {
-        const response = await fetch(`${RAG_SERVICE_URL}/api/neo-analyze`, {
+        const response = await fetch(`${NEO_SERVICE_URL}/api/neo-analyze`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -632,7 +632,7 @@ app.post('/api/neo-analyze-stream', async (req, res) => {
     const timeout = setTimeout(() => controller.abort(), 180000); // 3 minute timeout for streaming
 
     try {
-        const response = await fetch(`${RAG_SERVICE_URL}/api/neo-analyze-stream`, {
+        const response = await fetch(`${NEO_SERVICE_URL}/api/neo-analyze-stream`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -698,20 +698,20 @@ app.post('/api/neo-analyze-stream', async (req, res) => {
     }
 });
 
-app.get('/api/rag-stats', async (req, res) => {
+app.get('/api/neo-stats', async (req, res) => {
     try {
-        const response = await fetch(`${RAG_SERVICE_URL}/api/rag-stats`, {
+        const response = await fetch(`${NEO_SERVICE_URL}/api/neo-stats`, {
             headers: { 'Accept': 'application/json' }
         });
 
         if (!response.ok) {
-            return res.status(response.status).json({ error: 'RAG service error' });
+            return res.status(response.status).json({ error: 'Neo service error' });
         }
 
         const data = await response.json();
         res.json(data);
     } catch (error) {
-        res.status(503).json({ error: 'RAG stats unavailable' });
+        res.status(503).json({ error: 'Neo stats unavailable' });
     }
 });
 

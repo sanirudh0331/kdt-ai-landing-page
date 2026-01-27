@@ -2880,7 +2880,7 @@
         async function performSearch(query) {
             console.log('performSearch called with:', query);
             try {
-                const url = `/api/rag-search?q=${encodeURIComponent(query)}&n_results=15`;
+                const url = `/api/neo-search?q=${encodeURIComponent(query)}&n_results=15`;
                 console.log('Fetching:', url);
                 const response = await fetch(url);
                 console.log('Response status:', response.status);

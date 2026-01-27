@@ -1,4 +1,4 @@
-"""Claude API integration for RAG Q&A."""
+"""Claude API integration for Neo Q&A."""
 
 import os
 from typing import Optional

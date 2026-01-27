@@ -19,10 +19,10 @@ try:
     from router import route_question
     from semantic_cache import get_cached_response, cache_response
 except ImportError:
-    from rag.db import execute_query, list_tables, describe_table
-    from rag.tools import TOOLS
-    from rag.router import route_question
-    from rag.semantic_cache import get_cached_response, cache_response
+    from neo_mcp.db import execute_query, list_tables, describe_table
+    from neo_mcp.tools import TOOLS
+    from neo_mcp.router import route_question
+    from neo_mcp.semantic_cache import get_cached_response, cache_response
 
 
 # System prompt for the SQL agent

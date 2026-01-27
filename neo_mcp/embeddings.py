@@ -1,4 +1,4 @@
-"""ChromaDB and sentence-transformers setup for RAG search."""
+"""ChromaDB and sentence-transformers setup for Neo search."""
 
 import os
 from pathlib import Path

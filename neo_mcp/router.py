@@ -14,7 +14,7 @@ from typing import Optional, Tuple, List
 try:
     from db import execute_query, list_tables
 except ImportError:
-    from rag.db import execute_query, list_tables
+    from neo_mcp.db import execute_query, list_tables
 
 # Service URLs for entity links (same as agent.py)
 ENTITY_URLS = {

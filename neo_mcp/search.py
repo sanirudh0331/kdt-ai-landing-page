@@ -1,4 +1,4 @@
-"""RAG search and reranking logic."""
+"""Neo search and reranking logic."""
 
 from typing import Optional
 from dataclasses import dataclass, asdict
@@ -8,7 +8,7 @@ from sentence_transformers import CrossEncoder
 try:
     from embeddings import get_collection, get_embedding_function, COLLECTIONS
 except ImportError:
-    from rag.embeddings import get_collection, get_embedding_function, COLLECTIONS
+    from neo_mcp.embeddings import get_collection, get_embedding_function, COLLECTIONS
 
 
 # Cross-encoder reranker (singleton)

@@ -1,4 +1,4 @@
-"""RAG (Retrieval-Augmented Generation) search module for KdT AI."""
+"""Neo MCP - SQL agent and search module for KdT AI."""
 
 __all__ = [
     "get_chroma_client",

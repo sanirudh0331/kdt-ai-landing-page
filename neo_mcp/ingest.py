@@ -1,4 +1,4 @@
-"""Data ingestion scripts for RAG search.
+"""Data ingestion scripts for Neo MCP.
 
 Fetches data from KdT AI tool APIs and stores embeddings in ChromaDB.
 Supports checkpointing for resumable ingestion on rate limit errors.
@@ -16,7 +16,7 @@ try:
         get_collection, reset_collection, COLLECTIONS, CHROMA_PERSIST_DIR
     )
 except ImportError:
-    from rag.embeddings import (
+    from neo_mcp.embeddings import (
         get_collection, reset_collection, COLLECTIONS, CHROMA_PERSIST_DIR
     )
 

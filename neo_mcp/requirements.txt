@@ -1,4 +1,4 @@
-# RAG Search Dependencies
+# Neo MCP Dependencies
 fastapi>=0.109.0
 uvicorn[standard]>=0.27.0
 chromadb>=0.4.0

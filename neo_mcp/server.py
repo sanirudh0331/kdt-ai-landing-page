@@ -1,10 +1,10 @@
-"""FastAPI server for RAG search endpoints."""
+"""FastAPI server for Neo MCP endpoints."""
 
 import os
 import sys
 from typing import Optional
 
-# Support both module run (python -m rag.server) and standalone (uvicorn server:app)
+# Support both module run (python -m neo_mcp.server) and standalone (uvicorn server:app)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 if current_dir not in sys.path:
@@ -37,9 +37,9 @@ class NeoAnalyzeRequest(BaseModel):
 
 
 app = FastAPI(
-    title="KdT AI RAG Search",
-    description="Semantic search across all KdT AI tools",
-    version="1.0.0"
+    title="KdT Neo MCP",
+    description="SQL agent and search across all KdT AI data",
+    version="2.0.0"
 )
 
 
@@ -60,7 +60,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"status": "ok", "service": "KdT AI RAG Search"}
+    return {"status": "ok", "service": "KdT Neo MCP"}
 
 
 @app.get("/health")
@@ -68,8 +68,8 @@ async def health():
     return {"status": "healthy"}
 
 
-@app.get("/api/rag-search")
-async def rag_search(
+@app.get("/api/neo-search")
+async def neo_search(
     q: str = Query(..., min_length=1, description="Search query"),
     sources: str = Query("", description="Comma-separated source filters"),
     n_results: int = Query(10, ge=1, le=50, description="Number of results"),
@@ -81,7 +81,7 @@ async def rag_search(
         try:
             from search import search_with_filters
         except ImportError:
-            from rag.search import search_with_filters
+            from neo_mcp.search import search_with_filters
 
         source_list = None
         if sources:
@@ -106,7 +106,7 @@ async def rag_search(
         return JSONResponse(
             status_code=503,
             content={
-                "error": "RAG search not available",
+                "error": "Neo search not available",
                 "detail": str(e),
             }
         )
@@ -117,8 +117,8 @@ async def rag_search(
         )
 
 
-@app.post("/api/rag-ask")
-async def rag_ask(request: AskRequest):
+@app.post("/api/neo-ask")
+async def neo_ask(request: AskRequest):
     """AI-powered Q&A using RAG context."""
     import os
 
@@ -135,8 +135,8 @@ async def rag_ask(request: AskRequest):
             from search import search_with_filters
             from llm import ask_with_context
         except ImportError:
-            from rag.search import search_with_filters
-            from rag.llm import ask_with_context
+            from neo_mcp.search import search_with_filters
+            from neo_mcp.llm import ask_with_context
 
         # Skip search for follow-up questions that use existing context
         context_docs = []
@@ -173,7 +173,7 @@ async def rag_ask(request: AskRequest):
         return JSONResponse(
             status_code=503,
             content={
-                "error": "RAG Q&A not available",
+                "error": "Neo Q&A not available",
                 "detail": str(e),
             }
         )
@@ -184,19 +184,19 @@ async def rag_ask(request: AskRequest):
         )
 
 
-@app.get("/api/rag-stats")
-async def rag_stats():
+@app.get("/api/neo-stats")
+async def neo_stats():
     """Get statistics about indexed data."""
     try:
         try:
             from ingest import get_collection_stats
         except ImportError:
-            from rag.ingest import get_collection_stats
+            from neo_mcp.ingest import get_collection_stats
         return {"collections": get_collection_stats()}
     except ImportError as e:
         return JSONResponse(
             status_code=503,
-            content={"error": "RAG not available", "detail": str(e)}
+            content={"error": "Neo not available", "detail": str(e)}
         )
     except Exception as e:
         return JSONResponse(
@@ -205,8 +205,8 @@ async def rag_stats():
         )
 
 
-@app.post("/api/rag-ingest")
-async def rag_ingest(
+@app.post("/api/neo-ingest")
+async def neo_ingest(
     secret: str = Query(..., description="Ingest secret key"),
     source: str = Query(None, description="Single source to ingest (patents, grants, researchers, policies, fda_calendar, portfolio). If not specified, ingests all."),
     reset: bool = Query(False, description="Reset all collections before ingesting"),
@@ -226,7 +226,7 @@ async def rag_ingest(
                                ingest_patents, ingest_grants, ingest_researchers,
                                ingest_policies, ingest_fda_calendar, ingest_portfolio)
         except ImportError:
-            from rag.ingest import (ingest_all, get_collection_stats, load_checkpoint,
+            from neo_mcp.ingest import (ingest_all, get_collection_stats, load_checkpoint,
                                     ingest_patents, ingest_grants, ingest_researchers,
                                     ingest_policies, ingest_fda_calendar, ingest_portfolio)
 
@@ -267,7 +267,7 @@ async def rag_ingest(
     except ImportError as e:
         return JSONResponse(
             status_code=503,
-            content={"error": "RAG not available", "detail": str(e)}
+            content={"error": "Neo not available", "detail": str(e)}
         )
     except Exception as e:
         # On error, include checkpoint info
@@ -275,7 +275,7 @@ async def rag_ingest(
             try:
                 from ingest import load_checkpoint, get_collection_stats
             except ImportError:
-                from rag.ingest import load_checkpoint, get_collection_stats
+                from neo_mcp.ingest import load_checkpoint, get_collection_stats
             checkpoint = load_checkpoint()
             stats = get_collection_stats()
             return JSONResponse(
@@ -294,14 +294,14 @@ async def rag_ingest(
             )
 
 
-@app.get("/api/rag-checkpoint")
-async def rag_checkpoint():
+@app.get("/api/neo-checkpoint")
+async def neo_checkpoint():
     """Get current ingestion checkpoint status."""
     try:
         try:
             from ingest import load_checkpoint
         except ImportError:
-            from rag.ingest import load_checkpoint
+            from neo_mcp.ingest import load_checkpoint
         return {"checkpoint": load_checkpoint()}
     except Exception as e:
         return JSONResponse(
@@ -310,14 +310,14 @@ async def rag_checkpoint():
         )
 
 
-@app.get("/api/rag-debug")
-async def rag_debug():
+@app.get("/api/neo-debug")
+async def neo_debug():
     """Debug endpoint to check if embeddings are stored correctly."""
     try:
         try:
             from embeddings import get_collection, COLLECTIONS
         except ImportError:
-            from rag.embeddings import get_collection, COLLECTIONS
+            from neo_mcp.embeddings import get_collection, COLLECTIONS
 
         debug_info = {}
         for source, name in COLLECTIONS.items():
@@ -380,7 +380,7 @@ async def neo_analyze(request: NeoAnalyzeRequest):
         try:
             from agent import run_agent
         except ImportError:
-            from rag.agent import run_agent
+            from neo_mcp.agent import run_agent
 
         result = run_agent(
             question=request.question,
@@ -435,7 +435,7 @@ async def neo_analyze_stream(request: NeoAnalyzeRequest):
         try:
             from agent import run_agent_streaming
         except ImportError:
-            from rag.agent import run_agent_streaming
+            from neo_mcp.agent import run_agent_streaming
 
         def event_generator():
             try:
@@ -482,7 +482,7 @@ async def neo_db_stats():
         try:
             from db import get_database_stats
         except ImportError:
-            from rag.db import get_database_stats
+            from neo_mcp.db import get_database_stats
 
         return {"databases": get_database_stats()}
 
@@ -508,7 +508,7 @@ async def neo_query(
         try:
             from db import execute_query
         except ImportError:
-            from rag.db import execute_query
+            from neo_mcp.db import execute_query
 
         result = execute_query(database, query)
         return result
@@ -532,5 +532,5 @@ async def neo_query(
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("RAG_PORT", 8001))
+    port = int(os.environ.get("NEO_PORT", 8001))
     uvicorn.run(app, host="0.0.0.0", port=port)

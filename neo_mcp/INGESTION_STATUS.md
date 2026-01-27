@@ -1,6 +1,6 @@
-# RAG Ingestion Status
+# Neo MCP Ingestion Status
 
-Last updated: 2026-01-26
+Last updated: 2026-01-27
 
 ## Collection Status
 
@@ -26,21 +26,21 @@ To get all ~242k researchers, need to either:
 ### Continue Grants Ingestion
 ```bash
 # Run this ~16 more times (or in a loop) to complete grants
-curl -X POST "https://kdtrag.up.railway.app/api/rag-ingest?secret=<SECRET>&source=grants&limit=2000"
+curl -X POST "https://kdtneo.up.railway.app/api/neo-ingest?secret=<SECRET>&source=grants&limit=2000"
 ```
 
 ### Check Current Stats
 ```bash
-curl "https://kdtrag.up.railway.app/api/rag-stats"
+curl "https://kdtneo.up.railway.app/api/neo-stats"
 ```
 
 ### Ingest Other Sources
 ```bash
 # Policies
-curl -X POST "https://kdtrag.up.railway.app/api/rag-ingest?secret=<SECRET>&source=policies"
+curl -X POST "https://kdtneo.up.railway.app/api/neo-ingest?secret=<SECRET>&source=policies"
 
 # FDA Calendar
-curl -X POST "https://kdtrag.up.railway.app/api/rag-ingest?secret=<SECRET>&source=fda_calendar"
+curl -X POST "https://kdtneo.up.railway.app/api/neo-ingest?secret=<SECRET>&source=fda_calendar"
 ```
 
 ## Notes
