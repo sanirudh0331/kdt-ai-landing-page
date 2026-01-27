@@ -321,6 +321,7 @@ def route_question(question: str) -> dict:
             "tier_name": "instant",
             "answer": result["answer"],
             "data": result["data"],
+            "entities": [],  # Tier 1 returns stats, not individual entities
             "needs_agent": False,
         }
     elif tier == 2:
