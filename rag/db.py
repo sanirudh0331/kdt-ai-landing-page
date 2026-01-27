@@ -1,9 +1,12 @@
 """
 Database layer for Neo SQL tools.
 Calls Railway services directly via HTTP - exactly like MCP does.
+Includes query caching to avoid repeated calls.
 """
 
 import os
+import time
+import hashlib
 import httpx
 from typing import Optional
 
@@ -19,8 +22,41 @@ SERVICE_URLS = {
 # Optional secret for SQL endpoints
 NEO_SQL_SECRET = os.environ.get("NEO_SQL_SECRET", "")
 
+# Query cache: {cache_key: {"result": ..., "timestamp": ...}}
+_query_cache = {}
+CACHE_TTL = 300  # 5 minutes
 
-def execute_query(db_name: str, query: str, limit: int = 100) -> dict:
+
+def _cache_key(db_name: str, query: str) -> str:
+    """Generate cache key from db name and query."""
+    normalized = f"{db_name}:{query.strip().lower()}"
+    return hashlib.md5(normalized.encode()).hexdigest()
+
+
+def _get_cached(key: str) -> Optional[dict]:
+    """Get cached result if not expired."""
+    if key in _query_cache:
+        entry = _query_cache[key]
+        if time.time() - entry["timestamp"] < CACHE_TTL:
+            return entry["result"]
+        else:
+            del _query_cache[key]
+    return None
+
+
+def _set_cached(key: str, result: dict):
+    """Cache a query result."""
+    # Limit cache size (simple LRU-ish: just clear if too big)
+    if len(_query_cache) > 100:
+        # Remove oldest half
+        sorted_keys = sorted(_query_cache.keys(), key=lambda k: _query_cache[k]["timestamp"])
+        for k in sorted_keys[:50]:
+            del _query_cache[k]
+
+    _query_cache[key] = {"result": result, "timestamp": time.time()}
+
+
+def execute_query(db_name: str, query: str, limit: int = 100, use_cache: bool = True) -> dict:
     """
     Execute a SELECT query against the specified database via HTTP.
 
@@ -31,6 +67,7 @@ def execute_query(db_name: str, query: str, limit: int = 100) -> dict:
         db_name: Which database to query (researchers, patents, grants, policies, portfolio)
         query: SQL SELECT query to execute
         limit: Maximum rows to return (default 100)
+        use_cache: Whether to use query caching (default True)
 
     Returns:
         dict with 'columns', 'rows', 'row_count'
@@ -47,20 +84,47 @@ def execute_query(db_name: str, query: str, limit: int = 100) -> dict:
         limit = min(limit, 500)
         query = f"{query.rstrip(';')} LIMIT {limit}"
 
-    try:
-        with httpx.Client(timeout=90) as client:  # 90s for large table queries
-            response = client.post(
-                url,
-                json={"query": query, "secret": NEO_SQL_SECRET},
-                headers={"Content-Type": "application/json"}
-            )
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        error_detail = e.response.json().get("detail", str(e)) if e.response.content else str(e)
-        raise ValueError(f"Query error: {error_detail}")
-    except Exception as e:
-        raise ValueError(f"Failed to query {db_name}: {str(e)}")
+    # Check cache first
+    if use_cache:
+        cache_key = _cache_key(db_name, query)
+        cached = _get_cached(cache_key)
+        if cached is not None:
+            return cached
+
+    # Execute query with retry on timeout
+    max_retries = 2
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            timeout = 90 if attempt == 0 else 120  # Longer timeout on retry
+            with httpx.Client(timeout=timeout) as client:
+                response = client.post(
+                    url,
+                    json={"query": query, "secret": NEO_SQL_SECRET},
+                    headers={"Content-Type": "application/json"}
+                )
+                response.raise_for_status()
+                result = response.json()
+
+                # Cache successful result
+                if use_cache:
+                    _set_cached(cache_key, result)
+
+                return result
+
+        except httpx.TimeoutException as e:
+            last_error = f"Query timed out (attempt {attempt + 1}/{max_retries})"
+            if attempt < max_retries - 1:
+                continue  # Retry
+            raise ValueError(f"Query timed out after {max_retries} attempts. Try a simpler query with more restrictive WHERE clauses.")
+
+        except httpx.HTTPStatusError as e:
+            error_detail = e.response.json().get("detail", str(e)) if e.response.content else str(e)
+            raise ValueError(f"Query error: {error_detail}")
+
+        except Exception as e:
+            raise ValueError(f"Failed to query {db_name}: {str(e)}")
 
 
 def list_tables(db_name: str) -> list[dict]:
@@ -97,6 +161,21 @@ def describe_table(db_name: str, table_name: str) -> list[dict]:
             return data.get("columns", [])
     except Exception as e:
         raise ValueError(f"Failed to describe {table_name} in {db_name}: {str(e)}")
+
+
+def clear_cache():
+    """Clear the query cache."""
+    global _query_cache
+    _query_cache = {}
+
+
+def get_cache_stats() -> dict:
+    """Get cache statistics."""
+    return {
+        "entries": len(_query_cache),
+        "max_entries": 100,
+        "ttl_seconds": CACHE_TTL,
+    }
 
 
 def get_database_stats() -> dict:
