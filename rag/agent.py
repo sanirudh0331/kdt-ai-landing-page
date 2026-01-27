@@ -1,6 +1,10 @@
 """
 Neo SQL Agent - Agentic loop with Claude tool use.
 This replicates the MCP experience: Claude reasons, calls tools, analyzes results, repeats.
+
+Now with:
+- Question routing (Tier 1/2/3) to skip LLM for simple queries
+- Semantic caching to reuse similar question answers
 """
 
 import os
@@ -12,9 +16,13 @@ import anthropic
 try:
     from db import execute_query, list_tables, describe_table
     from tools import TOOLS
+    from router import route_question
+    from semantic_cache import get_cached_response, cache_response
 except ImportError:
     from rag.db import execute_query, list_tables, describe_table
     from rag.tools import TOOLS
+    from rag.router import route_question
+    from rag.semantic_cache import get_cached_response, cache_response
 
 
 # System prompt for the SQL agent
@@ -29,9 +37,10 @@ Tables:
 - researchers: id, name, orcid, h_index, i10_index, works_count, cited_by_count, two_yr_citedness, slope (h-index growth rate), topics (JSON text), affiliations (JSON text), primary_category
 - h_index_history: researcher_id, year, h_index
 - topic_categories: topic_name, category
+- hidden_gems: 2,000 pre-computed "hidden gem" researchers (slope > 3, h_index 20-60) - USE THIS for rising star queries!
 
 KEY INDEXES: h_index, slope, primary_category, name
-For "rising stars": ORDER BY slope DESC (high slope = fast h-index growth)
+For "rising stars" or "hidden gems": Query hidden_gems table first (instant), or ORDER BY slope DESC
 For topics: WHERE topics LIKE '%keyword%' (it's JSON stored as text)
 
 ### patents (2,400 patents, 24 portfolio companies)
@@ -141,6 +150,8 @@ def run_agent(
     model: str = None,
     max_turns: int = None,
     conversation_history: list = None,
+    skip_cache: bool = False,
+    skip_router: bool = False,
 ) -> dict:
     """
     Run the Neo SQL agent to answer a question.
@@ -150,10 +161,43 @@ def run_agent(
         model: Claude model to use (default: claude-sonnet-4-20250514)
         max_turns: Maximum tool use iterations (default: 15)
         conversation_history: Optional previous messages for context
+        skip_cache: Skip semantic cache lookup (default: False)
+        skip_router: Skip question router, always use full agent (default: False)
 
     Returns:
         dict with 'answer', 'tool_calls', 'insights', 'model', 'turns_used'
     """
+    # STEP 1: Check question router (Tier 1/2 questions don't need LLM)
+    if not skip_router and not conversation_history:
+        routed = route_question(question)
+        if not routed["needs_agent"]:
+            return {
+                "answer": routed["answer"],
+                "tool_calls": [],
+                "insights": [],
+                "model": None,
+                "turns_used": 0,
+                "tier": routed["tier"],
+                "tier_name": routed["tier_name"],
+                "routed": True,
+            }
+
+    # STEP 2: Check semantic cache for similar questions
+    if not skip_cache and not conversation_history:
+        cached = get_cached_response(question)
+        if cached:
+            return {
+                "answer": cached["answer"],
+                "tool_calls": cached.get("tool_calls", []),
+                "insights": cached.get("insights", []),
+                "model": None,
+                "turns_used": 0,
+                "cached": True,
+                "similarity": cached.get("similarity"),
+                "original_question": cached.get("original_question"),
+            }
+
+    # STEP 3: Full agent (Tier 3)
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return {
@@ -210,12 +254,18 @@ def run_agent(
                 if hasattr(block, "text"):
                     final_text += block.text
 
+            # Cache successful response for future similar questions
+            if not skip_cache and not conversation_history and final_text:
+                cache_response(question, final_text, all_tool_calls, insights)
+
             return {
                 "answer": final_text,
                 "tool_calls": all_tool_calls,
                 "insights": insights,
                 "model": model,
                 "turns_used": turns_used,
+                "tier": 3,
+                "tier_name": "agent",
             }
 
         elif response.stop_reason == "tool_use":
