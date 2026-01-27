@@ -41,6 +41,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+@app.on_event("startup")
+async def startup_event():
+    """Sync databases from Railway services at startup."""
+    try:
+        try:
+            from fetch_databases import fetch_all_databases
+        except ImportError:
+            from rag.fetch_databases import fetch_all_databases
+
+        # Run database sync (skips if databases exist and are fresh)
+        fetch_all_databases(force=False)
+    except Exception as e:
+        print(f"Warning: Database sync failed at startup: {e}")
+        print("Neo SQL agent may not have data until databases are synced.")
+
 # CORS for landing page
 app.add_middleware(
     CORSMiddleware,
