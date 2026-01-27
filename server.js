@@ -584,6 +584,48 @@ app.post('/api/rag-ask', async (req, res) => {
     }
 });
 
+// Neo SQL Agent proxy - Direct database access with agentic reasoning
+app.post('/api/neo-analyze', async (req, res) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for multi-step analysis
+
+    try {
+        const response = await fetch(`${RAG_SERVICE_URL}/api/neo-analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(req.body),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'Neo agent error' }));
+            return res.status(response.status).json(error);
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        clearTimeout(timeout);
+        console.error('Neo analyze proxy error:', error.message);
+
+        if (error.name === 'AbortError') {
+            res.status(504).json({
+                error: 'Request timeout',
+                detail: 'The analysis took too long. Try a simpler question.'
+            });
+        } else {
+            res.status(503).json({
+                error: 'Neo SQL agent unavailable',
+                detail: 'The database service is not running.'
+            });
+        }
+    }
+});
+
 app.get('/api/rag-stats', async (req, res) => {
     try {
         const response = await fetch(`${RAG_SERVICE_URL}/api/rag-stats`, {
