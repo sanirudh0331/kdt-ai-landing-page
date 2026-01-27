@@ -117,13 +117,14 @@ TIER1_PATTERNS = [
 ]
 
 # Tier 2: Parameterized queries (fast, template-based)
+# NOTE: All queries MUST include 'id' column for entity linking
 TIER2_PATTERNS = [
     # Rising stars / hidden gems in a field
     (
         r"(rising stars?|hidden gems?|fast[- ]?growing).*(?:in|for|about) (?P<field>[a-zA-Z]+)",
         "researchers",
         lambda m: f"""
-            SELECT name, h_index, slope, primary_category, affiliations
+            SELECT id, name, h_index, slope, primary_category, affiliations
             FROM researchers
             WHERE slope > 3 AND h_index BETWEEN 20 AND 60
               AND (topics LIKE '%{m.group('field')}%' OR primary_category LIKE '%{m.group('field')}%')
@@ -136,7 +137,7 @@ TIER2_PATTERNS = [
         r"top (?P<n>\d+)? ?researchers?.*(?:in|for|about) (?P<field>[a-zA-Z]+)",
         "researchers",
         lambda m: f"""
-            SELECT name, h_index, slope, primary_category, affiliations
+            SELECT id, name, h_index, slope, primary_category, affiliations
             FROM researchers
             WHERE topics LIKE '%{m.group('field')}%' OR primary_category LIKE '%{m.group('field')}%'
             ORDER BY h_index DESC LIMIT {m.group('n') or 10}
@@ -148,7 +149,7 @@ TIER2_PATTERNS = [
         r"patents?.*(for |from |by )?(?P<company>\w+)",
         "patents",
         lambda m: f"""
-            SELECT title, patent_number, filing_date, assignee
+            SELECT id, title, patent_number, filing_date, assignee
             FROM patents
             WHERE assignee LIKE '%{m.group('company')}%' OR title LIKE '%{m.group('company')}%'
             ORDER BY filing_date DESC LIMIT 10
@@ -160,7 +161,7 @@ TIER2_PATTERNS = [
         r"grants?.*(in |for |about )?(?P<field>\w+)",
         "grants",
         lambda m: f"""
-            SELECT title, total_cost, institute, fiscal_year
+            SELECT id, title, total_cost, institute, fiscal_year
             FROM grants
             WHERE title LIKE '%{m.group('field')}%' OR abstract LIKE '%{m.group('field')}%'
             ORDER BY total_cost DESC LIMIT 10
@@ -172,7 +173,7 @@ TIER2_PATTERNS = [
         r"(what is|tell me about|info on) (?P<company>\w+)",
         "portfolio",
         lambda m: f"""
-            SELECT name, modality, competitive_advantage, indications
+            SELECT id, name, modality, competitive_advantage, indications
             FROM companies
             WHERE name LIKE '%{m.group('company')}%'
             LIMIT 1
