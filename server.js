@@ -516,7 +516,7 @@ app.get('/api/fda-calendar', async (req, res) => {
 });
 
 // RAG Search proxy - forwards to Python FastAPI service
-const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || 'http://localhost:8001';
+const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || 'https://kdtrag.up.railway.app';
 
 app.get('/api/rag-search', async (req, res) => {
     try {
