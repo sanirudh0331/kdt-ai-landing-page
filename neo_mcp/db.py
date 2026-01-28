@@ -206,7 +206,7 @@ def get_database_stats() -> dict:
 
 
 # SEC Sentinel service URL
-SEC_SENTINEL_URL = os.environ.get("SEC_SENTINEL_URL", "https://sec-sentinel-production.up.railway.app")
+SEC_SENTINEL_URL = os.environ.get("SEC_SENTINEL_URL", "https://secsentinel.up.railway.app")
 
 
 # =============================================================================
