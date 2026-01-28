@@ -5,6 +5,7 @@ Includes query caching to avoid repeated calls.
 """
 
 import os
+import json
 import time
 import hashlib
 import httpx
@@ -202,6 +203,588 @@ def get_database_stats() -> dict:
             stats[db_name] = {"available": False, "error": str(e)}
 
     return stats
+
+
+# SEC Sentinel service URL
+SEC_SENTINEL_URL = os.environ.get("SEC_SENTINEL_URL", "https://sec-sentinel-production.up.railway.app")
+
+
+# =============================================================================
+# SEC SENTINEL SEMANTIC FUNCTIONS
+# =============================================================================
+
+def get_sec_filings(
+    ticker: str = None,
+    form_type: str = None,
+    days: int = 30,
+    runway_status: str = None
+) -> dict:
+    """Get SEC filings with optional filters and runway context."""
+    params = {"days": days}
+    if ticker:
+        params["ticker"] = ticker
+    if form_type:
+        params["form_type"] = form_type
+    if runway_status:
+        params["runway_status"] = runway_status
+
+    cache_key = _cache_key("sec", f"filings:{json.dumps(params, sort_keys=True)}")
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            response = client.get(f"{SEC_SENTINEL_URL}/api/semantic/filings", params=params)
+            response.raise_for_status()
+            result = response.json()
+            _set_cached(cache_key, result)
+            return result
+    except Exception as e:
+        return {"error": str(e), "filings": [], "count": 0}
+
+
+def get_companies_by_runway(
+    max_months: float = None,
+    min_months: float = 0,
+    limit: int = 50
+) -> dict:
+    """Get companies sorted by runway status."""
+    params = {"min_months": min_months, "limit": limit}
+    if max_months:
+        params["max_months"] = max_months
+
+    cache_key = _cache_key("sec", f"runway:{json.dumps(params, sort_keys=True)}")
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            response = client.get(f"{SEC_SENTINEL_URL}/api/semantic/runway", params=params)
+            response.raise_for_status()
+            result = response.json()
+            _set_cached(cache_key, result)
+            return result
+    except Exception as e:
+        return {"error": str(e), "companies": [], "count": 0}
+
+
+def get_insider_transactions(
+    ticker: str = None,
+    insider_role: str = None,
+    transaction_type: str = None,
+    days: int = 90,
+    min_value: float = 0
+) -> dict:
+    """Get insider transactions with runway context."""
+    params = {"days": days}
+    if ticker:
+        params["ticker"] = ticker
+    if insider_role:
+        params["insider_role"] = insider_role
+    if transaction_type:
+        params["transaction_type"] = transaction_type
+    if min_value:
+        params["min_value"] = min_value
+
+    cache_key = _cache_key("sec", f"insider:{json.dumps(params, sort_keys=True)}")
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            response = client.get(f"{SEC_SENTINEL_URL}/api/semantic/insider", params=params)
+            response.raise_for_status()
+            result = response.json()
+            _set_cached(cache_key, result)
+            return result
+    except Exception as e:
+        return {"error": str(e), "transactions": [], "count": 0}
+
+
+def get_runway_alerts() -> dict:
+    """Get runway distress alerts."""
+    cache_key = _cache_key("sec", "runway_alerts")
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        with httpx.Client(timeout=30) as client:
+            response = client.get(f"{SEC_SENTINEL_URL}/api/semantic/alerts")
+            response.raise_for_status()
+            result = response.json()
+            _set_cached(cache_key, result)
+            return result
+    except Exception as e:
+        return {"error": str(e), "critical_runway": [], "recent_s3_filings": [], "insider_sells_at_risk": []}
+
+
+# =============================================================================
+# SEMANTIC FUNCTIONS - Structured, validated queries with business context
+# =============================================================================
+
+def get_researchers(
+    min_h_index: int = None,
+    topic: str = None,
+    affiliation: str = None,
+    limit: int = 20
+) -> dict:
+    """Find researchers with optional filters."""
+    conditions = []
+    if min_h_index:
+        conditions.append(f"h_index >= {int(min_h_index)}")
+    if topic:
+        conditions.append(f"topics LIKE '%{topic}%'")
+    if affiliation:
+        conditions.append(f"affiliations LIKE '%{affiliation}%'")
+
+    where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+    query = f"""
+        SELECT id, name, h_index, slope, affiliations, topics, primary_category,
+               works_count, cited_by_count
+        FROM researchers
+        WHERE {where_clause}
+        ORDER BY h_index DESC
+        LIMIT {int(limit)}
+    """
+    return execute_query("researchers", query)
+
+
+def get_researcher_profile(name: str) -> dict:
+    """Get detailed profile for a specific researcher."""
+    # Get researcher basic info
+    query = f"""
+        SELECT r.*,
+               (SELECT GROUP_CONCAT(year || ':' || h_index, ', ')
+                FROM h_index_history
+                WHERE researcher_id = r.id
+                ORDER BY year DESC
+                LIMIT 10) as recent_history
+        FROM researchers r
+        WHERE r.name LIKE '%{name}%'
+        LIMIT 5
+    """
+    result = execute_query("researchers", query)
+
+    if result.get("rows"):
+        # Add trajectory analysis
+        for row in result["rows"]:
+            slope = row.get("slope", 0) or 0
+            h_index = row.get("h_index", 0) or 0
+            if slope > 3 and h_index < 60:
+                row["trajectory"] = "Rising Star - fast-growing impact"
+            elif slope > 1.5:
+                row["trajectory"] = "Growing - strong upward trend"
+            elif slope > 0:
+                row["trajectory"] = "Stable - steady output"
+            else:
+                row["trajectory"] = "Established - mature career"
+
+    return result
+
+
+def get_rising_stars(
+    min_slope: float = 2.0,
+    min_h_index: int = 15,
+    max_h_index: int = 80,
+    topic: str = None,
+    limit: int = 20
+) -> dict:
+    """Find researchers with fast-growing h-index."""
+    topic_filter = f"AND topics LIKE '%{topic}%'" if topic else ""
+
+    query = f"""
+        SELECT id, name, h_index, slope, affiliations, topics, primary_category
+        FROM researchers
+        WHERE slope >= {float(min_slope)}
+          AND h_index >= {int(min_h_index)}
+          AND h_index <= {int(max_h_index)}
+          {topic_filter}
+        ORDER BY slope DESC
+        LIMIT {int(limit)}
+    """
+    result = execute_query("researchers", query)
+
+    # Add context about what rising stars means
+    result["_context"] = {
+        "description": "Rising stars are researchers with h-index growth rate above peers",
+        "criteria": f"slope >= {min_slope}, h-index {min_h_index}-{max_h_index}",
+        "insight": "High slope indicates rapid career growth - good candidates for collaboration or hiring"
+    }
+    return result
+
+
+def get_researchers_by_topic(topic: str, limit: int = 20) -> dict:
+    """Find top researchers in a specific topic area."""
+    query = f"""
+        SELECT id, name, h_index, slope, affiliations, topics, primary_category
+        FROM researchers
+        WHERE topics LIKE '%{topic}%'
+        ORDER BY h_index DESC
+        LIMIT {int(limit)}
+    """
+    result = execute_query("researchers", query)
+    result["_context"] = {
+        "topic": topic,
+        "insight": f"Top researchers by h-index in {topic}"
+    }
+    return result
+
+
+def get_patents(
+    assignee: str = None,
+    inventor: str = None,
+    cpc_code: str = None,
+    days: int = None,
+    keyword: str = None,
+    limit: int = 20
+) -> dict:
+    """Search patents with filters."""
+    conditions = []
+    joins = ""
+
+    if assignee:
+        conditions.append(f"p.primary_assignee LIKE '%{assignee}%'")
+    if inventor:
+        joins = "JOIN inventors i ON p.id = i.patent_id"
+        conditions.append(f"i.name LIKE '%{inventor}%'")
+    if cpc_code:
+        conditions.append(f"p.cpc_codes LIKE '%{cpc_code}%'")
+    if days:
+        conditions.append(f"p.grant_date >= date('now', '-{int(days)} days')")
+    if keyword:
+        conditions.append(f"(p.title LIKE '%{keyword}%' OR p.abstract LIKE '%{keyword}%')")
+
+    where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+    query = f"""
+        SELECT DISTINCT p.id, p.patent_number, p.title, p.grant_date, p.filing_date,
+               p.primary_assignee, p.cpc_codes, p.claims_count
+        FROM patents p
+        {joins}
+        WHERE {where_clause}
+        ORDER BY p.grant_date DESC
+        LIMIT {int(limit)}
+    """
+    return execute_query("patents", query)
+
+
+def get_patent_portfolio(assignee: str) -> dict:
+    """Get patent portfolio summary for a company."""
+    # Get patent count and list
+    patents_query = f"""
+        SELECT id, patent_number, title, grant_date, cpc_codes, claims_count
+        FROM patents
+        WHERE primary_assignee LIKE '%{assignee}%'
+        ORDER BY grant_date DESC
+        LIMIT 50
+    """
+    patents_result = execute_query("patents", patents_query)
+
+    # Get summary stats
+    stats_query = f"""
+        SELECT
+            COUNT(*) as total_patents,
+            MIN(grant_date) as earliest_patent,
+            MAX(grant_date) as latest_patent,
+            AVG(claims_count) as avg_claims
+        FROM patents
+        WHERE primary_assignee LIKE '%{assignee}%'
+    """
+    stats_result = execute_query("patents", stats_query)
+
+    return {
+        "assignee": assignee,
+        "summary": stats_result.get("rows", [{}])[0] if stats_result.get("rows") else {},
+        "patents": patents_result.get("rows", []),
+        "row_count": patents_result.get("row_count", 0),
+        "_context": {
+            "insight": f"Patent portfolio analysis for {assignee}"
+        }
+    }
+
+
+def get_inventors_by_company(assignee: str, limit: int = 20) -> dict:
+    """Get top inventors at a company."""
+    query = f"""
+        SELECT i.name, COUNT(*) as patent_count,
+               GROUP_CONCAT(DISTINCT p.cpc_codes) as technology_areas
+        FROM inventors i
+        JOIN patents p ON i.patent_id = p.id
+        WHERE p.primary_assignee LIKE '%{assignee}%'
+        GROUP BY i.name
+        ORDER BY patent_count DESC
+        LIMIT {int(limit)}
+    """
+    result = execute_query("patents", query)
+    result["_context"] = {
+        "assignee": assignee,
+        "insight": f"Prolific inventors at {assignee} - potential key personnel"
+    }
+    return result
+
+
+def search_patents_by_topic(keywords: str, limit: int = 20) -> dict:
+    """Search patents by technology topic."""
+    query = f"""
+        SELECT id, patent_number, title, grant_date, primary_assignee, cpc_codes, abstract
+        FROM patents
+        WHERE title LIKE '%{keywords}%' OR abstract LIKE '%{keywords}%'
+        ORDER BY grant_date DESC
+        LIMIT {int(limit)}
+    """
+    result = execute_query("patents", query)
+    result["_context"] = {
+        "keywords": keywords,
+        "insight": f"Patent landscape for '{keywords}'"
+    }
+    return result
+
+
+def get_grants(
+    organization: str = None,
+    pi_name: str = None,
+    mechanism: str = None,
+    min_amount: int = None,
+    institute: str = None,
+    keyword: str = None,
+    limit: int = 20
+) -> dict:
+    """Search grants with filters."""
+    conditions = []
+    joins = ""
+
+    if organization:
+        conditions.append(f"g.organization LIKE '%{organization}%'")
+    if pi_name:
+        joins = "JOIN principal_investigators pi ON g.id = pi.grant_id"
+        conditions.append(f"pi.name LIKE '%{pi_name}%'")
+    if mechanism:
+        conditions.append(f"g.mechanism LIKE '%{mechanism}%'")
+    if min_amount:
+        conditions.append(f"g.total_cost >= {int(min_amount)}")
+    if institute:
+        conditions.append(f"g.institute LIKE '%{institute}%'")
+    if keyword:
+        conditions.append(f"(g.title LIKE '%{keyword}%' OR g.abstract LIKE '%{keyword}%')")
+
+    where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+    query = f"""
+        SELECT DISTINCT g.id, g.title, g.organization, g.mechanism, g.institute,
+               g.total_cost, g.start_date, g.end_date, g.fiscal_year
+        FROM grants g
+        {joins}
+        WHERE {where_clause}
+        ORDER BY g.total_cost DESC
+        LIMIT {int(limit)}
+    """
+    return execute_query("grants", query)
+
+
+def get_funding_summary(organization: str) -> dict:
+    """Get funding summary for an organization."""
+    # Total funding
+    total_query = f"""
+        SELECT
+            COUNT(*) as grant_count,
+            SUM(total_cost) as total_funding,
+            AVG(total_cost) as avg_grant_size,
+            MIN(start_date) as earliest_grant,
+            MAX(start_date) as latest_grant
+        FROM grants
+        WHERE organization LIKE '%{organization}%'
+    """
+    total_result = execute_query("grants", total_query)
+
+    # By mechanism
+    mechanism_query = f"""
+        SELECT mechanism, COUNT(*) as count, SUM(total_cost) as funding
+        FROM grants
+        WHERE organization LIKE '%{organization}%'
+        GROUP BY mechanism
+        ORDER BY funding DESC
+        LIMIT 10
+    """
+    mechanism_result = execute_query("grants", mechanism_query)
+
+    # Top grants
+    top_query = f"""
+        SELECT id, title, mechanism, total_cost, start_date
+        FROM grants
+        WHERE organization LIKE '%{organization}%'
+        ORDER BY total_cost DESC
+        LIMIT 10
+    """
+    top_result = execute_query("grants", top_query)
+
+    return {
+        "organization": organization,
+        "summary": total_result.get("rows", [{}])[0] if total_result.get("rows") else {},
+        "by_mechanism": mechanism_result.get("rows", []),
+        "top_grants": top_result.get("rows", []),
+        "_context": {
+            "insight": f"Research funding analysis for {organization}"
+        }
+    }
+
+
+def get_pis_by_organization(organization: str, limit: int = 20) -> dict:
+    """Get principal investigators at an organization."""
+    query = f"""
+        SELECT pi.name, COUNT(*) as grant_count, SUM(g.total_cost) as total_funding
+        FROM principal_investigators pi
+        JOIN grants g ON pi.grant_id = g.id
+        WHERE g.organization LIKE '%{organization}%'
+        GROUP BY pi.name
+        ORDER BY total_funding DESC
+        LIMIT {int(limit)}
+    """
+    result = execute_query("grants", query)
+    result["_context"] = {
+        "organization": organization,
+        "insight": f"Top-funded researchers at {organization}"
+    }
+    return result
+
+
+def get_grants_by_topic(keywords: str, limit: int = 20) -> dict:
+    """Search grants by research topic."""
+    query = f"""
+        SELECT id, title, organization, mechanism, institute, total_cost, start_date
+        FROM grants
+        WHERE title LIKE '%{keywords}%' OR abstract LIKE '%{keywords}%'
+        ORDER BY total_cost DESC
+        LIMIT {int(limit)}
+    """
+    result = execute_query("grants", query)
+    result["_context"] = {
+        "keywords": keywords,
+        "insight": f"Research funding landscape for '{keywords}'"
+    }
+    return result
+
+
+def search_entity(name: str) -> dict:
+    """Search for an entity across all databases."""
+    results = {
+        "query": name,
+        "found_in": [],
+        "details": {}
+    }
+
+    # Check entity_links table first
+    links_query = f"""
+        SELECT * FROM entity_links
+        WHERE canonical_name LIKE '%{name}%'
+           OR aliases LIKE '%{name}%'
+           OR patent_assignee_name LIKE '%{name}%'
+           OR grant_org_name LIKE '%{name}%'
+        LIMIT 5
+    """
+    try:
+        links = execute_query("grants", links_query)
+        if links.get("rows"):
+            results["entity_links"] = links["rows"]
+    except:
+        pass
+
+    # Search patents
+    try:
+        patents = execute_query("patents", f"""
+            SELECT COUNT(*) as count FROM patents
+            WHERE primary_assignee LIKE '%{name}%'
+        """)
+        if patents.get("rows") and patents["rows"][0].get("count", 0) > 0:
+            results["found_in"].append("patents")
+            results["details"]["patents"] = {
+                "count": patents["rows"][0]["count"],
+                "type": "assignee"
+            }
+    except:
+        pass
+
+    # Search grants
+    try:
+        grants = execute_query("grants", f"""
+            SELECT COUNT(*) as count, SUM(total_cost) as total_funding
+            FROM grants WHERE organization LIKE '%{name}%'
+        """)
+        if grants.get("rows") and grants["rows"][0].get("count", 0) > 0:
+            results["found_in"].append("grants")
+            results["details"]["grants"] = {
+                "count": grants["rows"][0]["count"],
+                "total_funding": grants["rows"][0].get("total_funding", 0)
+            }
+    except:
+        pass
+
+    # Search researchers (by affiliation)
+    try:
+        researchers = execute_query("researchers", f"""
+            SELECT COUNT(*) as count FROM researchers
+            WHERE affiliations LIKE '%{name}%'
+        """)
+        if researchers.get("rows") and researchers["rows"][0].get("count", 0) > 0:
+            results["found_in"].append("researchers")
+            results["details"]["researchers"] = {
+                "affiliated_count": researchers["rows"][0]["count"]
+            }
+    except:
+        pass
+
+    results["_context"] = {
+        "insight": f"Cross-database search for '{name}'"
+    }
+    return results
+
+
+def get_company_profile(name: str) -> dict:
+    """Get unified company profile from all databases."""
+    profile = {
+        "name": name,
+        "patents": None,
+        "grants": None,
+        "researchers": None,
+        "_context": {}
+    }
+
+    # Get patent data
+    try:
+        profile["patents"] = get_patent_portfolio(name)
+    except Exception as e:
+        profile["patents"] = {"error": str(e)}
+
+    # Get grant data
+    try:
+        profile["grants"] = get_funding_summary(name)
+    except Exception as e:
+        profile["grants"] = {"error": str(e)}
+
+    # Get affiliated researchers
+    try:
+        researchers = execute_query("researchers", f"""
+            SELECT id, name, h_index, slope, primary_category
+            FROM researchers
+            WHERE affiliations LIKE '%{name}%'
+            ORDER BY h_index DESC
+            LIMIT 10
+        """)
+        profile["researchers"] = {
+            "top_researchers": researchers.get("rows", []),
+            "count": len(researchers.get("rows", []))
+        }
+    except Exception as e:
+        profile["researchers"] = {"error": str(e)}
+
+    profile["_context"] = {
+        "insight": f"360-degree view of {name} across patents, grants, and researchers"
+    }
+    return profile
 
 
 if __name__ == "__main__":

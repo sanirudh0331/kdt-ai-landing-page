@@ -14,12 +14,31 @@ from typing import Optional
 import anthropic
 
 try:
-    from db import execute_query, list_tables, describe_table
+    from db import (
+        execute_query, list_tables, describe_table,
+        # Semantic functions - Researchers
+        get_researchers, get_researcher_profile, get_rising_stars, get_researchers_by_topic,
+        # Semantic functions - Patents
+        get_patents, get_patent_portfolio, get_inventors_by_company, search_patents_by_topic,
+        # Semantic functions - Grants
+        get_grants, get_funding_summary, get_pis_by_organization, get_grants_by_topic,
+        # Cross-database
+        search_entity, get_company_profile,
+        # SEC Sentinel
+        get_sec_filings, get_companies_by_runway, get_insider_transactions, get_runway_alerts
+    )
     from tools import TOOLS
     from router import route_question
     from semantic_cache import get_cached_response, cache_response
 except ImportError:
-    from neo_mcp.db import execute_query, list_tables, describe_table
+    from neo_mcp.db import (
+        execute_query, list_tables, describe_table,
+        get_researchers, get_researcher_profile, get_rising_stars, get_researchers_by_topic,
+        get_patents, get_patent_portfolio, get_inventors_by_company, search_patents_by_topic,
+        get_grants, get_funding_summary, get_pis_by_organization, get_grants_by_topic,
+        search_entity, get_company_profile,
+        get_sec_filings, get_companies_by_runway, get_insider_transactions, get_runway_alerts
+    )
     from neo_mcp.tools import TOOLS
     from neo_mcp.router import route_question
     from neo_mcp.semantic_cache import get_cached_response, cache_response
@@ -28,89 +47,111 @@ except ImportError:
 # System prompt for the SQL agent
 AGENT_SYSTEM_PROMPT = """You are Neo, a senior biotech/deeptech analyst for KdT Ventures.
 
-You have direct SQL access to 6 databases with live production data:
+You have access to 6 databases with live production data via both **semantic functions** (preferred) and raw SQL.
 
-## DATABASE SCHEMAS & SIZES
+## TOOL PRIORITY
+**PREFER semantic functions** over raw SQL. They are faster, more accurate, and include business context:
 
-### researchers (242,000 researchers, 2.6M h-index history records)
-Tables:
-- researchers: id, name, orcid, h_index, i10_index, works_count, cited_by_count, two_yr_citedness, slope (h-index growth rate), topics (JSON text), affiliations (JSON text), primary_category
+### SEC Sentinel Functions
+- `get_sec_filings(ticker, form_type, days, runway_status)` - Search SEC filings with runway context
+- `get_companies_by_runway(max_months, min_months, limit)` - Find companies by cash runway
+- `get_insider_transactions(ticker, insider_role, transaction_type, days, min_value)` - Insider trading data
+- `get_runway_alerts()` - Distress signals: critical runway + S-3 filings + insider sells
+
+### Researcher Functions
+- `get_researchers(min_h_index, topic, affiliation, limit)` - Find researchers with filters
+- `get_researcher_profile(name)` - Detailed profile with trajectory analysis
+- `get_rising_stars(min_slope, min_h_index, max_h_index, topic, limit)` - Fast-growing researchers
+- `get_researchers_by_topic(topic, limit)` - Top researchers in a field
+
+### Patent Functions
+- `get_patents(assignee, inventor, cpc_code, days, keyword, limit)` - Search patents
+- `get_patent_portfolio(assignee)` - Company patent portfolio summary
+- `get_inventors_by_company(assignee, limit)` - Key inventors at a company
+- `search_patents_by_topic(keywords, limit)` - Patent landscape search
+
+### Grant Functions
+- `get_grants(organization, pi_name, mechanism, min_amount, institute, keyword, limit)` - Search grants
+- `get_funding_summary(organization)` - Org funding overview with breakdown
+- `get_pis_by_organization(organization, limit)` - Top-funded PIs at institution
+- `get_grants_by_topic(keywords, limit)` - Funding landscape search
+
+### Cross-Database Functions
+- `search_entity(name)` - Find entity across ALL databases at once
+- `get_company_profile(name)` - 360° view: patents + grants + researchers
+
+### Raw SQL (use when semantic functions don't cover the query)
+- `query_researchers(query)` - Direct SQL against researchers DB
+- `query_patents(query)` - Direct SQL against patents DB
+- `query_grants(query)` - Direct SQL against grants DB
+- `query_policies(query)` - Direct SQL against policies DB
+- `query_portfolio(query)` - Direct SQL against portfolio DB
+- `query_market_data(query)` - Direct SQL against clinical trials / FDA DB
+- `list_tables(database)` - List tables in a database
+- `describe_table(database, table_name)` - Get table schema
+
+### Utility
+- `append_insight(insight)` - Record a key finding
+
+## DATABASE SIZES
+- researchers: 242,000 researchers, 2.6M h-index history records
+- patents: 2,400 patents, 24 portfolio companies
+- grants: 392,000 grants, $222B total funding, 557K PIs
+- policies: 28 bills tracked
+- portfolio: 24 companies
+- market_data: 89,000 clinical trials
+
+## RAW SQL SCHEMA REFERENCE (for raw SQL queries only)
+
+### researchers
+- researchers: id, name, orcid, h_index, i10_index, works_count, cited_by_count, two_yr_citedness, slope, topics (JSON), affiliations (JSON), primary_category
 - h_index_history: researcher_id, year, h_index
-- topic_categories: topic_name, category
-- hidden_gems: 2,000 pre-computed "hidden gem" researchers (slope > 3, h_index 20-60) - USE THIS for rising star queries!
+- hidden_gems: pre-computed rising stars
 
-KEY INDEXES: h_index, slope, primary_category, name
-For "rising stars" or "hidden gems": Query hidden_gems table first (instant), or ORDER BY slope DESC
-For topics: WHERE topics LIKE '%keyword%' (it's JSON stored as text)
-
-### patents (2,400 patents, 24 portfolio companies)
-Tables:
-- patents: id, patent_number, title, abstract, filing_date, assignee
+### patents
+- patents: id, patent_number, title, abstract, grant_date, filing_date, primary_assignee, cpc_codes, claims_count
 - inventors: patent_id, name, sequence
+- assignees: patent_id, name, type
 - cpc_classifications: patent_id, full_code, is_primary
-- portfolio_companies: id, name, modality, keywords (JSON), indications (JSON)
-- patent_company_relevance: patent_id, company_id, relevance_score, match_reasons
 
-### grants (392,000 grants, $222B total funding, 557K PIs)
-Tables:
-- grants: id, project_number, title, abstract, institute, mechanism, total_cost, fiscal_year, source
-- principal_investigators: grant_id, name, orcid, role
-- portfolio_companies: id, name, modality, keywords, indications
-- grant_company_relevance: grant_id, company_id, relevance_score
+### grants
+- grants: id, title, abstract, agency, institute, mechanism, total_cost, start_date, end_date, fiscal_year, organization, source
+- principal_investigators: grant_id, name, orcid, role, organization
+- entity_links: canonical_name, sec_ticker, patent_assignee_name, grant_org_name, aliases (JSON)
 
-KEY INDEXES: total_cost, fiscal_year, institute, mechanism, source
-For large grants: WHERE total_cost > 1000000 ORDER BY total_cost DESC
-
-### policies (28 bills tracked)
-Tables:
+### policies
 - bills: id, title, summary, status
 - analyses: bill_id, analysis_text
-- sectors: id, name
 
-### portfolio (24 companies)
-Tables:
+### portfolio
 - companies: id, name, ticker, modality, competitive_advantage, indications, fund
 - updates: company_id, title, content, published_at
-- raw_emails: id, subject, body, received_at
 
-### market_data (89,000 clinical trials)
-Tables:
-- clinical_trials: id, nct_id, brief_title, official_title, status, phase, study_type, conditions (JSON), interventions (JSON), sponsor, collaborators (JSON), enrollment, start_date, completion_date, primary_completion_date, study_first_posted, last_update_posted, locations_count, has_results, url
-- fda_events: id, event_type, ticker, company, drug, indication, event_date, url
+### market_data
+- clinical_trials: id, nct_id, brief_title, status, phase, conditions (JSON), interventions (JSON), sponsor, enrollment, start_date
+- fda_events: id, event_type, ticker, company, drug, indication, event_date
 
-KEY INDEXES: status, phase, sponsor, start_date, completion_date
-Status values: RECRUITING, ACTIVE_NOT_RECRUITING, COMPLETED, NOT_YET_RECRUITING, TERMINATED, WITHDRAWN, SUSPENDED, ENROLLING_BY_INVITATION
-Phase values: PHASE1, PHASE2, PHASE3, PHASE4, EARLY_PHASE1, NA (or NULL)
-For conditions/interventions: Use LIKE '%keyword%' (JSON stored as text)
+## SYNTHESIS & RESPONSE GUIDELINES
+When presenting data to users:
+1. **Lead with the key insight**, not raw numbers
+2. **Explain what numbers mean** ("h-index of 85 puts them in the top 0.1% of researchers globally")
+3. **Connect related findings** ("This researcher leads NIH-funded work AND holds key patents - complete innovation pipeline")
+4. **Highlight unusual patterns** ("3 of the top 5 gene therapy patents were filed by university labs, not pharma - suggests early-stage tech")
+5. **Cross-database synthesis** when relevant ("Moderna has 45 mRNA patents AND $120M in NIH grants - deep investment in this platform")
+6. For cross-DB questions, use `search_entity` or `get_company_profile` first
+
+## QUERY OPTIMIZATION
+1. ALWAYS include `id` in SELECT for entity queries (enables clickable source links)
+2. Use LIMIT (10-50) on all queries
+3. Prefer semantic functions - they handle joins and indexing automatically
+4. Only use raw SQL for queries not covered by semantic functions
 
 ## PORTFOLIO COMPANIES (Query portfolio_companies in patents/grants DBs)
 Examples: Epana (T-cell Engager, CD38/CD19, autoimmune), Montara (mTOR, LRRK2, Parkinson's), Skeletalis (bone-targeting), etc.
 
-## QUERY OPTIMIZATION RULES
-1. ALWAYS include `id` column in SELECT when querying entities (researchers, patents, grants, bills, companies) - this enables clickable source links
-2. ALWAYS use LIMIT (10-50) - these are large tables
-3. Use indexed columns in WHERE/ORDER BY when possible
-4. For text search: LIKE '%term%' works but is slow on large tables
-5. For aggregations on large tables (grants), use specific filters first
-6. If a query times out, simplify it or add more restrictive WHERE clauses
-
-## CROSS-DATABASE WORKFLOW EXAMPLE
-To find researchers for a portfolio company:
-1. Query portfolio_companies to get company focus (modality, indications, keywords)
-2. Query researchers WHERE topics LIKE '%relevant_term%' ORDER BY h_index DESC
-3. Optionally cross-reference with grants by PI name
-
-## Response Style
-- Lead with the key finding/recommendation
-- Support with specific numbers from queries
-- Use markdown tables for structured data (| Column | Column |)
-- Use headers (## and ###) to organize sections
-- When mentioning specific researchers, patents, grants, or companies, include their name naturally in the text
-- End with actionable next steps
-
 Be DIRECT. Execute queries efficiently. Synthesize insights across databases.
 
-NOTE: Do NOT include a Sources section - the system will automatically generate clickable source links from your query results. The UI will link entity names to their detail pages."""
+NOTE: Do NOT include a Sources section - the system will automatically generate clickable source links from your query results."""
 
 
 # Default model for SQL agent (Sonnet for balance of quality/cost)
@@ -204,7 +245,118 @@ def extract_entities(tool_name: str, result: dict) -> list:
 def execute_tool(tool_name: str, tool_input: dict, insights: list, entities: list) -> str:
     """Execute a tool and return the result as a string."""
     try:
-        if tool_name == "query_researchers":
+        # =================================================================
+        # SEMANTIC FUNCTIONS - Researchers
+        # =================================================================
+        if tool_name == "get_researchers":
+            result = get_researchers(**tool_input)
+            entities.extend(extract_entities("query_researchers", result))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_researcher_profile":
+            result = get_researcher_profile(**tool_input)
+            entities.extend(extract_entities("query_researchers", result))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_rising_stars":
+            result = get_rising_stars(**tool_input)
+            entities.extend(extract_entities("query_researchers", result))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_researchers_by_topic":
+            result = get_researchers_by_topic(**tool_input)
+            entities.extend(extract_entities("query_researchers", result))
+            return json.dumps(result, indent=2, default=str)
+
+        # =================================================================
+        # SEMANTIC FUNCTIONS - Patents
+        # =================================================================
+        elif tool_name == "get_patents":
+            result = get_patents(**tool_input)
+            entities.extend(extract_entities("query_patents", result))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_patent_portfolio":
+            result = get_patent_portfolio(**tool_input)
+            # Extract entities from the patents list
+            if result.get("patents"):
+                entities.extend(extract_entities("query_patents", {"rows": result["patents"]}))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_inventors_by_company":
+            result = get_inventors_by_company(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "search_patents_by_topic":
+            result = search_patents_by_topic(**tool_input)
+            entities.extend(extract_entities("query_patents", result))
+            return json.dumps(result, indent=2, default=str)
+
+        # =================================================================
+        # SEMANTIC FUNCTIONS - Grants
+        # =================================================================
+        elif tool_name == "get_grants":
+            result = get_grants(**tool_input)
+            entities.extend(extract_entities("query_grants", result))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_funding_summary":
+            result = get_funding_summary(**tool_input)
+            # Extract entities from top_grants list
+            if result.get("top_grants"):
+                entities.extend(extract_entities("query_grants", {"rows": result["top_grants"]}))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_pis_by_organization":
+            result = get_pis_by_organization(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_grants_by_topic":
+            result = get_grants_by_topic(**tool_input)
+            entities.extend(extract_entities("query_grants", result))
+            return json.dumps(result, indent=2, default=str)
+
+        # =================================================================
+        # CROSS-DATABASE FUNCTIONS
+        # =================================================================
+        elif tool_name == "search_entity":
+            result = search_entity(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_company_profile":
+            result = get_company_profile(**tool_input)
+            # Extract entities from nested results
+            if result.get("patents") and result["patents"].get("patents"):
+                entities.extend(extract_entities("query_patents", {"rows": result["patents"]["patents"]}))
+            if result.get("grants") and result["grants"].get("top_grants"):
+                entities.extend(extract_entities("query_grants", {"rows": result["grants"]["top_grants"]}))
+            if result.get("researchers") and result["researchers"].get("top_researchers"):
+                entities.extend(extract_entities("query_researchers", {"rows": result["researchers"]["top_researchers"]}))
+            return json.dumps(result, indent=2, default=str)
+
+        # =================================================================
+        # SEMANTIC FUNCTIONS - SEC Sentinel
+        # =================================================================
+        elif tool_name == "get_sec_filings":
+            result = get_sec_filings(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_companies_by_runway":
+            result = get_companies_by_runway(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_insider_transactions":
+            result = get_insider_transactions(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_runway_alerts":
+            result = get_runway_alerts()
+            return json.dumps(result, indent=2, default=str)
+
+        # =================================================================
+        # RAW SQL TOOLS
+        # =================================================================
+        elif tool_name == "query_researchers":
             result = execute_query("researchers", tool_input["query"])
             entities.extend(extract_entities(tool_name, result))
             return json.dumps(result, indent=2, default=str)
@@ -455,12 +607,33 @@ def run_agent(
 
 # Friendly status messages for each tool
 TOOL_STATUS_MESSAGES = {
-    "query_researchers": "Searching researchers database...",
-    "query_patents": "Searching patents database...",
-    "query_grants": "Searching grants database...",
-    "query_policies": "Searching policies database...",
-    "query_portfolio": "Searching portfolio database...",
-    "query_market_data": "Searching clinical trials database...",
+    # Semantic functions
+    "get_researchers": "Finding researchers...",
+    "get_researcher_profile": "Getting researcher profile...",
+    "get_rising_stars": "Finding rising star researchers...",
+    "get_researchers_by_topic": "Finding researchers by topic...",
+    "get_patents": "Searching patents...",
+    "get_patent_portfolio": "Analyzing patent portfolio...",
+    "get_inventors_by_company": "Finding key inventors...",
+    "search_patents_by_topic": "Searching patent landscape...",
+    "get_grants": "Searching grants...",
+    "get_funding_summary": "Analyzing funding...",
+    "get_pis_by_organization": "Finding principal investigators...",
+    "get_grants_by_topic": "Searching grant landscape...",
+    "search_entity": "Searching across all databases...",
+    "get_company_profile": "Building company profile...",
+    # SEC Sentinel
+    "get_sec_filings": "Searching SEC filings...",
+    "get_companies_by_runway": "Checking company runway data...",
+    "get_insider_transactions": "Searching insider transactions...",
+    "get_runway_alerts": "Checking runway alerts...",
+    # Raw SQL tools
+    "query_researchers": "Querying researchers database...",
+    "query_patents": "Querying patents database...",
+    "query_grants": "Querying grants database...",
+    "query_policies": "Querying policies database...",
+    "query_portfolio": "Querying portfolio database...",
+    "query_market_data": "Querying clinical trials database...",
     "list_tables": "Exploring database schema...",
     "describe_table": "Examining table structure...",
     "append_insight": "Recording insight...",

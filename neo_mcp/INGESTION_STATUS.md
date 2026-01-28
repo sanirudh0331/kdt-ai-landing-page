@@ -1,6 +1,40 @@
-# Neo MCP Ingestion Status
+# Neo MCP Status
 
-Last updated: 2026-01-27
+Last updated: 2026-01-28
+
+## Semantic Layer (2026-01-28)
+
+### Completed
+- [x] **18 semantic functions** added (4 each for researchers, patents, grants, SEC + 2 cross-DB)
+- [x] **_schema_docs tables** in all 4 databases with business context, key column descriptions, and example questions
+- [x] **entity_links table** with 35 entities (20 biotech companies, 11 universities, 3 research institutes, 1 gov) for cross-DB resolution
+- [x] **Updated system prompt** with synthesis guidelines and tool priority
+- [x] **SEC Sentinel integration** with 4 semantic endpoints (filings, runway, insider, alerts)
+- [x] **Result caching** (5-min TTL) on all semantic functions
+
+### Semantic Functions Available
+| Category | Functions |
+|----------|-----------|
+| Researchers | `get_researchers`, `get_researcher_profile`, `get_rising_stars`, `get_researchers_by_topic` |
+| Patents | `get_patents`, `get_patent_portfolio`, `get_inventors_by_company`, `search_patents_by_topic` |
+| Grants | `get_grants`, `get_funding_summary`, `get_pis_by_organization`, `get_grants_by_topic` |
+| SEC Sentinel | `get_sec_filings`, `get_companies_by_runway`, `get_insider_transactions`, `get_runway_alerts` |
+| Cross-DB | `search_entity`, `get_company_profile` |
+
+### Files Modified
+- `neo_mcp/tools.py` (213 → 659 lines) - 18 semantic function tool definitions
+- `neo_mcp/db.py` (219 → 801 lines) - Semantic function implementations + SEC client
+- `neo_mcp/agent.py` (698 → 870 lines) - Updated system prompt, execute_tool routing, status messages
+- `sec-sentinel/app.py` (692 → 942 lines) - 4 semantic API endpoints
+
+### Remaining
+- [ ] Deploy updated Neo to Railway
+- [ ] Deploy updated SEC Sentinel to Railway
+- [ ] Test 20 key questions end-to-end
+- [ ] Populate Form 4 transaction data (SEC Sentinel)
+- [ ] Add more entities to entity_links as data coverage grows
+
+---
 
 ## Collection Status
 
