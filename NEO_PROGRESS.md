@@ -4,6 +4,57 @@
 
 ---
 
+## Market Data Service (2026-01-27)
+
+### Summary
+Created new `kdt-market-data` Railway service to host FDA calendar and clinical trials data. This gives Neo access to regulatory timelines and clinical trial information.
+
+### New Service: `market_data/`
+
+| File | Description |
+|------|-------------|
+| `server.py` | FastAPI server with `/api/sql`, `/api/sql/tables`, `/api/sql/schema/{table}` endpoints |
+| `sync_data.py` | Combined sync script for FDA calendar and clinical trials |
+| `Dockerfile` | Python 3.11-slim container |
+| `requirements.txt` | FastAPI, uvicorn, httpx |
+| `railway.toml` | Railway build configuration |
+
+### Database Tables
+
+**`fda_events`** - FDA calendar / PDUFA dates
+- `event_type`, `ticker`, `company`, `drug`, `indication`, `event_date`, `url`
+- Sourced from static `fda-calendar.json`
+
+**`clinical_trials`** - ClinicalTrials.gov data
+- `nct_id`, `brief_title`, `status`, `phase`, `sponsor`, `conditions`, `interventions`
+- `enrollment`, `start_date`, `completion_date`, `locations_count`, `has_results`
+- Sourced from ClinicalTrials.gov API v2
+
+### API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /` | Health check |
+| `GET /api/sql/tables` | List available tables |
+| `GET /api/sql/schema/{table}` | Get table schema |
+| `POST /api/sql` | Execute SELECT query |
+| `GET /api/stats` | Get data statistics |
+
+### Railway Setup Required
+
+1. Create new Railway service `kdt-market-data`
+2. Root directory: `market_data`
+3. Add volume mounted at `/data`
+4. Deploy and run sync: `python sync_data.py`
+
+### Integration with Neo
+
+- Added `market_data` to `neo_mcp/db.py` SERVICE_URLS
+- Default URL: `https://kdt-market-data.up.railway.app`
+- Neo can now query FDA events and clinical trials
+
+---
+
 ## Rename: rag → neo_mcp (2026-01-27)
 
 ### Summary
