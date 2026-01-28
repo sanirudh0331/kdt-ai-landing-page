@@ -55,6 +55,21 @@ PORTFOLIO_SPONSORS = [
     "BioNTech",
 ]
 
+# Active trial statuses (for Option C: all active + recent completed)
+ACTIVE_STATUSES = [
+    "RECRUITING",
+    "ACTIVE_NOT_RECRUITING",
+    "NOT_YET_RECRUITING",
+    "ENROLLING_BY_INVITATION",
+]
+
+COMPLETED_STATUSES = [
+    "COMPLETED",
+    "TERMINATED",
+    "WITHDRAWN",
+    "SUSPENDED",
+]
+
 
 # ============ FDA Calendar ============
 
@@ -197,10 +212,22 @@ def fetch_trials(
     sponsor: Optional[str] = None,
     condition: Optional[str] = None,
     status: Optional[str] = None,
+    statuses: Optional[list] = None,
+    min_date: Optional[str] = None,
     page_size: int = 100,
     max_pages: int = 10,
 ) -> list:
-    """Fetch trials from ClinicalTrials.gov API."""
+    """Fetch trials from ClinicalTrials.gov API.
+
+    Args:
+        sponsor: Filter by lead sponsor name
+        condition: Filter by condition/disease
+        status: Single status filter (deprecated, use statuses)
+        statuses: List of statuses to filter by
+        min_date: Minimum study first posted date (YYYY-MM-DD)
+        page_size: Results per page
+        max_pages: Maximum pages to fetch
+    """
     all_trials = []
     page_token = None
 
@@ -215,7 +242,13 @@ def fetch_trials(
             query_parts.append(f"AREA[LeadSponsorName]{sponsor}")
         if condition:
             query_parts.append(f"AREA[Condition]{condition}")
-        if status:
+        if min_date:
+            query_parts.append(f"AREA[StudyFirstPostDate]RANGE[{min_date},MAX]")
+
+        # Handle status filtering
+        if statuses:
+            params["filter.overallStatus"] = ",".join(statuses)
+        elif status:
             params["filter.overallStatus"] = status
 
         if query_parts:
@@ -339,9 +372,22 @@ def upsert_trial(conn: sqlite3.Connection, trial: dict) -> str:
         return "updated"
 
 
-def sync_clinical_trials(sponsor: Optional[str] = None, max_sponsors: int = 5):
-    """Sync clinical trials data."""
+def sync_clinical_trials(
+    sponsor: Optional[str] = None,
+    max_sponsors: int = 17,
+    active_only: bool = False,
+    completed_since: str = "2023-01-01",
+):
+    """Sync clinical trials data using Option C: all active + recent completed.
+
+    Args:
+        sponsor: Sync only this sponsor (optional)
+        max_sponsors: Max sponsors to sync (default: all 17)
+        active_only: Only sync active trials (skip completed)
+        completed_since: Date cutoff for completed trials (default: 2023-01-01)
+    """
     print("\n=== Syncing Clinical Trials ===")
+    print(f"Strategy: All active trials + completed since {completed_since}")
 
     # Ensure directory exists
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -357,10 +403,16 @@ def sync_clinical_trials(sponsor: Optional[str] = None, max_sponsors: int = 5):
         sponsors = PORTFOLIO_SPONSORS[:max_sponsors]
 
     for sponsor_name in sponsors:
-        print(f"\nFetching trials for: {sponsor_name}")
-        trials = fetch_trials(sponsor=sponsor_name, max_pages=5)
+        # Part 1: Fetch ALL active trials (any date)
+        print(f"\n[{sponsor_name}] Fetching active trials...")
+        active_trials = fetch_trials(
+            sponsor=sponsor_name,
+            statuses=ACTIVE_STATUSES,
+            max_pages=10,  # More pages for active trials
+        )
+        print(f"  Found {len(active_trials)} active trials")
 
-        for study in trials:
+        for study in active_trials:
             try:
                 trial = parse_trial(study)
                 result = upsert_trial(conn, trial)
@@ -370,16 +422,53 @@ def sync_clinical_trials(sponsor: Optional[str] = None, max_sponsors: int = 5):
                 stats["errors"] += 1
 
         conn.commit()
+
+        # Part 2: Fetch completed trials since cutoff date
+        if not active_only:
+            print(f"[{sponsor_name}] Fetching completed trials since {completed_since}...")
+            completed_trials = fetch_trials(
+                sponsor=sponsor_name,
+                statuses=COMPLETED_STATUSES,
+                min_date=completed_since,
+                max_pages=5,
+            )
+            print(f"  Found {len(completed_trials)} completed trials")
+
+            for study in completed_trials:
+                try:
+                    trial = parse_trial(study)
+                    result = upsert_trial(conn, trial)
+                    stats[result] += 1
+                except Exception as e:
+                    print(f"  Error parsing trial: {e}")
+                    stats["errors"] += 1
+
+            conn.commit()
+
         time.sleep(1)  # Rate limiting between sponsors
 
     # Final stats
     cursor = conn.execute("SELECT COUNT(*) FROM clinical_trials")
     total = cursor.fetchone()[0]
+
+    cursor = conn.execute("""
+        SELECT status, COUNT(*) as cnt FROM clinical_trials
+        GROUP BY status ORDER BY cnt DESC
+    """)
+    status_breakdown = cursor.fetchall()
+
     conn.close()
 
-    print(f"\nInserted: {stats['inserted']}, Updated: {stats['updated']}, Errors: {stats['errors']}")
-    print(f"Total in DB: {total}")
-    print(f"Database: {TRIALS_DB_PATH}")
+    print(f"\n{'='*50}")
+    print(f"Sync complete!")
+    print(f"  Inserted: {stats['inserted']}")
+    print(f"  Updated: {stats['updated']}")
+    print(f"  Errors: {stats['errors']}")
+    print(f"  Total in DB: {total}")
+    print(f"\nBy status:")
+    for status, cnt in status_breakdown:
+        print(f"  {status}: {cnt}")
+    print(f"\nDatabase: {TRIALS_DB_PATH}")
 
 
 # ============ Main ============
@@ -389,7 +478,9 @@ def main():
     parser.add_argument("--fda-only", action="store_true", help="Only sync FDA calendar")
     parser.add_argument("--trials-only", action="store_true", help="Only sync clinical trials")
     parser.add_argument("--sponsor", help="Sync trials for specific sponsor")
-    parser.add_argument("--max-sponsors", type=int, default=5, help="Max sponsors to sync (default 5)")
+    parser.add_argument("--max-sponsors", type=int, default=17, help="Max sponsors to sync (default: all 17)")
+    parser.add_argument("--active-only", action="store_true", help="Only sync active trials (skip completed)")
+    parser.add_argument("--completed-since", default="2023-01-01", help="Date cutoff for completed trials (default: 2023-01-01)")
     args = parser.parse_args()
 
     print("KdT Market Data Sync")
@@ -399,10 +490,20 @@ def main():
     if args.fda_only:
         sync_fda_calendar()
     elif args.trials_only:
-        sync_clinical_trials(sponsor=args.sponsor, max_sponsors=args.max_sponsors)
+        sync_clinical_trials(
+            sponsor=args.sponsor,
+            max_sponsors=args.max_sponsors,
+            active_only=args.active_only,
+            completed_since=args.completed_since,
+        )
     else:
         sync_fda_calendar()
-        sync_clinical_trials(sponsor=args.sponsor, max_sponsors=args.max_sponsors)
+        sync_clinical_trials(
+            sponsor=args.sponsor,
+            max_sponsors=args.max_sponsors,
+            active_only=args.active_only,
+            completed_since=args.completed_since,
+        )
 
     print("\n" + "=" * 50)
     print("Sync complete!")
