@@ -49,9 +49,9 @@ Last updated: 2026-01-28
 - `sec-sentinel/scripts/sync_form4.py` - **New file**: Form 4 XML parser
 
 ### Remaining
-- [ ] Deploy updated Neo to Railway (auto-deploys from GitHub push)
-- [ ] Deploy updated SEC Sentinel to Railway
-- [ ] Run Form 4 initial parse: `curl .../api/sync-form4?limit=500`
+- [x] Deploy updated Neo to Railway (auto-deployed from GitHub push)
+- [x] Deploy updated SEC Sentinel to Railway
+- [x] Run Form 4 initial parse: **32,583 transactions** from 12,458 filings (2026-01-28)
 - [ ] Test 20 key questions end-to-end
 - [ ] Add more entities to entity_links as data coverage grows
 
