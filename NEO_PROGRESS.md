@@ -4,6 +4,201 @@
 
 ---
 
+## How Neo Search & Querying Works
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER QUESTION                                   │
+│                    "Who are the rising stars in oncology?"                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           LANDING PAGE (Node.js)                             │
+│                        https://kdt-ai.railway.app                            │
+│  • Chat UI with conversation history                                         │
+│  • Proxies requests to Neo MCP service                                       │
+│  • Handles SSE streaming for real-time updates                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                           POST /api/neo-analyze
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         NEO MCP SERVICE (Python)                             │
+│                       https://kdtneo.up.railway.app                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 1: QUESTION ROUTER (router.py)                                  │   │
+│  │                                                                       │   │
+│  │ Classifies question into 3 tiers:                                    │   │
+│  │                                                                       │   │
+│  │ TIER 1 - Instant (no LLM)      "How many trials?"                    │   │
+│  │   └─→ Direct SQL patterns       └─→ SELECT COUNT(*) → 89,018         │   │
+│  │                                                                       │   │
+│  │ TIER 2 - Fast (no LLM)         "Trials for cancer"                   │   │
+│  │   └─→ Parameterized templates   └─→ SELECT ... WHERE conditions      │   │
+│  │                                      LIKE '%cancer%'                  │   │
+│  │                                                                       │   │
+│  │ TIER 3 - Full Agent (Claude)   "Compare patent landscapes for        │   │
+│  │   └─→ Complex/cross-DB queries   our oncology portfolio companies"   │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                       │                                      │
+│               ┌───────────────────────┴───────────────────────┐             │
+│               │                                               │             │
+│               ▼ (if Tier 3)                                   ▼ (Tier 1/2)  │
+│  ┌────────────────────────────────┐              ┌─────────────────────┐    │
+│  │ STEP 2: SEMANTIC CACHE         │              │ Return answer       │    │
+│  │ (semantic_cache.py)            │              │ immediately         │    │
+│  │                                │              │ No LLM cost!        │    │
+│  │ • SQLite + embeddings          │              └─────────────────────┘    │
+│  │ • 80% similarity threshold     │                                         │
+│  │ • 1-hour TTL                   │                                         │
+│  │                                │                                         │
+│  │ Similar question found?        │                                         │
+│  │ "Rising stars in immunology"   │                                         │
+│  │  → Return cached answer        │                                         │
+│  └────────────────────────────────┘                                         │
+│               │ (cache miss)                                                 │
+│               ▼                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 3: CLAUDE AGENT LOOP (agent.py)                                 │   │
+│  │                                                                       │   │
+│  │ Claude Sonnet with tool_use API:                                     │   │
+│  │                                                                       │   │
+│  │ while not done and turns < 25:                                       │   │
+│  │   1. Claude thinks about what to do                                  │   │
+│  │   2. Claude calls a tool (query_researchers, query_patents, etc.)    │   │
+│  │   3. Tool executes SQL against Railway databases                     │   │
+│  │   4. Results returned to Claude                                      │   │
+│  │   5. Claude decides: need more info? → loop, else → respond          │   │
+│  │                                                                       │   │
+│  │ Available tools (tools.py):                                          │   │
+│  │   • query_researchers  - 242K researchers                            │   │
+│  │   • query_patents      - 2.4K patents                                │   │
+│  │   • query_grants       - 392K grants ($222B)                         │   │
+│  │   • query_policies     - 28 bills                                    │   │
+│  │   • query_portfolio    - 24 companies                                │   │
+│  │   • query_market_data  - 89K clinical trials                         │   │
+│  │   • list_tables        - Discover schema                             │   │
+│  │   • describe_table     - Get column info                             │   │
+│  │   • append_insight     - Record findings                             │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│               │                                                              │
+│               ▼                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ STEP 4: DATABASE LAYER (db.py)                                       │   │
+│  │                                                                       │   │
+│  │ Each tool call → HTTP POST to Railway service → SQL execution        │   │
+│  │                                                                       │   │
+│  │ • 5-minute query cache (avoid repeated identical queries)            │   │
+│  │ • Auto-add LIMIT if missing (safety)                                 │   │
+│  │ • Retry logic with longer timeouts                                   │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                    HTTP POST /api/sql to each Railway service
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         RAILWAY DATABASE SERVICES                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │  Talent Scout   │  │ Patent Warrior  │  │ Grants Tracker  │              │
+│  │  (researchers)  │  │   (patents)     │  │    (grants)     │              │
+│  │  242K records   │  │   2.4K records  │  │  392K records   │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                              │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │  Policy Watch   │  │   Portfolio     │  │  Clinical Trials │             │
+│  │   (policies)    │  │  (companies)    │  │  (market_data)   │             │
+│  │   28 records    │  │   24 records    │  │  89K records     │             │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Request Flow Example
+
+**Question:** "Find rising star researchers in oncology who might be relevant for our Epana portfolio"
+
+```
+1. USER SUBMITS QUESTION
+   └─→ POST /api/neo-analyze { question: "Find rising star researchers..." }
+
+2. ROUTER CHECK (router.py)
+   └─→ Cross-DB detected (researchers + portfolio)
+   └─→ Tier 3: Needs full agent
+
+3. SEMANTIC CACHE CHECK (semantic_cache.py)
+   └─→ No similar question found (< 80% similarity)
+   └─→ Cache miss
+
+4. CLAUDE AGENT LOOP (agent.py)
+
+   Turn 1:
+   └─→ Claude thinks: "I need to understand Epana first"
+   └─→ Tool call: query_portfolio
+       { "query": "SELECT * FROM companies WHERE name LIKE '%Epana%'" }
+   └─→ Result: { modality: "T-cell Engager", indications: "CD38/CD19, autoimmune" }
+
+   Turn 2:
+   └─→ Claude thinks: "Now find researchers in relevant areas"
+   └─→ Tool call: query_researchers
+       { "query": "SELECT id, name, h_index, slope FROM researchers
+                   WHERE (topics LIKE '%T-cell%' OR topics LIKE '%autoimmune%')
+                   AND slope > 3 AND h_index BETWEEN 20 AND 60
+                   ORDER BY slope DESC LIMIT 15" }
+   └─→ Result: [{ name: "Dr. Smith", h_index: 45, slope: 5.2 }, ...]
+
+   Turn 3:
+   └─→ Claude thinks: "I have enough info to respond"
+   └─→ Returns formatted answer with recommendations
+
+5. CACHE RESPONSE
+   └─→ Store answer + embedding for future similar questions
+
+6. RETURN TO USER
+   └─→ { answer: "...", entities: [...], tool_calls: [...], turns_used: 3 }
+```
+
+### Cost Optimization Layers
+
+| Layer | What it does | Cost |
+|-------|--------------|------|
+| **Tier 1 Router** | Instant SQL for counts/stats | $0 |
+| **Tier 2 Router** | Parameterized queries | $0 |
+| **Semantic Cache** | Reuse similar answers (80% threshold) | $0 |
+| **Query Cache** | 5-min cache for identical SQL | $0 |
+| **Full Agent** | Claude Sonnet + SQL | ~$0.01-0.05/question |
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `server.py` | FastAPI endpoints, SSE streaming |
+| `router.py` | Tier 1/2/3 question classification |
+| `semantic_cache.py` | SQLite + embeddings for similar questions |
+| `agent.py` | Claude agentic loop with tool_use |
+| `tools.py` | Tool definitions for Claude |
+| `db.py` | HTTP calls to Railway services |
+
+### Database Service URLs
+
+| Service | URL | Records |
+|---------|-----|---------|
+| Researchers | kdttalentscout.up.railway.app | 242,000 |
+| Patents | patentwarrior.up.railway.app | 2,400 |
+| Grants | grants-tracker-production.up.railway.app | 392,000 |
+| Policies | policywatch.up.railway.app | 28 |
+| Portfolio | web-production-a9d068.up.railway.app | 24 |
+| Clinical Trials | clinicaltrialsdata.up.railway.app | 89,018 |
+
+---
+
 ## Router v2: Smart Question Routing (2026-01-28)
 
 ### Summary
