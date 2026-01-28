@@ -25,7 +25,9 @@ try:
         # Cross-database
         search_entity, get_company_profile,
         # SEC Sentinel
-        get_sec_filings, get_companies_by_runway, get_insider_transactions, get_runway_alerts
+        get_sec_filings, get_companies_by_runway, get_insider_transactions, get_runway_alerts,
+        # Schema docs & temporal context
+        get_schema_docs, get_recent_changes,
     )
     from tools import TOOLS
     from router import route_question
@@ -37,7 +39,8 @@ except ImportError:
         get_patents, get_patent_portfolio, get_inventors_by_company, search_patents_by_topic,
         get_grants, get_funding_summary, get_pis_by_organization, get_grants_by_topic,
         search_entity, get_company_profile,
-        get_sec_filings, get_companies_by_runway, get_insider_transactions, get_runway_alerts
+        get_sec_filings, get_companies_by_runway, get_insider_transactions, get_runway_alerts,
+        get_schema_docs, get_recent_changes,
     )
     from neo_mcp.tools import TOOLS
     from neo_mcp.router import route_question
@@ -90,7 +93,9 @@ You have access to 6 databases with live production data via both **semantic fun
 - `list_tables(database)` - List tables in a database
 - `describe_table(database, table_name)` - Get table schema
 
-### Utility
+### Context & Utility
+- `get_recent_changes(days)` - What's new across all databases (recent filings, patents, grants)
+- `get_schema_docs(database)` - Get column meanings and business context before writing raw SQL
 - `append_insight(insight)` - Record a key finding
 
 ## DATABASE SIZES
@@ -131,6 +136,14 @@ You have access to 6 databases with live production data via both **semantic fun
 - clinical_trials: id, nct_id, brief_title, status, phase, conditions (JSON), interventions (JSON), sponsor, enrollment, start_date
 - fda_events: id, event_type, ticker, company, drug, indication, event_date
 
+## QUESTION PLANNING
+Before executing queries, briefly plan your approach:
+1. **Identify which databases** are relevant (SEC, patents, grants, researchers, clinical trials)
+2. **Choose the right tools** - prefer semantic functions, fall back to raw SQL only when needed
+3. **For cross-DB questions**, call multiple semantic functions and synthesize (e.g., "Tell me about Moderna" → `get_company_profile` OR parallel calls to `get_patent_portfolio` + `get_funding_summary` + `get_sec_filings`)
+4. **For "what's new" questions**, start with `get_recent_changes` to ground your answer in current data
+5. **Before raw SQL**, call `get_schema_docs(database)` to understand column meanings
+
 ## SYNTHESIS & RESPONSE GUIDELINES
 When presenting data to users:
 1. **Lead with the key insight**, not raw numbers
@@ -139,6 +152,7 @@ When presenting data to users:
 4. **Highlight unusual patterns** ("3 of the top 5 gene therapy patents were filed by university labs, not pharma - suggests early-stage tech")
 5. **Cross-database synthesis** when relevant ("Moderna has 45 mRNA patents AND $120M in NIH grants - deep investment in this platform")
 6. For cross-DB questions, use `search_entity` or `get_company_profile` first
+7. **Temporal context**: When relevant, note whether data is recent or historical
 
 ## QUERY OPTIMIZATION
 1. ALWAYS include `id` in SELECT for entity queries (enables clickable source links)
@@ -394,6 +408,18 @@ def execute_tool(tool_name: str, tool_input: dict, insights: list, entities: lis
             result = describe_table(tool_input["database"], tool_input["table_name"])
             return json.dumps(result, indent=2)
 
+        # =================================================================
+        # CONTEXT & UTILITY
+        # =================================================================
+        elif tool_name == "get_recent_changes":
+            result = get_recent_changes(**tool_input)
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "get_schema_docs":
+            db_name = tool_input.get("database", "")
+            result = get_schema_docs(db_name)
+            return json.dumps(result, indent=2, default=str)
+
         elif tool_name == "append_insight":
             insights.append(tool_input["insight"])
             return json.dumps({"status": "insight recorded", "total_insights": len(insights)})
@@ -487,6 +513,23 @@ def run_agent(
 
     client = anthropic.Anthropic(api_key=api_key)
 
+    # Build system prompt with routing hints if available
+    system_prompt = AGENT_SYSTEM_PROMPT
+    if not skip_router and not conversation_history:
+        routed = route_question(question)
+        if routed.get("routing_hints"):
+            hints = routed["routing_hints"]
+            hint_parts = []
+            if hints.get("detected_dbs"):
+                hint_parts.append(f"Relevant databases: {', '.join(hints['detected_dbs'])}")
+            if hints.get("intents"):
+                hint_parts.append(f"Detected intent: {', '.join(hints['intents'])}")
+            if hints.get("suggested_queries"):
+                for sq in hints["suggested_queries"]:
+                    hint_parts.append(f"Suggested: query {sq[0]} with: {sq[1][:100]}")
+            if hint_parts:
+                system_prompt += "\n\n## ROUTING HINTS FOR THIS QUESTION\n" + "\n".join(f"- {h}" for h in hint_parts)
+
     # Build messages
     messages = []
     if conversation_history:
@@ -507,7 +550,7 @@ def run_agent(
             response = client.messages.create(
                 model=model,
                 max_tokens=4096,
-                system=AGENT_SYSTEM_PROMPT,
+                system=system_prompt,
                 tools=TOOLS,
                 messages=messages,
             )
@@ -627,6 +670,9 @@ TOOL_STATUS_MESSAGES = {
     "get_companies_by_runway": "Checking company runway data...",
     "get_insider_transactions": "Searching insider transactions...",
     "get_runway_alerts": "Checking runway alerts...",
+    # Context & Utility
+    "get_recent_changes": "Checking for recent updates...",
+    "get_schema_docs": "Loading database documentation...",
     # Raw SQL tools
     "query_researchers": "Querying researchers database...",
     "query_patents": "Querying patents database...",
@@ -709,6 +755,23 @@ def run_agent_streaming(
 
     client = anthropic.Anthropic(api_key=api_key)
 
+    # Build system prompt with routing hints if available
+    system_prompt = AGENT_SYSTEM_PROMPT
+    if not skip_router and not conversation_history:
+        routed = route_question(question)
+        if routed.get("routing_hints"):
+            hints = routed["routing_hints"]
+            hint_parts = []
+            if hints.get("detected_dbs"):
+                hint_parts.append(f"Relevant databases: {', '.join(hints['detected_dbs'])}")
+            if hints.get("intents"):
+                hint_parts.append(f"Detected intent: {', '.join(hints['intents'])}")
+            if hints.get("suggested_queries"):
+                for sq in hints["suggested_queries"]:
+                    hint_parts.append(f"Suggested: query {sq[0]} with: {sq[1][:100]}")
+            if hint_parts:
+                system_prompt += "\n\n## ROUTING HINTS FOR THIS QUESTION\n" + "\n".join(f"- {h}" for h in hint_parts)
+
     # Build messages
     messages = []
     if conversation_history:
@@ -731,7 +794,7 @@ def run_agent_streaming(
             response = client.messages.create(
                 model=model,
                 max_tokens=4096,
-                system=AGENT_SYSTEM_PROMPT,
+                system=system_prompt,
                 tools=TOOLS,
                 messages=messages,
             )

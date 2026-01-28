@@ -628,6 +628,41 @@ Use this to understand table structure before writing queries.""",
         }
     },
     {
+        "name": "get_recent_changes",
+        "description": """Check all databases for recently added or updated data.
+
+Returns a summary of new patents, grants, filings, and researcher updates from the specified period.
+Use this to answer questions like "What's new?" or to provide temporal context before deeper analysis.""",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "type": "integer",
+                    "description": "Look back N days (default: 7)"
+                }
+            },
+            "required": []
+        }
+    },
+    {
+        "name": "get_schema_docs",
+        "description": """Get business context and column documentation for a specific database.
+
+Returns table descriptions, key column meanings, business context, and example questions.
+Use this before writing raw SQL queries to understand what columns mean and how to interpret data.""",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "type": "string",
+                    "enum": ["researchers", "patents", "grants"],
+                    "description": "Which database to get documentation for"
+                }
+            },
+            "required": ["database"]
+        }
+    },
+    {
         "name": "append_insight",
         "description": """Record a business insight discovered during analysis.
 

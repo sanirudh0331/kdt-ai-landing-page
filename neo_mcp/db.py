@@ -787,6 +787,160 @@ def get_company_profile(name: str) -> dict:
     return profile
 
 
+# =============================================================================
+# SCHEMA DOCS - Business context for raw SQL queries
+# =============================================================================
+
+def get_schema_docs(db_name: str) -> list:
+    """Get schema documentation from _schema_docs table for a database."""
+    cache_key = _cache_key(db_name, "_schema_docs_all")
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        result = execute_query(db_name, """
+            SELECT table_name, description, key_columns, business_context, example_questions
+            FROM _schema_docs
+            ORDER BY table_name
+        """)
+        docs = result.get("rows", [])
+        _set_cached(cache_key, docs)
+        return docs
+    except Exception:
+        return []
+
+
+def get_all_schema_context() -> dict:
+    """Get schema docs from all databases for agent context injection."""
+    all_docs = {}
+    for db_name in ["researchers", "patents", "grants"]:
+        docs = get_schema_docs(db_name)
+        if docs:
+            all_docs[db_name] = docs
+
+    # SEC schema docs via HTTP
+    try:
+        with httpx.Client(timeout=10) as client:
+            response = client.post(
+                f"{SEC_SENTINEL_URL}/api/sql",
+                json={"query": "SELECT table_name, description, key_columns, business_context FROM _schema_docs"},
+                headers={"Content-Type": "application/json"}
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("rows"):
+                    all_docs["sec_sentinel"] = data["rows"]
+    except Exception:
+        pass
+
+    return all_docs
+
+
+# =============================================================================
+# TEMPORAL CONTEXT - Recent changes across all databases
+# =============================================================================
+
+def get_recent_changes(days: int = 7) -> dict:
+    """Check each database for recently added/updated records."""
+    results = {
+        "period": f"last {days} days",
+        "databases": {},
+        "_context": {
+            "insight": f"Summary of new data across all databases in the last {days} days"
+        }
+    }
+
+    # SEC Sentinel - recent filings
+    try:
+        with httpx.Client(timeout=15) as client:
+            response = client.get(
+                f"{SEC_SENTINEL_URL}/api/filings",
+                params={"days": days, "limit": 5}
+            )
+            if response.status_code == 200:
+                filings = response.json()
+                filing_count_resp = client.get(
+                    f"{SEC_SENTINEL_URL}/api/stats"
+                )
+                stats = filing_count_resp.json() if filing_count_resp.status_code == 200 else {}
+                results["databases"]["sec_sentinel"] = {
+                    "recent_filings": len(filings),
+                    "total_filings_week": stats.get("total", 0),
+                    "sample": [
+                        {
+                            "ticker": f.get("ticker"),
+                            "form_type": f.get("form_type"),
+                            "filing_date": f.get("filing_date"),
+                            "company_name": f.get("company_name")
+                        }
+                        for f in filings[:3]
+                    ] if filings else []
+                }
+    except Exception as e:
+        results["databases"]["sec_sentinel"] = {"error": str(e)}
+
+    # Patents - recently granted
+    try:
+        result = execute_query("patents", f"""
+            SELECT COUNT(*) as count,
+                   MAX(grant_date) as latest_date
+            FROM patents
+            WHERE grant_date >= date('now', '-{int(days)} days')
+        """)
+        if result.get("rows"):
+            row = result["rows"][0]
+            results["databases"]["patents"] = {
+                "new_patents": row.get("count", 0),
+                "latest_date": row.get("latest_date")
+            }
+
+            if row.get("count", 0) > 0:
+                sample = execute_query("patents", f"""
+                    SELECT id, title, primary_assignee, grant_date
+                    FROM patents
+                    WHERE grant_date >= date('now', '-{int(days)} days')
+                    ORDER BY grant_date DESC LIMIT 3
+                """)
+                results["databases"]["patents"]["sample"] = sample.get("rows", [])
+    except Exception:
+        results["databases"]["patents"] = {"new_patents": 0}
+
+    # Grants - recently awarded
+    try:
+        result = execute_query("grants", f"""
+            SELECT COUNT(*) as count,
+                   MAX(award_notice_date) as latest_date,
+                   SUM(total_cost) as total_new_funding
+            FROM grants
+            WHERE award_notice_date >= date('now', '-{int(days)} days')
+        """)
+        if result.get("rows"):
+            row = result["rows"][0]
+            results["databases"]["grants"] = {
+                "new_grants": row.get("count", 0),
+                "latest_date": row.get("latest_date"),
+                "total_new_funding": row.get("total_new_funding", 0)
+            }
+    except Exception:
+        results["databases"]["grants"] = {"new_grants": 0}
+
+    # Researchers - recently updated
+    try:
+        result = execute_query("researchers", """
+            SELECT COUNT(*) as count FROM researchers
+            WHERE updated_at >= date('now', '-7 days')
+        """)
+        if result.get("rows"):
+            results["databases"]["researchers"] = {
+                "recently_updated": result["rows"][0].get("count", 0)
+            }
+    except Exception:
+        results["databases"]["researchers"] = {"recently_updated": 0}
+
+    return results
+
+
 if __name__ == "__main__":
     # Quick test
     print("Database Stats (via Railway services):")

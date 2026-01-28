@@ -27,11 +27,32 @@ Last updated: 2026-01-28
 - `neo_mcp/agent.py` (698 → 870 lines) - Updated system prompt, execute_tool routing, status messages
 - `sec-sentinel/app.py` (692 → 942 lines) - 4 semantic API endpoints
 
+### Phase 2 Enhancements (2026-01-28)
+- [x] **Form 4 XML parser** - `sync_form4.py` downloads and parses SEC Form 4 XML to extract insider transactions (buys, sells, awards, exercises). Schema includes is_director/is_officer/is_ten_percent_owner flags, transaction codes, ownership type.
+- [x] **Schema docs in agent** - `get_schema_docs(database)` function loads `_schema_docs` business context before raw SQL queries. Agent prompted to call this before writing SQL.
+- [x] **Question router planner** - Router detects relevant databases (incl. SEC) and injects routing hints into agent system prompt for Tier 3 questions. Agent plans approach before executing queries.
+- [x] **Temporal context** - `get_recent_changes(days)` checks all databases for recent additions (filings, patents, grants, researcher updates). Enables "what's new" answers.
+- [x] **SEC keywords in router** - Router now detects SEC-related questions (insider, runway, 8-K, S-3, etc.)
+
+### New Functions Added
+| Function | DB | Purpose |
+|----------|----|---------|
+| `get_recent_changes` | All | New data across all DBs in last N days |
+| `get_schema_docs` | researchers/patents/grants | Business context for raw SQL fallback |
+
+### Files Modified (Phase 2)
+- `neo_mcp/db.py` - Added `get_schema_docs`, `get_all_schema_context`, `get_recent_changes`
+- `neo_mcp/tools.py` - Added 2 new tool definitions (get_recent_changes, get_schema_docs)
+- `neo_mcp/agent.py` - New imports, routing hints injection, question planning prompt, execute_tool routing, status messages
+- `neo_mcp/router.py` - Added SEC keywords, KOL keyword, removed "filing" collision with patents
+- `sec-sentinel/app.py` - Updated form4_transactions schema, added `/api/sync-form4`, updated semantic endpoints
+- `sec-sentinel/scripts/sync_form4.py` - **New file**: Form 4 XML parser
+
 ### Remaining
-- [ ] Deploy updated Neo to Railway
+- [ ] Deploy updated Neo to Railway (auto-deploys from GitHub push)
 - [ ] Deploy updated SEC Sentinel to Railway
+- [ ] Run Form 4 initial parse: `curl .../api/sync-form4?limit=500`
 - [ ] Test 20 key questions end-to-end
-- [ ] Populate Form 4 transaction data (SEC Sentinel)
 - [ ] Add more entities to entity_links as data coverage grows
 
 ---

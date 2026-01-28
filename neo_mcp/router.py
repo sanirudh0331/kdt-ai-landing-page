@@ -32,15 +32,21 @@ DB_KEYWORDS = {
     "researchers": [
         "researcher", "researchers", "scientist", "scientists", "professor",
         "h-index", "h_index", "hindex", "citations", "publications", "slope",
-        "rising star", "hidden gem", "talent", "academic", "author"
+        "rising star", "hidden gem", "talent", "academic", "author", "kol"
     ],
     "patents": [
         "patent", "patents", "invention", "inventions", "assignee", "claims",
-        "filing", "intellectual property", "ip", "patent number"
+        "intellectual property", "ip", "patent number", "cpc"
     ],
     "grants": [
         "grant", "grants", "funding", "nih", "nsf", "r01", "award",
         "pi", "principal investigator", "fiscal year", "institute"
+    ],
+    "sec_sentinel": [
+        "sec", "filing", "filings", "8-k", "10-k", "10-q", "s-1", "s-3",
+        "form 4", "insider", "insider trading", "insider sell", "insider buy",
+        "runway", "cash runway", "burn rate", "distress", "shelf registration",
+        "ipo", "proxy", "13d", "13g", "activist"
     ],
     "market_data": [
         "trial", "trials", "clinical trial", "clinical trials", "phase",
