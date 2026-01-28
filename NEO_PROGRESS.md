@@ -1,57 +1,104 @@
 # Neo MCP - Progress Notes
 
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-01-28
+
+---
+
+## Clinical Trials Integration Complete (2026-01-28)
+
+### Summary
+Full integration of ClinicalTrials.gov data into Neo. Neo can now answer questions about clinical trials, pipelines, and sponsors.
+
+### Data Synced
+
+| Metric | Count |
+|--------|-------|
+| **Total Clinical Trials** | 89,018 |
+| COMPLETED | 34,806 |
+| RECRUITING | 28,505 |
+| NOT_YET_RECRUITING | 11,237 |
+| ACTIVE_NOT_RECRUITING | 9,798 |
+| Other statuses | 2,672 |
+
+### Sync Strategy (Option C)
+- **All active trials** - Any status that's still running (no date filter)
+- **Completed trials since 2023** - Recent outcomes for pipeline analysis
+- **All sponsors** - Not limited to portfolio companies
+
+### Weekly Automated Sync
+
+GitHub Action: `.github/workflows/sync-clinical-trials.yml`
+- **Schedule:** Every Sunday 2am UTC
+- **Mode:** Incremental (`--incremental --days 7`)
+- Only fetches trials updated in last 7 days
+- Updates existing trials + adds new ones
+
+### Neo Integration
+
+Added to Neo agent:
+- `query_market_data` tool in `tools.py`
+- Tool handler in `agent.py`
+- `market_data` service URL in `db.py`
+- System prompt updated with clinical_trials schema
+
+### Service URLs
+
+| Service | URL |
+|---------|-----|
+| Clinical Trials API | `https://clinicaltrialsdata.up.railway.app` |
+| Neo MCP | `https://kdtneo.up.railway.app` |
+
+### Example Questions Neo Can Answer
+
+- "How many Phase 3 trials are recruiting?"
+- "What are the top sponsors by trial count?"
+- "Show me oncology trials in Phase 2"
+- "What trials has AstraZeneca completed recently?"
+
+### Bug Fix: Railway Watch Path
+
+**Issue:** Railway wasn't auto-deploying from GitHub
+**Root Cause:** Watch path was set to `rag/**` (old folder name) instead of `neo_mcp/**`
+**Fix:** Updated watch path in Railway service settings
 
 ---
 
 ## Market Data Service (2026-01-27)
 
 ### Summary
-Created new `kdt-market-data` Railway service to host FDA calendar and clinical trials data. This gives Neo access to regulatory timelines and clinical trial information.
+Created new Railway service to host FDA calendar and clinical trials data.
 
-### New Service: `market_data/`
+### Service: `market_data/`
 
 | File | Description |
 |------|-------------|
-| `server.py` | FastAPI server with `/api/sql`, `/api/sql/tables`, `/api/sql/schema/{table}` endpoints |
-| `sync_data.py` | Combined sync script for FDA calendar and clinical trials |
+| `server.py` | FastAPI server with SQL endpoints |
+| `sync_data.py` | Sync script with `--incremental` and `--full` modes |
 | `Dockerfile` | Python 3.11-slim container |
 | `requirements.txt` | FastAPI, uvicorn, httpx |
 | `railway.toml` | Railway build configuration |
 
 ### Database Tables
 
-**`fda_events`** - FDA calendar / PDUFA dates
-- `event_type`, `ticker`, `company`, `drug`, `indication`, `event_date`, `url`
-- Sourced from static `fda-calendar.json`
-
-**`clinical_trials`** - ClinicalTrials.gov data
+**`clinical_trials`** - 89,018 trials from ClinicalTrials.gov
 - `nct_id`, `brief_title`, `status`, `phase`, `sponsor`, `conditions`, `interventions`
 - `enrollment`, `start_date`, `completion_date`, `locations_count`, `has_results`
-- Sourced from ClinicalTrials.gov API v2
 
-### API Endpoints
+**`fda_events`** - FDA calendar / PDUFA dates (not yet synced)
+- `event_type`, `ticker`, `company`, `drug`, `indication`, `event_date`, `url`
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /` | Health check |
-| `GET /api/sql/tables` | List available tables |
-| `GET /api/sql/schema/{table}` | Get table schema |
-| `POST /api/sql` | Execute SELECT query |
-| `GET /api/stats` | Get data statistics |
+### Sync Commands
 
-### Railway Setup Required
+```bash
+# Full sync (initial population)
+python sync_data.py --full
 
-1. Create new Railway service `kdt-market-data`
-2. Root directory: `market_data`
-3. Add volume mounted at `/data`
-4. Deploy and run sync: `python sync_data.py`
+# Incremental sync (weekly cron)
+python sync_data.py --incremental --days 7
 
-### Integration with Neo
-
-- Added `market_data` to `neo_mcp/db.py` SERVICE_URLS
-- Default URL: `https://kdt-market-data.up.railway.app`
-- Neo can now query FDA events and clinical trials
+# Specific sponsor
+python sync_data.py --full --sponsor "Pfizer"
+```
 
 ---
 
