@@ -1,0 +1,35 @@
+name: Sync Clinical Trials
+
+on:
+  schedule:
+    # Run every Sunday at 2am UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.com/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Sync Clinical Trials
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          # Run sync on Railway service via SSH
+          railway ssh \
+            -p f62b4e36-a0b8-49ab-920b-97468cde5512 \
+            -e 7ea49833-2531-4b5d-8ed7-25fb33101d61 \
+            -s market_data \
+            -- python /app/sync_data.py --trials-only
+
+      - name: Verify Sync
+        run: |
+          echo "Checking data stats..."
+          curl -s https://marketdata-production.up.railway.app/api/stats | jq .
