@@ -847,26 +847,6 @@
         .flip-card-back {
             transform: rotateY(180deg);
         }
-        /* Flip hint icon */
-        .flip-hint {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
-        .flip-card:hover .flip-hint {
-            opacity: 0.8;
-        }
-        .flip-hint-text {
-            font-size: 10px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
         /* Line clamp utilities */
         .line-clamp-2 {
             display: -webkit-box;
@@ -2197,13 +2177,7 @@
                                         <span class="text-xs font-medium flex-shrink-0 ${statusColor}">${statusLabel}</span>
                                     </div>
                                 </div>
-                                <div class="flip-hint text-dark-400">
-                                    <span class="flip-hint-text">Flip</span>
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </div>
+                                                            </div>
                             <!-- Back of card -->
                             <a href="https://clinicaltrials.gov/study/${nctId}" target="_blank" rel="noopener"
                                class="flip-card-back flex flex-col p-4 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 hover:border-indigo-300 dark:hover:border-indigo-700 cursor-pointer"
@@ -2230,13 +2204,7 @@
                                         <p class="mt-0.5 text-dark-600 dark:text-dark-300 line-clamp-2" title="${secondaryEndpoint}">${truncate(secondaryEndpoint, 80)}</p>
                                     </div>
                                 </div>
-                                <div class="flip-hint text-dark-400">
-                                    <span class="flip-hint-text">Flip</span>
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                    </svg>
-                                </div>
-                            </a>
+                                                            </a>
                         </div>
                     </div>
                 `;
