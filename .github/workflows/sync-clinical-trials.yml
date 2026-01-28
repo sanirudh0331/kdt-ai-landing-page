@@ -21,16 +21,16 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Sync Clinical Trials
+      - name: Sync Clinical Trials (Incremental)
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          # Run sync on Railway service via SSH
+          # Incremental sync: only trials updated in last 7 days
           railway ssh \
             -p f62b4e36-a0b8-49ab-920b-97468cde5512 \
             -e 7ea49833-2531-4b5d-8ed7-25fb33101d61 \
             -s market_data \
-            -- python /app/sync_data.py --trials-only
+            -- python /app/sync_data.py --incremental --days 7
 
       - name: Verify Sync
         run: |

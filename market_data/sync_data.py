@@ -214,8 +214,9 @@ def fetch_trials(
     status: Optional[str] = None,
     statuses: Optional[list] = None,
     min_date: Optional[str] = None,
+    updated_since: Optional[str] = None,
     page_size: int = 100,
-    max_pages: int = 10,
+    max_pages: int = 100,
 ) -> list:
     """Fetch trials from ClinicalTrials.gov API.
 
@@ -225,6 +226,7 @@ def fetch_trials(
         status: Single status filter (deprecated, use statuses)
         statuses: List of statuses to filter by
         min_date: Minimum study first posted date (YYYY-MM-DD)
+        updated_since: Only fetch trials updated since this date (YYYY-MM-DD)
         page_size: Results per page
         max_pages: Maximum pages to fetch
     """
@@ -244,6 +246,8 @@ def fetch_trials(
             query_parts.append(f"AREA[Condition]{condition}")
         if min_date:
             query_parts.append(f"AREA[StudyFirstPostDate]RANGE[{min_date},MAX]")
+        if updated_since:
+            query_parts.append(f"AREA[LastUpdatePostDate]RANGE[{updated_since},MAX]")
 
         # Handle status filtering
         if statuses:
@@ -372,21 +376,158 @@ def upsert_trial(conn: sqlite3.Connection, trial: dict) -> str:
         return "updated"
 
 
+def sync_clinical_trials_incremental(days: int = 7):
+    """Incremental sync: fetch only trials updated in the last N days.
+
+    This is for weekly cron jobs - only fetches changes, not everything.
+    """
+    from datetime import datetime, timedelta
+
+    print("\n=== Incremental Clinical Trials Sync ===")
+
+    # Calculate date range
+    since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    print(f"Fetching trials updated since: {since_date}")
+
+    # Ensure directory exists
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    conn = sqlite3.connect(TRIALS_DB_PATH)
+    create_trials_table(conn)
+
+    stats = {"inserted": 0, "updated": 0, "errors": 0}
+
+    # Fetch ALL trials updated in the last N days (no sponsor filter)
+    print(f"\nFetching all trials updated in last {days} days...")
+    trials = fetch_trials(
+        updated_since=since_date,
+        max_pages=500,  # Allow many pages for full scan
+    )
+    print(f"Found {len(trials)} updated trials")
+
+    for study in trials:
+        try:
+            trial = parse_trial(study)
+            result = upsert_trial(conn, trial)
+            stats[result] += 1
+        except Exception as e:
+            print(f"  Error parsing trial: {e}")
+            stats["errors"] += 1
+
+    conn.commit()
+
+    # Final stats
+    cursor = conn.execute("SELECT COUNT(*) FROM clinical_trials")
+    total = cursor.fetchone()[0]
+
+    cursor = conn.execute("""
+        SELECT status, COUNT(*) as cnt FROM clinical_trials
+        GROUP BY status ORDER BY cnt DESC
+    """)
+    status_breakdown = cursor.fetchall()
+
+    conn.close()
+
+    print(f"\n{'='*50}")
+    print(f"Incremental sync complete!")
+    print(f"  Inserted: {stats['inserted']}")
+    print(f"  Updated: {stats['updated']}")
+    print(f"  Errors: {stats['errors']}")
+    print(f"  Total in DB: {total}")
+    print(f"\nBy status:")
+    for status, cnt in status_breakdown:
+        print(f"  {status}: {cnt}")
+    print(f"\nDatabase: {TRIALS_DB_PATH}")
+
+
+def sync_clinical_trials_full(min_posted_date: str = "2023-01-01"):
+    """Full sync: fetch ALL trials posted since a date (no sponsor filter).
+
+    Use this for initial population or to backfill data.
+    """
+    print("\n=== Full Clinical Trials Sync ===")
+    print(f"Fetching ALL trials posted since: {min_posted_date}")
+
+    # Ensure directory exists
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    conn = sqlite3.connect(TRIALS_DB_PATH)
+    create_trials_table(conn)
+
+    stats = {"inserted": 0, "updated": 0, "errors": 0}
+
+    # Part 1: All active trials (any date)
+    print(f"\nFetching all active trials...")
+    active_trials = fetch_trials(
+        statuses=ACTIVE_STATUSES,
+        max_pages=500,
+    )
+    print(f"Found {len(active_trials)} active trials")
+
+    for study in active_trials:
+        try:
+            trial = parse_trial(study)
+            result = upsert_trial(conn, trial)
+            stats[result] += 1
+        except Exception as e:
+            print(f"  Error parsing trial: {e}")
+            stats["errors"] += 1
+
+    conn.commit()
+    print(f"  Processed active trials: {stats['inserted']} inserted, {stats['updated']} updated")
+
+    # Part 2: Completed trials since cutoff
+    print(f"\nFetching completed trials since {min_posted_date}...")
+    completed_trials = fetch_trials(
+        statuses=COMPLETED_STATUSES,
+        min_date=min_posted_date,
+        max_pages=500,
+    )
+    print(f"Found {len(completed_trials)} completed trials")
+
+    for study in completed_trials:
+        try:
+            trial = parse_trial(study)
+            result = upsert_trial(conn, trial)
+            stats[result] += 1
+        except Exception as e:
+            print(f"  Error parsing trial: {e}")
+            stats["errors"] += 1
+
+    conn.commit()
+
+    # Final stats
+    cursor = conn.execute("SELECT COUNT(*) FROM clinical_trials")
+    total = cursor.fetchone()[0]
+
+    cursor = conn.execute("""
+        SELECT status, COUNT(*) as cnt FROM clinical_trials
+        GROUP BY status ORDER BY cnt DESC
+    """)
+    status_breakdown = cursor.fetchall()
+
+    conn.close()
+
+    print(f"\n{'='*50}")
+    print(f"Full sync complete!")
+    print(f"  Inserted: {stats['inserted']}")
+    print(f"  Updated: {stats['updated']}")
+    print(f"  Errors: {stats['errors']}")
+    print(f"  Total in DB: {total}")
+    print(f"\nBy status:")
+    for status, cnt in status_breakdown:
+        print(f"  {status}: {cnt}")
+    print(f"\nDatabase: {TRIALS_DB_PATH}")
+
+
 def sync_clinical_trials(
     sponsor: Optional[str] = None,
     max_sponsors: int = 17,
     active_only: bool = False,
     completed_since: str = "2023-01-01",
 ):
-    """Sync clinical trials data using Option C: all active + recent completed.
-
-    Args:
-        sponsor: Sync only this sponsor (optional)
-        max_sponsors: Max sponsors to sync (default: all 17)
-        active_only: Only sync active trials (skip completed)
-        completed_since: Date cutoff for completed trials (default: 2023-01-01)
-    """
-    print("\n=== Syncing Clinical Trials ===")
+    """Legacy sync by sponsor list. Use sync_clinical_trials_full instead."""
+    print("\n=== Syncing Clinical Trials (by sponsor) ===")
     print(f"Strategy: All active trials + completed since {completed_since}")
 
     # Ensure directory exists
@@ -475,12 +616,25 @@ def sync_clinical_trials(
 
 def main():
     parser = argparse.ArgumentParser(description="Sync market data to SQLite")
+
+    # Mode selection
     parser.add_argument("--fda-only", action="store_true", help="Only sync FDA calendar")
     parser.add_argument("--trials-only", action="store_true", help="Only sync clinical trials")
-    parser.add_argument("--sponsor", help="Sync trials for specific sponsor")
-    parser.add_argument("--max-sponsors", type=int, default=17, help="Max sponsors to sync (default: all 17)")
-    parser.add_argument("--active-only", action="store_true", help="Only sync active trials (skip completed)")
-    parser.add_argument("--completed-since", default="2023-01-01", help="Date cutoff for completed trials (default: 2023-01-01)")
+
+    # Clinical trials sync mode
+    parser.add_argument("--incremental", action="store_true",
+                        help="Incremental sync: only trials updated in last N days (for weekly cron)")
+    parser.add_argument("--full", action="store_true",
+                        help="Full sync: ALL trials (active + completed since 2023)")
+    parser.add_argument("--days", type=int, default=7,
+                        help="Days to look back for incremental sync (default: 7)")
+    parser.add_argument("--since", default="2023-01-01",
+                        help="Date cutoff for full sync completed trials (default: 2023-01-01)")
+
+    # Legacy sponsor-based sync
+    parser.add_argument("--sponsor", help="Sync trials for specific sponsor (legacy)")
+    parser.add_argument("--max-sponsors", type=int, default=17, help="Max sponsors (legacy)")
+
     args = parser.parse_args()
 
     print("KdT Market Data Sync")
@@ -489,21 +643,23 @@ def main():
 
     if args.fda_only:
         sync_fda_calendar()
-    elif args.trials_only:
-        sync_clinical_trials(
-            sponsor=args.sponsor,
-            max_sponsors=args.max_sponsors,
-            active_only=args.active_only,
-            completed_since=args.completed_since,
-        )
+    elif args.trials_only or args.incremental or args.full:
+        if args.incremental:
+            # Weekly cron job: only updated trials
+            sync_clinical_trials_incremental(days=args.days)
+        elif args.full:
+            # Full sync: all trials
+            sync_clinical_trials_full(min_posted_date=args.since)
+        elif args.sponsor:
+            # Legacy: specific sponsor
+            sync_clinical_trials(sponsor=args.sponsor)
+        else:
+            # Default: incremental (safe for cron)
+            sync_clinical_trials_incremental(days=args.days)
     else:
+        # Sync everything
         sync_fda_calendar()
-        sync_clinical_trials(
-            sponsor=args.sponsor,
-            max_sponsors=args.max_sponsors,
-            active_only=args.active_only,
-            completed_since=args.completed_since,
-        )
+        sync_clinical_trials_incremental(days=args.days)
 
     print("\n" + "=" * 50)
     print("Sync complete!")
