@@ -4,6 +4,109 @@
 
 ---
 
+## Router v2: Smart Question Routing (2026-01-28)
+
+### Summary
+Major upgrade to question router with 5 new improvements. Reduces API costs and improves response speed for common queries.
+
+### Improvements Implemented
+
+| # | Improvement | Description | Benefit |
+|---|-------------|-------------|---------|
+| 1 | **Clinical Trials Tier 2 Patterns** | Parameterized queries for trials | Fast responses without LLM |
+| 2 | **Cross-Database Patterns** | Detects multi-DB questions | Better routing hints for agent |
+| 3 | **Keyword-Based DB Routing** | Maps keywords to databases | Faster DB detection |
+| 4 | **Intent Detection** | Regex-based intent classification | No LLM needed for routing |
+| 5 | **Cached Aggregations** | TTL cache for common agg queries | 5min cache, instant responses |
+
+### New Clinical Trials Tier 2 Patterns
+
+These queries now execute instantly (no Claude API call):
+
+| Pattern | Example |
+|---------|---------|
+| `trials for {condition}` | "Trials for cancer?" |
+| `{sponsor}'s trials` | "Pfizer's clinical trials" |
+| `recruiting trials for {field}` | "Recruiting trials for diabetes" |
+| `phase N trials for {condition}` | "Phase 3 trials for Alzheimer's" |
+| `top N sponsors by trials` | "Top 10 sponsors by trial count" |
+| `trials started in {year}` | "Trials started in 2024" |
+
+### Keyword-Based Database Detection
+
+Router now maps keywords to databases:
+
+```python
+DB_KEYWORDS = {
+    "researchers": ["h-index", "citations", "rising star", "hidden gem", ...],
+    "patents": ["patent", "assignee", "claims", "filing", ...],
+    "grants": ["grant", "funding", "nih", "nsf", "r01", ...],
+    "market_data": ["trial", "recruiting", "phase", "sponsor", "fda", ...],
+    "portfolio": ["portfolio", "company", "modality", "indication", ...],
+    "policies": ["bill", "policy", "legislation", "congress", ...],
+}
+```
+
+### Intent Detection (Regex-Based)
+
+Detects user intent without LLM:
+
+| Intent | Patterns |
+|--------|----------|
+| `count` | "how many", "number of", "total count" |
+| `list` | "list all", "show me", "what are", "find" |
+| `top_n` | "top 5", "best 10", "highest", "most" |
+| `compare` | "compare", "vs", "difference between" |
+| `lookup` | "what is", "tell me about", "who is" |
+| `aggregate` | "total", "sum", "average", "by status" |
+| `filter` | "where", "with", "greater than", "over $1M" |
+| `cross_db` | "researchers with patents", "grants and trials" |
+
+### Cached Aggregations
+
+Common aggregation queries are cached for 5 minutes:
+
+| Cache Key | Description |
+|-----------|-------------|
+| `trials_by_status` | Count by RECRUITING, COMPLETED, etc. |
+| `trials_by_phase` | Count by Phase 1, 2, 3, 4 |
+| `trials_by_sponsor` | Top 20 sponsors |
+| `grants_by_institute` | Top 20 institutes by funding |
+| `researchers_by_category` | Top 20 research categories |
+
+### Routing Hints for Tier 3
+
+When questions require the full Claude agent, router now provides hints:
+
+```json
+{
+  "tier": 3,
+  "tier_name": "agent",
+  "needs_agent": true,
+  "routing_hints": {
+    "detected_dbs": ["researchers", "patents"],
+    "intents": ["list", "cross_db"],
+    "hint": "cross_db",
+    "suggested_queries": [...]
+  }
+}
+```
+
+### Cost Impact
+
+| Query Type | Before | After |
+|------------|--------|-------|
+| "How many recruiting trials?" | Claude API call | Instant SQL |
+| "Pfizer's trials" | Claude API call | Tier 2 template |
+| "Trials by status" | Claude API call | Cached (5min) |
+| Complex cross-DB | Claude API call | Claude + hints |
+
+### Files Changed
+
+- `neo_mcp/router.py` - All 5 improvements implemented
+
+---
+
 ## Clinical Trials Integration Complete (2026-01-28)
 
 ### Summary

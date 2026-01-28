@@ -5,16 +5,179 @@ Classifies questions into tiers to avoid unnecessary LLM calls.
 Tier 1 (instant): Direct SQL lookups - stats, counts, simple filters
 Tier 2 (fast): Parameterized queries - rising stars in X field, top N by metric
 Tier 3 (full agent): Complex multi-DB reasoning requiring Claude
+
+Router Improvements (v2):
+- Keyword-based database routing
+- Intent detection for better classification
+- Cached aggregations with TTL
+- Cross-database pattern support
+- Clinical trials Tier 2 patterns
 """
 
 import re
 import json
-from typing import Optional, Tuple, List
+import time
+from typing import Optional, Tuple, List, Dict, Any
 
 try:
     from db import execute_query, list_tables
 except ImportError:
     from neo_mcp.db import execute_query, list_tables
+
+
+# =============================================================================
+# IMPROVEMENT 3: Keyword-based database routing
+# =============================================================================
+DB_KEYWORDS = {
+    "researchers": [
+        "researcher", "researchers", "scientist", "scientists", "professor",
+        "h-index", "h_index", "hindex", "citations", "publications", "slope",
+        "rising star", "hidden gem", "talent", "academic", "author"
+    ],
+    "patents": [
+        "patent", "patents", "invention", "inventions", "assignee", "claims",
+        "filing", "intellectual property", "ip", "patent number"
+    ],
+    "grants": [
+        "grant", "grants", "funding", "nih", "nsf", "r01", "award",
+        "pi", "principal investigator", "fiscal year", "institute"
+    ],
+    "market_data": [
+        "trial", "trials", "clinical trial", "clinical trials", "phase",
+        "recruiting", "sponsor", "fda", "drug", "intervention", "nct",
+        "enrollment", "completed", "terminated", "suspended"
+    ],
+    "portfolio": [
+        "portfolio", "company", "companies", "startup", "modality",
+        "indication", "competitive advantage", "investment"
+    ],
+    "policies": [
+        "bill", "bills", "policy", "policies", "legislation", "congress",
+        "senate", "house", "law", "regulation"
+    ],
+}
+
+
+def detect_databases(question: str) -> List[str]:
+    """Detect which databases a question likely refers to."""
+    question_lower = question.lower()
+    detected = []
+
+    for db, keywords in DB_KEYWORDS.items():
+        for keyword in keywords:
+            if keyword in question_lower:
+                if db not in detected:
+                    detected.append(db)
+                break
+
+    return detected
+
+
+# =============================================================================
+# IMPROVEMENT 4: Intent detection (regex-based, no LLM)
+# =============================================================================
+INTENT_PATTERNS = {
+    "count": [
+        r"how many", r"count of", r"number of", r"total (?:number|count)",
+    ],
+    "list": [
+        r"list (?:all|the)?", r"show (?:me )?(?:all|the)?", r"what are",
+        r"who are", r"find (?:all|the)?", r"get (?:all|the)?",
+    ],
+    "top_n": [
+        r"top \d+", r"best \d+", r"highest \d+", r"largest \d+",
+        r"most \w+", r"biggest",
+    ],
+    "compare": [
+        r"compare", r"versus", r" vs\.?[ $]", r"difference between",
+        r"how does .+ compare",
+    ],
+    "lookup": [
+        r"what is", r"tell me about", r"info on", r"details (?:on|about|for)",
+        r"who is", r"describe",
+    ],
+    "aggregate": [
+        r"total", r"sum of", r"average", r"mean", r"median",
+        r"by (?:status|phase|year|sponsor|category|field)",
+    ],
+    "filter": [
+        r"where", r"with", r"that have", r"greater than", r"less than",
+        r"more than", r"over \$?\d+", r"under \$?\d+", r"between",
+    ],
+    "cross_db": [
+        r"and (?:also|their|any)", r"who .+ and .+ have",
+        r"researchers .+ patents", r"researchers .+ trials",
+        r"companies .+ patents", r"grants .+ trials",
+        r"for each", r"across", r"both .+ and",
+    ],
+}
+
+
+def detect_intent(question: str) -> List[str]:
+    """Detect the intent(s) of a question using regex patterns."""
+    question_lower = question.lower()
+    intents = []
+
+    for intent, patterns in INTENT_PATTERNS.items():
+        for pattern in patterns:
+            if re.search(pattern, question_lower):
+                if intent not in intents:
+                    intents.append(intent)
+                break
+
+    return intents if intents else ["general"]
+
+
+# =============================================================================
+# IMPROVEMENT 5: Cached aggregations with TTL
+# =============================================================================
+AGGREGATION_CACHE: Dict[str, Dict[str, Any]] = {}
+CACHE_TTL_SECONDS = 300  # 5 minutes
+
+CACHED_AGGREGATIONS = {
+    "trials_by_status": {
+        "db": "market_data",
+        "query": "SELECT status, COUNT(*) as count FROM clinical_trials GROUP BY status ORDER BY count DESC",
+        "description": "Clinical trials count by status",
+    },
+    "trials_by_phase": {
+        "db": "market_data",
+        "query": "SELECT phase, COUNT(*) as count FROM clinical_trials GROUP BY phase ORDER BY count DESC",
+        "description": "Clinical trials count by phase",
+    },
+    "trials_by_sponsor": {
+        "db": "market_data",
+        "query": "SELECT sponsor, COUNT(*) as count FROM clinical_trials GROUP BY sponsor ORDER BY count DESC LIMIT 20",
+        "description": "Top 20 sponsors by trial count",
+    },
+    "grants_by_institute": {
+        "db": "grants",
+        "query": "SELECT institute, COUNT(*) as count, SUM(total_cost) as total_funding FROM grants GROUP BY institute ORDER BY total_funding DESC LIMIT 20",
+        "description": "Top 20 institutes by grant funding",
+    },
+    "researchers_by_category": {
+        "db": "researchers",
+        "query": "SELECT primary_category, COUNT(*) as count, AVG(h_index) as avg_h_index FROM researchers GROUP BY primary_category ORDER BY count DESC LIMIT 20",
+        "description": "Top 20 research categories",
+    },
+}
+
+
+def get_cached_aggregation(key: str) -> Optional[Dict]:
+    """Get a cached aggregation if it exists and is not expired."""
+    if key in AGGREGATION_CACHE:
+        cached = AGGREGATION_CACHE[key]
+        if time.time() - cached["timestamp"] < CACHE_TTL_SECONDS:
+            return cached["data"]
+    return None
+
+
+def set_cached_aggregation(key: str, data: Dict) -> None:
+    """Cache an aggregation result."""
+    AGGREGATION_CACHE[key] = {
+        "data": data,
+        "timestamp": time.time(),
+    }
 
 # Service URLs for entity links (same as agent.py)
 ENTITY_URLS = {
@@ -23,6 +186,7 @@ ENTITY_URLS = {
     "grants": "https://grants-tracker-production.up.railway.app/grant",
     "policies": "https://policywatch.up.railway.app/bill",
     "portfolio": "https://web-production-a9d068.up.railway.app/company",
+    "market_data": "https://clinicaltrials.gov/study",  # Links to ClinicalTrials.gov
 }
 
 
@@ -85,6 +249,18 @@ def extract_entities_from_rows(db: str, rows: list) -> List[dict]:
                     "name": row.get("name", "Unknown"),
                     "url": f"{base_url}/{company_id}",
                     "meta": row.get("modality", "")
+                }
+
+        elif db == "market_data":
+            nct_id = row.get("nct_id")
+            if nct_id:
+                title = row.get("title", "Untitled Trial")
+                entity = {
+                    "type": "clinical_trial",
+                    "id": nct_id,
+                    "name": title[:50] + "..." if len(title) > 50 else title,
+                    "url": f"{base_url}/{nct_id}",
+                    "meta": f"{row.get('status', '')} | {row.get('phase', '')}"
                 }
 
         if entity:
@@ -189,6 +365,123 @@ TIER2_PATTERNS = [
             LIMIT 1
         """
     ),
+
+    # =============================================================================
+    # IMPROVEMENT 1: Clinical trials Tier 2 patterns
+    # =============================================================================
+    # Trials for a condition/disease
+    (
+        r"(?:clinical )?trials? (?:for|treating|in) (?P<condition>[a-zA-Z\s]+?)(?:\?|$|,| and)",
+        "market_data",
+        lambda m: f"""
+            SELECT id, nct_id, title, status, phase, sponsor, start_date
+            FROM clinical_trials
+            WHERE (title LIKE '%{m.group('condition').strip()}%'
+                   OR conditions LIKE '%{m.group('condition').strip()}%')
+            ORDER BY start_date DESC LIMIT 15
+        """
+    ),
+
+    # Trials by a sponsor
+    (
+        r"(?P<sponsor>\w+(?:\s+\w+)?)'?s? (?:clinical )?trials?",
+        "market_data",
+        lambda m: f"""
+            SELECT id, nct_id, title, status, phase, conditions, start_date
+            FROM clinical_trials
+            WHERE sponsor LIKE '%{m.group('sponsor').strip()}%'
+            ORDER BY start_date DESC LIMIT 15
+        """
+    ),
+
+    # Recruiting trials in a field
+    (
+        r"recruiting (?:clinical )?trials? (?:for|in|treating) (?P<field>[a-zA-Z\s]+)",
+        "market_data",
+        lambda m: f"""
+            SELECT id, nct_id, title, phase, sponsor, enrollment, start_date
+            FROM clinical_trials
+            WHERE status = 'RECRUITING'
+              AND (title LIKE '%{m.group('field').strip()}%'
+                   OR conditions LIKE '%{m.group('field').strip()}%')
+            ORDER BY enrollment DESC LIMIT 15
+        """
+    ),
+
+    # Phase N trials for a condition
+    (
+        r"phase ?(?P<phase>\d) (?:clinical )?trials? (?:for|in|treating) (?P<condition>[a-zA-Z\s]+)",
+        "market_data",
+        lambda m: f"""
+            SELECT id, nct_id, title, status, sponsor, enrollment, start_date
+            FROM clinical_trials
+            WHERE phase LIKE '%PHASE{m.group('phase')}%'
+              AND (title LIKE '%{m.group('condition').strip()}%'
+                   OR conditions LIKE '%{m.group('condition').strip()}%')
+            ORDER BY start_date DESC LIMIT 15
+        """
+    ),
+
+    # Top sponsors by trial count
+    (
+        r"top (?P<n>\d+)? ?sponsors? (?:by|with) (?:most )?trials?",
+        "market_data",
+        lambda m: f"""
+            SELECT sponsor, COUNT(*) as trial_count,
+                   SUM(CASE WHEN status = 'RECRUITING' THEN 1 ELSE 0 END) as recruiting
+            FROM clinical_trials
+            GROUP BY sponsor
+            ORDER BY trial_count DESC
+            LIMIT {m.group('n') or 10}
+        """
+    ),
+
+    # Trials starting/posted in a year
+    (
+        r"(?:clinical )?trials? (?:started|posted|from|in) (?P<year>20\d{2})",
+        "market_data",
+        lambda m: f"""
+            SELECT id, nct_id, title, status, phase, sponsor
+            FROM clinical_trials
+            WHERE start_date LIKE '{m.group('year')}%'
+            ORDER BY start_date DESC LIMIT 20
+        """
+    ),
+]
+
+
+# =============================================================================
+# IMPROVEMENT 2: Cross-database patterns
+# These require multiple DB queries and light processing
+# =============================================================================
+CROSS_DB_PATTERNS = [
+    # Researchers with patents
+    {
+        "pattern": r"researchers? (?:with|who have) patents?",
+        "queries": [
+            ("researchers", "SELECT id, name, h_index, affiliations FROM researchers ORDER BY h_index DESC LIMIT 50"),
+            ("patents", "SELECT assignee, COUNT(*) as patent_count FROM patents GROUP BY assignee"),
+        ],
+        "join_hint": "Match researcher affiliations with patent assignees",
+    },
+    # Trials by companies in our portfolio
+    {
+        "pattern": r"(?:clinical )?trials? (?:by|from|for) (?:our )?portfolio (?:companies)?",
+        "queries": [
+            ("portfolio", "SELECT id, name FROM companies"),
+            ("market_data", "SELECT sponsor, COUNT(*) as trial_count, SUM(CASE WHEN status='RECRUITING' THEN 1 ELSE 0 END) as recruiting FROM clinical_trials GROUP BY sponsor"),
+        ],
+        "join_hint": "Match portfolio company names with trial sponsors",
+    },
+    # Grants related to active trials
+    {
+        "pattern": r"grants? (?:related to|for|in) (?:active|recruiting) (?:clinical )?trials?",
+        "queries": [
+            ("market_data", "SELECT DISTINCT conditions FROM clinical_trials WHERE status = 'RECRUITING' LIMIT 100"),
+            ("grants", "SELECT id, title, total_cost, institute FROM grants ORDER BY total_cost DESC LIMIT 100"),
+        ],
+        "join_hint": "Match trial conditions with grant research areas",
+    },
 ]
 
 
@@ -203,6 +496,61 @@ def classify_question(question: str) -> Tuple[int, Optional[dict]]:
         - Tier 3: (3, None) - needs full agent
     """
     question_lower = question.lower().strip()
+
+    # Detect intent and databases for routing hints
+    intents = detect_intent(question)
+    detected_dbs = detect_databases(question)
+
+    # Check for cached aggregations first (Improvement 5)
+    for agg_key, agg_config in CACHED_AGGREGATIONS.items():
+        # Match common aggregation queries
+        if agg_key == "trials_by_status" and re.search(r"trials? by status", question_lower):
+            cached = get_cached_aggregation(agg_key)
+            if cached:
+                return (1, cached)
+            try:
+                result = execute_query(agg_config["db"], agg_config["query"])
+                if result["rows"]:
+                    response = {
+                        "answer": format_aggregation_response(result["rows"], agg_config["description"]),
+                        "data": result["rows"],
+                    }
+                    set_cached_aggregation(agg_key, response)
+                    return (1, response)
+            except Exception:
+                pass
+
+        elif agg_key == "trials_by_phase" and re.search(r"trials? by phase", question_lower):
+            cached = get_cached_aggregation(agg_key)
+            if cached:
+                return (1, cached)
+            try:
+                result = execute_query(agg_config["db"], agg_config["query"])
+                if result["rows"]:
+                    response = {
+                        "answer": format_aggregation_response(result["rows"], agg_config["description"]),
+                        "data": result["rows"],
+                    }
+                    set_cached_aggregation(agg_key, response)
+                    return (1, response)
+            except Exception:
+                pass
+
+        elif agg_key == "trials_by_sponsor" and re.search(r"top sponsors?", question_lower):
+            cached = get_cached_aggregation(agg_key)
+            if cached:
+                return (1, cached)
+            try:
+                result = execute_query(agg_config["db"], agg_config["query"])
+                if result["rows"]:
+                    response = {
+                        "answer": format_aggregation_response(result["rows"], agg_config["description"]),
+                        "data": result["rows"],
+                    }
+                    set_cached_aggregation(agg_key, response)
+                    return (1, response)
+            except Exception:
+                pass
 
     # Check Tier 1 patterns
     for pattern, db, query in TIER1_PATTERNS:
@@ -261,8 +609,56 @@ def classify_question(question: str) -> Tuple[int, Optional[dict]]:
             except Exception as e:
                 return (3, None)  # Fall back to agent
 
+    # Check cross-database patterns (Improvement 2)
+    if "cross_db" in intents or len(detected_dbs) > 1:
+        for cross_pattern in CROSS_DB_PATTERNS:
+            if re.search(cross_pattern["pattern"], question_lower):
+                # For now, flag as Tier 3 with routing hints
+                # Future: could execute both queries and do light joining
+                return (3, {
+                    "routing_hint": "cross_db",
+                    "detected_dbs": detected_dbs,
+                    "intents": intents,
+                    "suggested_queries": cross_pattern["queries"],
+                })
+
     # Tier 3: Complex question requiring full agent
-    return (3, None)
+    # Include routing hints for the agent
+    return (3, {
+        "routing_hint": "complex",
+        "detected_dbs": detected_dbs,
+        "intents": intents,
+    } if detected_dbs or intents != ["general"] else None)
+
+
+def format_aggregation_response(rows: list, description: str) -> str:
+    """Format aggregation query results."""
+    if not rows:
+        return "No data found."
+
+    lines = [f"**{description}**", ""]
+
+    # Determine column headers from first row
+    if rows:
+        headers = list(rows[0].keys())
+        header_line = "| " + " | ".join(h.replace("_", " ").title() for h in headers) + " |"
+        separator = "|" + "|".join("-" * (len(h) + 2) for h in headers) + "|"
+        lines.extend([header_line, separator])
+
+        for row in rows[:15]:
+            values = []
+            for h in headers:
+                val = row.get(h, "")
+                if isinstance(val, (int, float)) and h in ("total_funding", "total_cost"):
+                    val = f"${val:,.0f}"
+                elif isinstance(val, float):
+                    val = f"{val:.1f}"
+                elif isinstance(val, int):
+                    val = f"{val:,}"
+                values.append(str(val)[:30])
+            lines.append("| " + " | ".join(values) + " |")
+
+    return "\n".join(lines)
 
 
 def format_tier2_response(result: dict, db: str) -> str:
@@ -307,6 +703,17 @@ def format_tier2_response(result: dict, db: str) -> str:
 - Advantage: {r.get('competitive_advantage', '?')}
 - Indications: {r.get('indications', '?')}"""
 
+    elif db == "market_data":
+        # Clinical trials formatting
+        lines = ["| Title | Status | Phase | Sponsor |", "|-------|--------|-------|---------|"]
+        for r in rows[:10]:
+            title = (r.get("title") or "?")[:35]
+            status = (r.get("status") or "?")[:12]
+            phase = (r.get("phase") or "?")[:10]
+            sponsor = (r.get("sponsor") or "?")[:20]
+            lines.append(f"| {title} | {status} | {phase} | {sponsor} |")
+        return "\n".join(lines)
+
     else:
         return json.dumps(rows[:5], indent=2)
 
@@ -323,6 +730,7 @@ def route_question(question: str) -> dict:
 
     Returns:
         dict with 'tier', 'answer', 'data', 'needs_agent'
+        For Tier 3: may include 'routing_hints' with detected_dbs and intents
     """
     tier, result = classify_question(question)
 
@@ -346,24 +754,48 @@ def route_question(question: str) -> dict:
             "needs_agent": False,
         }
     else:
-        return {
+        # Tier 3 - include routing hints if available
+        response = {
             "tier": 3,
             "tier_name": "agent",
             "needs_agent": True,
         }
+        if result:
+            response["routing_hints"] = {
+                "detected_dbs": result.get("detected_dbs", []),
+                "intents": result.get("intents", []),
+                "hint": result.get("routing_hint", "complex"),
+            }
+            if result.get("suggested_queries"):
+                response["routing_hints"]["suggested_queries"] = result["suggested_queries"]
+        return response
 
 
 if __name__ == "__main__":
     # Test the router
     test_questions = [
+        # Tier 1: Instant counts
         "How many researchers are in the database?",
         "How many patents?",
         "What's the total grant funding?",
+        "How many clinical trials?",
+        "How many recruiting trials?",
+        "How many phase 3 trials?",
+
+        # Tier 2: Parameterized queries
         "Who are the rising stars in immunology?",
         "Top 5 researchers in machine learning",
         "What grants are there for Parkinson's?",
-        "For Epana, which researchers should we talk to?",  # Should be Tier 3
+        "Trials for cancer?",
+        "Pfizer's clinical trials",
+        "Recruiting trials for diabetes",
+        "Phase 3 trials for Alzheimer's",
+
+        # Tier 3: Complex / Cross-DB
+        "For Epana, which researchers should we talk to?",  # Tier 3
         "Compare patent landscapes across three portfolio companies",  # Tier 3
+        "Researchers with patents in oncology",  # Cross-DB
+        "Trials by our portfolio companies",  # Cross-DB
     ]
 
     for q in test_questions:
@@ -372,3 +804,5 @@ if __name__ == "__main__":
         print(f"Tier: {result['tier']} ({result['tier_name']})")
         if not result["needs_agent"]:
             print(f"Answer: {result['answer'][:100]}...")
+        elif result.get("routing_hints"):
+            print(f"Hints: DBs={result['routing_hints'].get('detected_dbs')}, Intents={result['routing_hints'].get('intents')}")
