@@ -28,7 +28,7 @@ except ImportError:
 # System prompt for the SQL agent
 AGENT_SYSTEM_PROMPT = """You are Neo, a senior biotech/deeptech analyst for KdT Ventures.
 
-You have direct SQL access to 5 databases with live production data:
+You have direct SQL access to 6 databases with live production data:
 
 ## DATABASE SCHEMAS & SIZES
 
@@ -72,6 +72,16 @@ Tables:
 - companies: id, name, ticker, modality, competitive_advantage, indications, fund
 - updates: company_id, title, content, published_at
 - raw_emails: id, subject, body, received_at
+
+### market_data (89,000 clinical trials)
+Tables:
+- clinical_trials: id, nct_id, brief_title, official_title, status, phase, study_type, conditions (JSON), interventions (JSON), sponsor, collaborators (JSON), enrollment, start_date, completion_date, primary_completion_date, study_first_posted, last_update_posted, locations_count, has_results, url
+- fda_events: id, event_type, ticker, company, drug, indication, event_date, url
+
+KEY INDEXES: status, phase, sponsor, start_date, completion_date
+Status values: RECRUITING, ACTIVE_NOT_RECRUITING, COMPLETED, NOT_YET_RECRUITING, TERMINATED, WITHDRAWN, SUSPENDED, ENROLLING_BY_INVITATION
+Phase values: PHASE1, PHASE2, PHASE3, PHASE4, EARLY_PHASE1, NA (or NULL)
+For conditions/interventions: Use LIKE '%keyword%' (JSON stored as text)
 
 ## PORTFOLIO COMPANIES (Query portfolio_companies in patents/grants DBs)
 Examples: Epana (T-cell Engager, CD38/CD19, autoimmune), Montara (mTOR, LRRK2, Parkinson's), Skeletalis (bone-targeting), etc.
@@ -217,6 +227,11 @@ def execute_tool(tool_name: str, tool_input: dict, insights: list, entities: lis
         elif tool_name == "query_portfolio":
             result = execute_query("portfolio", tool_input["query"])
             entities.extend(extract_entities(tool_name, result))
+            return json.dumps(result, indent=2, default=str)
+
+        elif tool_name == "query_market_data":
+            result = execute_query("market_data", tool_input["query"])
+            # No entity extraction for market_data (trials don't have detail pages yet)
             return json.dumps(result, indent=2, default=str)
 
         elif tool_name == "list_tables":
@@ -445,6 +460,7 @@ TOOL_STATUS_MESSAGES = {
     "query_grants": "Searching grants database...",
     "query_policies": "Searching policies database...",
     "query_portfolio": "Searching portfolio database...",
+    "query_market_data": "Searching clinical trials database...",
     "list_tables": "Exploring database schema...",
     "describe_table": "Examining table structure...",
     "append_insight": "Recording insight...",

@@ -118,10 +118,33 @@ Use this for tracking portfolio company news, competitive updates, and market de
         }
     },
     {
+        "name": "query_market_data",
+        "description": """Execute a SQL SELECT query against the market_data database.
+
+Contains clinical trials and FDA calendar data (89,000+ trials):
+- clinical_trials: id, nct_id, brief_title, official_title, status, phase, study_type, conditions (JSON), interventions (JSON), sponsor, collaborators (JSON), enrollment, start_date, completion_date, primary_completion_date, study_first_posted, last_update_posted, locations_count, has_results, url
+- fda_events: id, event_type, ticker, company, drug, indication, event_date, url
+
+Status values: RECRUITING, ACTIVE_NOT_RECRUITING, COMPLETED, NOT_YET_RECRUITING, TERMINATED, WITHDRAWN, SUSPENDED, ENROLLING_BY_INVITATION
+Phase values: PHASE1, PHASE2, PHASE3, PHASE4, EARLY_PHASE1, NA (or NULL)
+
+Use this for clinical trial landscape analysis, tracking company pipelines, finding trials by condition/phase/sponsor, and FDA calendar events.""",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "SQL SELECT query to execute"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
         "name": "list_tables",
         "description": """List all tables in a specified database.
 
-Available databases: researchers, patents, grants, policies, portfolio
+Available databases: researchers, patents, grants, policies, portfolio, market_data
 
 Use this to discover what tables are available before writing queries.""",
         "input_schema": {
@@ -129,7 +152,7 @@ Use this to discover what tables are available before writing queries.""",
             "properties": {
                 "database": {
                     "type": "string",
-                    "enum": ["researchers", "patents", "grants", "policies", "portfolio"],
+                    "enum": ["researchers", "patents", "grants", "policies", "portfolio", "market_data"],
                     "description": "Which database to list tables from"
                 }
             },
@@ -146,7 +169,7 @@ Use this to understand table structure before writing queries.""",
             "properties": {
                 "database": {
                     "type": "string",
-                    "enum": ["researchers", "patents", "grants", "policies", "portfolio"],
+                    "enum": ["researchers", "patents", "grants", "policies", "portfolio", "market_data"],
                     "description": "Which database the table is in"
                 },
                 "table_name": {
