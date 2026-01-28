@@ -26,3 +26,4 @@ EXPOSE 8080
 
 # Run the server (use shell form to interpret $PORT from Railway)
 CMD uvicorn server:app --host 0.0.0.0 --port ${PORT:-8080}
+# Force rebuild 1769563464
