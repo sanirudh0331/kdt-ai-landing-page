@@ -108,12 +108,22 @@ TIER1_PATTERNS = [
     # Hidden gems count
     (r"how many hidden gems?", "researchers", "SELECT COUNT(*) as count FROM researchers WHERE slope > 3 AND h_index BETWEEN 20 AND 60"),
 
+    # Clinical trials stats
+    (r"how many (clinical )?trials?", "market_data", "SELECT COUNT(*) as count FROM clinical_trials"),
+    (r"how many recruiting trials?", "market_data", "SELECT COUNT(*) as count FROM clinical_trials WHERE status = 'RECRUITING'"),
+    (r"how many phase ?3 trials?", "market_data", "SELECT COUNT(*) as count FROM clinical_trials WHERE phase LIKE '%PHASE3%'"),
+    (r"how many completed trials?", "market_data", "SELECT COUNT(*) as count FROM clinical_trials WHERE status = 'COMPLETED'"),
+    (r"trials? by status", "market_data", "SELECT status, COUNT(*) as count FROM clinical_trials GROUP BY status ORDER BY count DESC"),
+    (r"trials? by phase", "market_data", "SELECT phase, COUNT(*) as count FROM clinical_trials GROUP BY phase ORDER BY count DESC"),
+    (r"top sponsors?", "market_data", "SELECT sponsor, COUNT(*) as count FROM clinical_trials GROUP BY sponsor ORDER BY count DESC LIMIT 20"),
+
     # Table listings
     (r"what tables.*(researchers?|talent)", "researchers", None),  # Special: list_tables
     (r"what tables.*(patents?)", "patents", None),
     (r"what tables.*(grants?)", "grants", None),
     (r"what tables.*(portfolio)", "portfolio", None),
     (r"what tables.*(policies?|bills?)", "policies", None),
+    (r"what tables.*(trials?|market|clinical)", "market_data", None),
 ]
 
 # Tier 2: Parameterized queries (fast, template-based)
