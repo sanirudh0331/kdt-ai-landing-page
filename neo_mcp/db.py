@@ -17,7 +17,7 @@ SERVICE_URLS = {
     "grants": os.environ.get("GRANTS_SERVICE_URL", "https://grants-tracker-production.up.railway.app"),
     "policies": os.environ.get("POLICIES_SERVICE_URL", "https://policywatch.up.railway.app"),
     "portfolio": os.environ.get("PORTFOLIO_SERVICE_URL", "https://web-production-a9d068.up.railway.app"),
-    "market_data": os.environ.get("MARKET_DATA_SERVICE_URL", "https://kdt-market-data.up.railway.app"),
+    "market_data": os.environ.get("MARKET_DATA_SERVICE_URL", "https://marketdata-production.up.railway.app"),
 }
 
 # Optional secret for SQL endpoints
