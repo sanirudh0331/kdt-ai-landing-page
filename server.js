@@ -516,7 +516,8 @@ app.get('/api/fda-calendar', async (req, res) => {
 });
 
 // Neo MCP proxy - forwards to Python FastAPI service
-const NEO_SERVICE_URL = process.env.NEO_SERVICE_URL || 'https://kdtneo.up.railway.app';
+// Hardcoded to Neo v1 until Leo v2 is fully tested
+const NEO_SERVICE_URL = 'https://kdtneo.up.railway.app';
 
 app.get('/api/neo-search', async (req, res) => {
     try {
