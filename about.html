@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - KdT AI</title>
+    <meta name="description" content="Learn about KdT AI tools and how to use them for venture capital research.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="static/kdt-logo.png">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Prevent flash of wrong theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (saved === 'dark' || (!saved && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        dark: {
+                            950: '#09090b',
+                            900: '#18181b',
+                            800: '#27272a',
+                            700: '#3f3f46',
+                            500: '#71717a',
+                            400: '#a1a1aa',
+                            200: '#e4e4e7',
+                            100: '#f4f4f5',
+                            50: '#fafafa'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        * { transition: background-color 200ms, border-color 200ms, color 200ms; }
+
+        /* Background effects */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .dark .bg-glow::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+            filter: blur(60px);
+        }
+
+        .bg-glow::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 40%, transparent 70%);
+            filter: blur(60px);
+        }
+
+        .tool-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .tool-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-dark-50 dark:bg-dark-950 text-dark-800 dark:text-dark-100 min-h-screen antialiased">
+    <div class="bg-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="border-b border-dark-200 dark:border-dark-800 bg-dark-50/80 dark:bg-dark-950/80 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14 sm:h-16">
+                <a href="/" class="flex items-center gap-2 sm:gap-3">
+                    <img src="static/kdt-logo.png" alt="KdT" class="h-6 sm:h-8 w-auto">
+                    <span class="text-base sm:text-lg font-semibold tracking-tight">KdT AI</span>
+                </a>
+
+                <div class="flex items-center gap-4">
+                    <a href="/" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Home</a>
+                    <a href="/about.html" class="text-sm text-indigo-500 dark:text-indigo-400 font-medium">About</a>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle"
+                            class="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 transition-colors"
+                            aria-label="Toggle theme">
+                        <svg class="w-5 h-5 hidden dark:block text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <svg class="w-5 h-5 block dark:hidden text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <!-- Header -->
+        <div class="mb-10 sm:mb-12">
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">About KdT AI</h1>
+            <p class="text-lg text-dark-600 dark:text-dark-400 leading-relaxed">
+                KdT AI is a suite of AI-powered tools designed to help venture capital professionals with research, due diligence, and portfolio monitoring. All tools are built to surface insights from public data sources and help you stay ahead of the market.
+            </p>
+        </div>
+
+        <!-- Neo Section -->
+        <section class="mb-12">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <img src="static/kdt-logo.png" alt="Neo" class="w-6 h-6">
+                </div>
+                <h2 class="text-2xl font-semibold">KdT Neo</h2>
+            </div>
+            <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                <p class="text-dark-600 dark:text-dark-400 mb-4">
+                    Neo is your AI research assistant that can answer questions about KdT's entire knowledge base. Access it from the search bar on the home page or by clicking the floating Neo button on any tool.
+                </p>
+                <h3 class="font-semibold mb-2">What Neo can do:</h3>
+                <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 mb-4">
+                    <li>Search across researchers, patents, grants, and clinical trials</li>
+                    <li>Answer complex questions that span multiple data sources</li>
+                    <li>Help identify rising star researchers in specific fields</li>
+                    <li>Find relevant grants and funding information</li>
+                    <li>Track clinical trial activity by sponsor or condition</li>
+                </ul>
+                <h3 class="font-semibold mb-2">Tips for better results:</h3>
+                <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1">
+                    <li>Be specific about what you're looking for</li>
+                    <li>Mention the database you want to search (e.g., "patents", "grants", "researchers")</li>
+                    <li>Use follow-up questions to drill deeper into results</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Tools Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6">Tools Guide</h2>
+            <div class="space-y-6">
+
+                <!-- Portfolio Beacon -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Portfolio Beacon</h3>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Track real-time updates across your portfolio companies. See news, SEC filings, clinical trial updates, and competitive intelligence all in one place.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Timeline view of portfolio company events</li>
+                        <li>Filter by company, event type, or date range</li>
+                        <li>Build custom timelines for specific research</li>
+                    </ul>
+                </div>
+
+                <!-- Talent Scout -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Talent Scout</h3>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Track h-indexes, discover rising stars, and monitor key researchers in your fields of interest. Powered by OpenAlex data with 242,000+ researchers indexed.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Rising stars: researchers with rapidly growing h-index</li>
+                        <li>Hidden gems: high-impact researchers who may be under the radar</li>
+                        <li>Compare researchers side-by-side</li>
+                        <li>Filter by research topic, institution, or country</li>
+                    </ul>
+                </div>
+
+                <!-- Grant Radar -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Grant Radar</h3>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Track NIH grants, SBIR/STTR awards, and funding flowing to key researchers. Search 392,000+ grants totaling $222B+ in funding.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Search grants by PI, institution, or topic</li>
+                        <li>Track SBIR/STTR awards to emerging companies</li>
+                        <li>View funding trends over time</li>
+                        <li>Filter by NIH institute, grant type, or funding amount</li>
+                    </ul>
+                </div>
+
+                <!-- SEC Sentinel -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">SEC Sentinel</h3>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Monitor SEC filings, track executive talent moves, follow IPO pipelines, and stay on top of material events in the biotech sector.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Track 13F holdings and institutional ownership</li>
+                        <li>Monitor insider trading activity</li>
+                        <li>Follow IPO filings and S-1 amendments</li>
+                        <li>Analyze company runway from 10-K/10-Q filings</li>
+                        <li>Track executive moves between companies</li>
+                    </ul>
+                </div>
+
+                <!-- Patent Warrior -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Patent Warrior</h3>
+                        <span class="px-2 py-0.5 text-xs font-medium bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full">In Development</span>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Track patent applications, analyze IP portfolios, and monitor patent landscapes in your areas of interest.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Search patents by assignee, inventor, or technology</li>
+                        <li>Track patent application timelines</li>
+                        <li>Monitor competitive IP landscapes</li>
+                    </ul>
+                </div>
+
+                <!-- Policy Watch -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Policy Watch</h3>
+                        <span class="px-2 py-0.5 text-xs font-medium bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-full">In Development</span>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Track legislation and regulatory changes that impact biotech and deeptech startups.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Monitor bills moving through Congress</li>
+                        <li>Track FDA regulatory guidance updates</li>
+                        <li>Analyze policy impact on specific sectors</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Data Sources Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6">Data Sources</h2>
+            <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                <p class="text-dark-600 dark:text-dark-400 mb-4">
+                    KdT AI aggregates data from multiple public sources:
+                </p>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-medium mb-2">Research & Academia</h4>
+                        <ul class="text-sm text-dark-600 dark:text-dark-400 space-y-1">
+                            <li>OpenAlex - researcher profiles & publications</li>
+                            <li>NIH Reporter - grants & funding data</li>
+                            <li>USPTO - patent applications & filings</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-2">Clinical & Regulatory</h4>
+                        <ul class="text-sm text-dark-600 dark:text-dark-400 space-y-1">
+                            <li>ClinicalTrials.gov - 89,000+ trials</li>
+                            <li>FDA - PDUFA dates & approvals</li>
+                            <li>SEC EDGAR - filings & disclosures</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section>
+            <h2 class="text-2xl font-semibold mb-6">Questions or Feedback?</h2>
+            <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                <p class="text-dark-600 dark:text-dark-400">
+                    Use the feedback button (speech bubble icon) on any tool to send us your thoughts, report bugs, or request features. We read every message.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-200 dark:border-dark-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center text-sm text-dark-500 dark:text-dark-400">
+            <p>Built by <a href="https://kdt.vc" target="_blank" class="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400">KdT Ventures</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>
