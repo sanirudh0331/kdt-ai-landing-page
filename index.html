@@ -1535,41 +1535,68 @@
         </div>
     </section>
 
-    <!-- Floating Feedback Button -->
-    <div id="feedbackWidget" class="fixed bottom-16 right-3 sm:right-6 z-50">
-        <!-- Expanded Form -->
-        <div id="feedbackPanel" class="hidden mb-3 w-64 sm:w-72 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl p-3 sm:p-4">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-medium">Send Feedback</span>
-                <button id="closeFeedback" class="text-dark-400 hover:text-dark-600 dark:hover:text-dark-200">
+    <!-- Floating Widget Stack (Neo + Feedback) -->
+    <div id="floatingWidgetStack" class="fixed bottom-16 right-3 sm:right-6 z-50">
+        <!-- Expanded State -->
+        <div id="widgetExpanded" class="flex flex-col items-end gap-2">
+            <!-- Feedback Panel (appears above buttons when open) -->
+            <div id="feedbackPanel" class="hidden mb-1 w-64 sm:w-72 bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl shadow-xl p-3 sm:p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium">Send Feedback</span>
+                    <button id="closeFeedback" class="text-dark-400 hover:text-dark-600 dark:hover:text-dark-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form id="feedbackForm" action="https://formsubmit.co/ajax/sanirudh0331@gmail.com" method="POST" class="space-y-2">
+                    <input type="hidden" name="_subject" value="KdT AI Landing Page Feedback">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="text" name="name" placeholder="Your name" required
+                           class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    <input type="email" name="email" placeholder="Your email" required
+                           class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    <textarea name="message" rows="3" placeholder="Your feedback..." required
+                              class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"></textarea>
+                    <button type="submit" id="feedbackSubmit"
+                            class="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all">
+                        Send
+                    </button>
+                </form>
+                <p id="feedbackSuccess" class="hidden mt-2 text-xs text-green-600 dark:text-green-400 text-center">Thanks for your feedback!</p>
+            </div>
+            <!-- Button Stack -->
+            <div class="flex flex-col items-center gap-2">
+                <!-- Neo Button -->
+                <button id="neoFloatingBtn" title="Ask Neo"
+                        class="w-12 h-12 bg-white dark:bg-dark-800 border-2 border-indigo-500 hover:border-indigo-600 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 hover:shadow-indigo-500/25 hover:shadow-xl">
+                    <img src="static/kdt-logo.png" alt="Neo" class="w-7 h-7">
+                </button>
+                <!-- Feedback Button -->
+                <button id="feedbackToggle" title="Send Feedback"
+                        class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                </button>
+                <!-- Hide Button -->
+                <button id="hideWidgetsBtn" title="Hide widgets"
+                        class="w-8 h-8 bg-dark-200 dark:bg-dark-700 hover:bg-dark-300 dark:hover:bg-dark-600 text-dark-500 dark:text-dark-400 rounded-full shadow flex items-center justify-center transition-all hover:scale-105">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
             </div>
-            <form id="feedbackForm" action="https://formsubmit.co/ajax/sanirudh0331@gmail.com" method="POST" class="space-y-2">
-                <input type="hidden" name="_subject" value="KdT AI Landing Page Feedback">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="text" name="name" placeholder="Your name" required
-                       class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                <input type="email" name="email" placeholder="Your email" required
-                       class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                <textarea name="message" rows="3" placeholder="Your feedback..." required
-                          class="w-full px-3 py-2 text-sm bg-dark-50 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 rounded-lg text-dark-900 dark:text-dark-50 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"></textarea>
-                <button type="submit" id="feedbackSubmit"
-                        class="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all">
-                    Send
-                </button>
-            </form>
-            <p id="feedbackSuccess" class="hidden mt-2 text-xs text-green-600 dark:text-green-400 text-center">Thanks for your feedback!</p>
         </div>
-        <!-- Toggle Button -->
-        <button id="feedbackToggle"
-                class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-        </button>
+        <!-- Collapsed State (small dot) -->
+        <div id="widgetCollapsed" class="hidden">
+            <button id="showWidgetsBtn" title="Show Neo & Feedback"
+                    class="w-6 h-6 bg-indigo-500 hover:bg-indigo-600 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-125 animate-pulse hover:animate-none">
+                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <!-- RAG Search Results Modal -->
@@ -1797,12 +1824,45 @@
         }
         createParticles();
 
-        // Feedback widget toggle
+        // Floating widget stack (Neo + Feedback)
         const feedbackToggle = document.getElementById('feedbackToggle');
         const feedbackPanel = document.getElementById('feedbackPanel');
         const closeFeedback = document.getElementById('closeFeedback');
         const feedbackForm = document.getElementById('feedbackForm');
         const feedbackSuccess = document.getElementById('feedbackSuccess');
+        const neoFloatingBtn = document.getElementById('neoFloatingBtn');
+        const hideWidgetsBtn = document.getElementById('hideWidgetsBtn');
+        const showWidgetsBtn = document.getElementById('showWidgetsBtn');
+        const widgetExpanded = document.getElementById('widgetExpanded');
+        const widgetCollapsed = document.getElementById('widgetCollapsed');
+
+        // Check localStorage for widget visibility preference
+        if (localStorage.getItem('widgetsHidden') === 'true') {
+            widgetExpanded.classList.add('hidden');
+            widgetCollapsed.classList.remove('hidden');
+        }
+
+        // Neo button opens the search modal
+        neoFloatingBtn.addEventListener('click', () => {
+            const searchResultsModal = document.getElementById('searchResultsModal');
+            searchResultsModal.classList.remove('hidden');
+            document.getElementById('chatInput').focus();
+        });
+
+        // Hide widgets
+        hideWidgetsBtn.addEventListener('click', () => {
+            widgetExpanded.classList.add('hidden');
+            widgetCollapsed.classList.remove('hidden');
+            feedbackPanel.classList.add('hidden');
+            localStorage.setItem('widgetsHidden', 'true');
+        });
+
+        // Show widgets
+        showWidgetsBtn.addEventListener('click', () => {
+            widgetCollapsed.classList.add('hidden');
+            widgetExpanded.classList.remove('hidden');
+            localStorage.setItem('widgetsHidden', 'false');
+        });
 
         feedbackToggle.addEventListener('click', () => {
             feedbackPanel.classList.toggle('hidden');
