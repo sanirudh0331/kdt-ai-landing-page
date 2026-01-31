@@ -5,6 +5,29 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS middleware for API routes (allow tool pages to call Neo API)
+app.use('/api', (req, res, next) => {
+    const allowedOrigins = [
+        'https://kdt-ai-landing.up.railway.app',
+        'https://kdttalentscout.up.railway.app',
+        'https://kdtportfoliobeacon.up.railway.app',
+        'https://kdtgrantstracker.up.railway.app',
+        'https://kdtpatentwarrior.up.railway.app',
+        'http://localhost:3000',
+        'http://localhost:5000'
+    ];
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
+
 // Parse JSON bodies for login endpoint
 app.use(express.json());
 
