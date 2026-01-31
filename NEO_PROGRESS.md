@@ -704,3 +704,40 @@ FDA Calendar  | 0      | ❌ Not ingested
 - Cross-encoder reranking adds significant latency, needs pre-loading
 - Full re-ingest with reset is risky - blocks server for extended periods
 - Incremental ingests (without reset) are safer
+
+---
+
+## 2026-01-31: Neo Widget Improvements
+
+### Changes Made
+
+**Widget Design Updates (all KdT tools):**
+- Neo button: 56px with gradient background (`#18181b` → `#27272a`)
+- Logo: 32px KdT logo with rounded corners
+- Indigo glow shadow: `box-shadow: 0 4px 16px rgba(99,102,241,0.4)`
+- Modal: 800px width, 85vh height (up from 600px/80vh)
+
+**New Features:**
+- Model selector (Sonnet/Opus/Haiku) in chat modal header
+- Session persistence via localStorage + server API
+- Mobile responsive CSS (media queries for < 640px)
+
+**Session Persistence API (server.js):**
+- `GET /api/conversation/:sessionId` - Retrieve conversation history
+- `POST /api/conversation/:sessionId` - Save conversation history
+- `DELETE /api/conversation/:sessionId` - Clear conversation
+- In-memory storage with 24-hour expiry
+
+**Updated Repos:**
+- ✅ KdT Landing Page (`index.html`, `server.js`, `floating-widget-snippet.html`)
+- ✅ Patent Warrior (all templates)
+- ✅ H-Index Tracker (dashboard, compare, researcher, rising_stars)
+- ✅ Grants Tracker (`base.html` - Jinja inheritance)
+- ✅ Policy Watch (`base.html` - Jinja inheritance)
+- ✅ SEC Sentinel (all 6 templates: dashboard, holdings, insider, ipos, runway, talent)
+
+**Documentation:**
+- Added detailed header comment to `floating-widget-snippet.html`
+- Documents how to copy widget to new tools with Railway links
+
+**Note:** All Railway-linked tools on the KdT landing page now have the Neo widget integrated.
