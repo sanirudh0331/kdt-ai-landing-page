@@ -1,6 +1,6 @@
 # Neo MCP - Progress Notes
 
-**Last Updated:** 2026-01-28
+**Last Updated:** 2026-01-31
 
 ---
 
@@ -770,3 +770,63 @@ Updated Neo widget across all tools to match the home page design:
 - ✅ Policy Tracker (`base.html`)
 - ✅ SEC Sentinel (all 6 templates)
 - ✅ neo-widget-template.html (master template)
+
+---
+
+## 2026-01-31: About Page Launch
+
+### Summary
+Created comprehensive About page for KdT AI landing site with tool documentation, FAQ, changelog, and keyboard shortcuts.
+
+### New Page: `/about.html`
+
+**Navigation:**
+- "KdT AI Home" button (matches other tools' back navigation)
+- Theme toggle preserved
+- About link moved before Tools in landing page nav
+
+**Sections Added:**
+
+| Section | Content |
+|---------|---------|
+| **Header** | Updated description for KdT team focus |
+| **KdT Neo** | What Neo can do, tips for better results |
+| **Tools Guide** | All 8 tools with descriptions and key features |
+| **Data Sources** | Research/Academia + Clinical/Regulatory sources |
+| **Keyboard Shortcuts** | Home page (/, 1-9, T) and Neo chat (Esc, Enter) |
+| **FAQ** | 9 questions covering data updates, exports, Neo models, and upcoming features |
+| **Recent Updates** | Changelog grouped by month (Jan 2026, Dec 2025, Nov 2025) |
+| **Feedback** | Pointer to feedback button |
+
+**Tools Documented:**
+1. Portfolio Beacon - portfolio company tracking
+2. Talent Scout - researcher h-index tracking (242K+ researchers)
+3. Conference Navigator - conference planning
+4. Deal Watchdog - biotech deals monitoring
+5. Grant Radar - NIH grants (392K+ grants)
+6. SEC Sentinel - SEC filings, 13F, insider trading
+7. Patent Warrior (In Development) - IP tracking
+8. Policy Watch (In Development) - legislation tracking
+
+**FAQ Topics:**
+- Data update frequency
+- CSV export availability
+- Neo model options (Sonnet/Opus/Haiku)
+- Cross-database search capability
+- Upcoming: watchlists, mobile app, alerts, team sharing
+
+**Changelog Based on Git History:**
+- Pulled actual commits from last 30 days across all KdT repos
+- Organized by month with tool-specific updates
+
+**Neo Widget:**
+- Full widget + feedback button added to About page
+- Theme-aware styling (light/dark mode)
+- All functionality matches other tools
+
+### Files Changed
+- `about.html` - New comprehensive About page
+- `index.html` - Moved About link before Tools in nav
+
+### Commit
+- `d54e614` - Enhance About page with Neo widget, FAQ, changelog, and keyboard shortcuts
