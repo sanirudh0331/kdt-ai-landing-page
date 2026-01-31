@@ -741,3 +741,32 @@ FDA Calendar  | 0      | ❌ Not ingested
 - Documents how to copy widget to new tools with Railway links
 
 **Note:** All Railway-linked tools on the KdT landing page now have the Neo widget integrated.
+
+### 2026-01-31 Update: Widget Redesign (Match Home Page Style)
+
+Updated Neo widget across all tools to match the home page design:
+
+**Header Changes:**
+- "Clear chat" button moved to the LEFT with trash icon
+- "Model:" label + dropdown on the RIGHT (styled as purple button)
+- Model dropdown: purple (#6366f1) background, white text, dropdown arrow
+
+**Welcome Screen:**
+- Larger logo (64px vs 48px)
+- "KdT Neo" title with muted gray styling
+- Updated tagline: "Ask Neo anything about KdT's knowledge base"
+
+**Input Area:**
+- Placeholder: "Continue the conversation..."
+- Added microphone button (for future voice input)
+- Send button with arrow icon
+
+**Footer:**
+- "Press Esc to close" on LEFT
+- "Powered by Claude" link on RIGHT
+
+**Repos Updated:**
+- ✅ Portfolio Tracker (`base.html`)
+- ✅ Policy Tracker (`base.html`)
+- ✅ SEC Sentinel (all 6 templates)
+- ✅ neo-widget-template.html (master template)
