@@ -20,7 +20,7 @@ app.use('/api', (req, res, next) => {
     if (allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     }
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
@@ -44,6 +44,51 @@ app.post('/api/login', (req, res) => {
     } else {
         res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
+});
+
+// Session-based conversation storage (in-memory, expires after 24 hours)
+const conversationSessions = new Map();
+const SESSION_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+// Clean up expired sessions periodically
+setInterval(() => {
+    const now = Date.now();
+    for (const [sessionId, session] of conversationSessions) {
+        if (now - session.lastAccess > SESSION_EXPIRY) {
+            conversationSessions.delete(sessionId);
+        }
+    }
+}, 60 * 60 * 1000); // Check every hour
+
+// Get conversation history
+app.get('/api/conversation/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const session = conversationSessions.get(sessionId);
+    if (session) {
+        session.lastAccess = Date.now();
+        res.json({ history: session.history, model: session.model || 'claude-sonnet-4-20250514' });
+    } else {
+        res.json({ history: [], model: 'claude-sonnet-4-20250514' });
+    }
+});
+
+// Save conversation history
+app.post('/api/conversation/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const { history, model } = req.body;
+    conversationSessions.set(sessionId, {
+        history: history || [],
+        model: model || 'claude-sonnet-4-20250514',
+        lastAccess: Date.now()
+    });
+    res.json({ success: true });
+});
+
+// Clear conversation
+app.delete('/api/conversation/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    conversationSessions.delete(sessionId);
+    res.json({ success: true });
 });
 
 // Cache for RSS feeds
