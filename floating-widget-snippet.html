@@ -24,7 +24,7 @@
   ║                                                                       ║
   ║  Configuration:                                                       ║
   ║  ─────────────────                                                    ║
-  ║  - NEO_API_URL: https://kdt-ai-landing.up.railway.app/api             ║
+  ║  - NEO_API_URL: https://kdt-ai-landing-page-production.up.railway.app/api             ║
   ║  - Update feedback _subject value for each tool                       ║
   ║  - Session key: 'kdt_neo_session' (shared across all tools)           ║
   ║                                                                       ║
@@ -67,7 +67,7 @@
             <!-- Neo Button -->
             <button id="neoFloatingBtn" title="Ask Neo"
                     style="width: 56px; height: 56px; background: linear-gradient(135deg, #18181b 0%, #27272a 100%); border: 2px solid #6366f1; border-radius: 50%; box-shadow: 0 4px 16px rgba(99,102,241,0.4), 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 0;">
-                <img src="https://kdt-ai-landing.up.railway.app/static/kdt-logo.png" alt="Neo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px;">
+                <img src="https://kdt-ai-landing-page-production.up.railway.app/static/kdt-logo.png" alt="Neo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px;">
             </button>
             <!-- Feedback Button -->
             <button id="feedbackToggle" title="Send Feedback"
@@ -219,7 +219,7 @@
 <script>
 (function() {
     // Configuration - Update this URL to your Neo API endpoint
-    const NEO_API_URL = 'https://kdt-ai-landing.up.railway.app/api';
+    const NEO_API_URL = 'https://kdt-ai-landing-page-production.up.railway.app/api';
 
     const feedbackToggle = document.getElementById('feedbackToggle');
     const feedbackPanel = document.getElementById('feedbackPanel');
