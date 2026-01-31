@@ -107,8 +107,10 @@
                 </a>
 
                 <div class="flex items-center gap-4">
-                    <a href="/" class="text-sm text-dark-600 dark:text-dark-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">Home</a>
-                    <a href="/about.html" class="text-sm text-indigo-500 dark:text-indigo-400 font-medium">About</a>
+                    <a href="/" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        KdT AI Home
+                    </a>
 
                     <!-- Theme Toggle -->
                     <button id="themeToggle"
@@ -132,7 +134,7 @@
         <div class="mb-10 sm:mb-12">
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">About KdT AI</h1>
             <p class="text-lg text-dark-600 dark:text-dark-400 leading-relaxed">
-                KdT AI is a suite of AI-powered tools designed to help venture capital professionals with research, due diligence, and portfolio monitoring. All tools are built to surface insights from public data sources and help you stay ahead of the market.
+                KdT AI is a suite of AI-powered tools designed to help the KdT team with research, due diligence, and portfolio monitoring. All tools are built to surface insights from a variety of data sources and help us stay ahead of the pack.
             </p>
         </div>
 
@@ -210,6 +212,50 @@
                         <li>Hidden gems: high-impact researchers who may be under the radar</li>
                         <li>Compare researchers side-by-side</li>
                         <li>Filter by research topic, institution, or country</li>
+                    </ul>
+                </div>
+
+                <!-- Conference Navigator -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Conference Navigator</h3>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Plan conference strategies and analyze portfolio relevance for upcoming events. Stay ahead of key industry conferences.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Track upcoming biotech and deeptech conferences</li>
+                        <li>Analyze portfolio company presence at events</li>
+                        <li>Plan meeting schedules and session attendance</li>
+                        <li>Identify key speakers and presentation topics</li>
+                    </ul>
+                </div>
+
+                <!-- Deal Watchdog -->
+                <div class="tool-card bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Deal Watchdog</h3>
+                    </div>
+                    <p class="text-dark-600 dark:text-dark-400 mb-3">
+                        Track and monitor biotech deals and transactions in real-time. Stay informed on M&A, partnerships, and financing activity.
+                    </p>
+                    <h4 class="font-medium mb-2">Key Features:</h4>
+                    <ul class="list-disc list-inside text-dark-600 dark:text-dark-400 space-y-1 text-sm">
+                        <li>Monitor biotech M&A and partnership announcements</li>
+                        <li>Track financing rounds and valuations</li>
+                        <li>Analyze deal terms and trends</li>
+                        <li>Set alerts for specific companies or deal types</li>
                     </ul>
                 </div>
 
@@ -333,6 +379,139 @@
             </div>
         </section>
 
+        <!-- Keyboard Shortcuts Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6">Keyboard Shortcuts</h2>
+            <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium mb-3">Home Page</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center justify-between">
+                                <span class="text-dark-600 dark:text-dark-400">Open Neo</span>
+                                <kbd class="px-2 py-1 bg-dark-100 dark:bg-dark-800 rounded text-xs font-mono">/</kbd>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span class="text-dark-600 dark:text-dark-400">Quick access tools</span>
+                                <kbd class="px-2 py-1 bg-dark-100 dark:bg-dark-800 rounded text-xs font-mono">1-9</kbd>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span class="text-dark-600 dark:text-dark-400">Toggle theme</span>
+                                <kbd class="px-2 py-1 bg-dark-100 dark:bg-dark-800 rounded text-xs font-mono">T</kbd>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-3">Neo Chat</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center justify-between">
+                                <span class="text-dark-600 dark:text-dark-400">Close modal</span>
+                                <kbd class="px-2 py-1 bg-dark-100 dark:bg-dark-800 rounded text-xs font-mono">Esc</kbd>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span class="text-dark-600 dark:text-dark-400">Send message</span>
+                                <kbd class="px-2 py-1 bg-dark-100 dark:bg-dark-800 rounded text-xs font-mono">Enter</kbd>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6">FAQ</h2>
+            <div class="space-y-4">
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">How often is the data updated?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Most data sources are refreshed daily. SEC filings and clinical trial updates are pulled in near real-time. Researcher h-index data from OpenAlex is updated weekly.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">Can I export data from the tools?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Yes, most tools support CSV export for tables and search results. Look for the export button in the toolbar of each tool.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">What models power Neo?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Neo uses Claude (Anthropic's AI). You can choose between Sonnet (recommended for most queries), Opus (best quality), or Haiku (fastest) using the model selector in the chat.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">Can Neo search across all databases at once?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Yes! Neo has access to a semantic layer with 18 structured functions that can query across researchers, grants, patents, SEC filings, and clinical trials. It can also link entities across databases.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">How do I add companies to my portfolio watchlist?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">This is on our roadmap! We're building watchlist functionality that will let you track specific companies across all tools.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">Is there a mobile app?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Not yet, but all tools are responsive and work well on mobile browsers. Policy Watch recently got a full mobile redesign.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">Can I set up alerts for specific events?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">We're working on it! Email and Slack alerts for SEC filings, clinical trial updates, and other key events are in the pipeline.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">How do I share findings with the team?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Coming soon - shareable links and team collaboration features are on the way.</p>
+                </div>
+                <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                    <h4 class="font-medium mb-2">How do I report a bug or request a feature?</h4>
+                    <p class="text-sm text-dark-600 dark:text-dark-400">Use the feedback button (speech bubble icon) on any page. You can also reach out directly to Anirudh.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Updates Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6">Recent Updates</h2>
+            <div class="bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 rounded-xl p-6">
+                <div class="space-y-6">
+                    <div class="border-l-2 border-indigo-500 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-sm font-medium">January 2026</span>
+                            <span class="px-2 py-0.5 text-xs font-medium bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">Latest</span>
+                        </div>
+                        <ul class="text-sm text-dark-600 dark:text-dark-400 space-y-1">
+                            <li><strong>Landing Page:</strong> About page with tools documentation, keyboard shortcuts, FAQ</li>
+                            <li><strong>SEC Sentinel:</strong> 13F institutional holdings tracker with biotech-only filter</li>
+                            <li><strong>SEC Sentinel:</strong> Multi-select year filter, View by Ticker toggle, KdT Connection for executives</li>
+                            <li><strong>SEC Sentinel:</strong> Runway sync tracking with history and Unknown filter</li>
+                            <li><strong>Talent Scout:</strong> OpenAlex bulk data integration for global researcher coverage</li>
+                            <li><strong>Talent Scout:</strong> Global country and institution type filters</li>
+                            <li><strong>Talent Scout:</strong> Wasabi streaming architecture (zero local storage)</li>
+                            <li><strong>Grant Radar:</strong> Deployed to Railway with 392,000+ NIH grants</li>
+                            <li><strong>Policy Watch:</strong> Responsive design for mobile/tablet/desktop</li>
+                            <li><strong>Neo:</strong> Widget redesign with model selector (Sonnet/Opus/Haiku)</li>
+                            <li><strong>Neo:</strong> Semantic layer with 18 structured functions + cross-DB entity linking</li>
+                            <li><strong>Neo:</strong> Session persistence API and CORS support</li>
+                            <li><strong>All Tools:</strong> Floating Neo + Feedback widget stack, theme-aware styling</li>
+                        </ul>
+                    </div>
+                    <div class="border-l-2 border-dark-300 dark:border-dark-600 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-sm font-medium">December 2025</span>
+                        </div>
+                        <ul class="text-sm text-dark-600 dark:text-dark-400 space-y-1">
+                            <li><strong>Talent Scout:</strong> Now indexes 242,000+ researchers</li>
+                            <li><strong>Talent Scout:</strong> Rising stars and hidden gems discovery features</li>
+                            <li><strong>Conference Navigator:</strong> Initial launch</li>
+                            <li><strong>Patent Warrior:</strong> /api/sql endpoint for Neo database access</li>
+                        </ul>
+                    </div>
+                    <div class="border-l-2 border-dark-300 dark:border-dark-600 pl-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-sm font-medium">November 2025</span>
+                        </div>
+                        <ul class="text-sm text-dark-600 dark:text-dark-400 space-y-1">
+                            <li><strong>Portfolio Beacon:</strong> Timeline view improvements</li>
+                            <li><strong>Neo:</strong> AI assistant beta launch</li>
+                            <li><strong>Landing Page:</strong> New unified tool access with keyboard shortcuts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Contact Section -->
         <section>
             <h2 class="text-2xl font-semibold mb-6">Questions or Feedback?</h2>
@@ -358,6 +537,264 @@
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         });
+    </script>
+
+    <!-- KdT Neo Widget + Feedback Stack -->
+    <div id="floatingWidgetStack" style="position: fixed; bottom: 64px; right: 12px; z-index: 50;">
+        <div id="widgetExpanded" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <div id="feedbackPanel" class="neo-theme-panel" style="display: none; margin-bottom: 4px; width: 280px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <span class="neo-theme-text" style="font-size: 14px; font-weight: 500;">Send Feedback</span>
+                    <button id="closeFeedback" class="neo-theme-muted" style="cursor: pointer; border: none; background: none; padding: 4px;">
+                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="feedbackForm" action="https://formsubmit.co/ajax/sanirudh0331@gmail.com" method="POST" style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="hidden" name="_subject" value="KdT Tool Feedback">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="page" id="feedbackPage">
+                    <input type="text" name="name" placeholder="Your name" required class="neo-theme-input">
+                    <input type="email" name="email" placeholder="Your email" required class="neo-theme-input">
+                    <textarea name="message" rows="3" placeholder="Your feedback..." required class="neo-theme-input" style="resize: none;"></textarea>
+                    <button type="submit" id="feedbackSubmit" style="width: 100%; padding: 8px 16px; font-size: 14px; font-weight: 500; color: white; background: linear-gradient(to right, #6366f1, #9333ea); border: none; border-radius: 8px; cursor: pointer;">Send</button>
+                </form>
+                <p id="feedbackSuccess" style="display: none; margin-top: 8px; font-size: 12px; color: #22c55e; text-align: center;">Thanks for your feedback!</p>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <button id="neoFloatingBtn" title="Ask Neo" style="width: 56px; height: 56px; background: linear-gradient(135deg, #18181b 0%, #27272a 100%); border: 2px solid #6366f1; border-radius: 50%; box-shadow: 0 4px 16px rgba(99,102,241,0.4), 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 0;">
+                    <img src="static/kdt-logo.png" alt="Neo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px;">
+                </button>
+                <button id="feedbackToggle" title="Send Feedback" style="width: 48px; height: 48px; background: linear-gradient(to right, #6366f1, #9333ea); color: white; border: none; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </button>
+                <button id="hideWidgetsBtn" title="Hide widgets" class="neo-theme-hide-btn" style="width: 32px; height: 32px; border: none; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;">
+                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="widgetCollapsed" style="display: none;">
+            <button id="showWidgetsBtn" title="Show Neo & Feedback" style="width: 24px; height: 24px; background: #6366f1; border: none; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; animation: neo-pulse 2s infinite;">
+                <svg style="width: 12px; height: 12px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Neo Chat Modal -->
+    <div id="neoChatModal" class="neo-modal-backdrop" style="display: none; position: fixed; inset: 0; z-index: 100; backdrop-filter: blur(4px); padding: 16px;">
+        <div class="neo-modal-container" style="max-width: 800px; width: 100%; height: 85vh; max-height: 800px; margin: auto; margin-top: 3vh; border-radius: 16px; box-shadow: 0 25px 50px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden;">
+            <!-- Header -->
+            <div class="neo-modal-header" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;">
+                <button id="neoClearChat" class="neo-theme-muted" style="display: flex; align-items: center; gap: 4px; padding: 4px 8px; font-size: 12px; background: none; border: none; cursor: pointer;">
+                    <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Clear chat
+                </button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="neo-theme-muted" style="font-size: 12px;">Model:</span>
+                        <select id="neoModelSelect" class="neo-model-select">
+                            <option value="claude-sonnet-4-20250514" selected>Sonnet (Recommended)</option>
+                            <option value="claude-opus-4-20250514">Opus (Best)</option>
+                            <option value="claude-3-5-haiku-20241022">Haiku (Fast)</option>
+                        </select>
+                    </div>
+                    <button id="neoCloseModal" class="neo-theme-muted" style="padding: 4px; background: none; border: none; cursor: pointer;">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Messages -->
+            <div id="neoChatMessages" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                <div id="neoWelcome" class="neo-theme-muted" style="text-align: center; padding: 60px 20px;">
+                    <img src="static/kdt-logo.png" alt="Neo" style="width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.8; border-radius: 8px;">
+                    <h3 class="neo-theme-text" style="font-size: 20px; font-weight: 600; margin-bottom: 8px; opacity: 0.7;">KdT Neo</h3>
+                    <p style="font-size: 14px;">Ask Neo anything about KdT's knowledge base</p>
+                </div>
+            </div>
+            <!-- Input -->
+            <div class="neo-modal-footer" style="padding: 12px 16px;">
+                <form id="neoChatForm" style="display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="neoChatInput" placeholder="Continue the conversation..." class="neo-theme-input" style="flex: 1;">
+                    <button type="button" id="neoMicBtn" class="neo-mic-btn" title="Voice input (coming soon)" style="width: 40px; height: 40px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                        <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                    </button>
+                    <button type="submit" id="neoChatSend" style="padding: 10px 20px; font-size: 14px; font-weight: 500; color: white; background: #6366f1; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        Send
+                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </form>
+            </div>
+            <!-- Footer note -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; font-size: 11px;">
+                <span class="neo-theme-muted">Press <kbd class="neo-theme-kbd">Esc</kbd> to close</span>
+                <span class="neo-theme-muted">Powered by <a href="https://claude.ai" target="_blank" style="color: #6366f1; text-decoration: none;">Claude</a></span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes neo-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        #floatingWidgetStack button:hover { transform: scale(1.05); }
+        #showWidgetsBtn:hover { animation: none; transform: scale(1.25); }
+
+        /* Theme detection - Light mode (default) */
+        .neo-modal-backdrop { background: rgba(0,0,0,0.5); }
+        .neo-modal-container { background: #ffffff; border: 1px solid #e5e7eb; }
+        .neo-modal-header { border-bottom: 1px solid #e5e7eb; }
+        .neo-modal-footer { border-top: 1px solid #e5e7eb; background: #f9fafb; }
+        .neo-theme-panel { background: #ffffff; border: 1px solid #e5e7eb; }
+        .neo-theme-text { color: #1f2937; }
+        .neo-theme-muted { color: #6b7280; }
+        .neo-theme-input { width: 100%; padding: 8px 12px; font-size: 14px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; outline: none; color: #1f2937; }
+        .neo-theme-select { padding: 4px 8px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; color: #374151; cursor: pointer; }
+        .neo-model-select { padding: 6px 12px; font-size: 12px; font-weight: 500; border: none; border-radius: 6px; background: #6366f1; color: white; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; padding-right: 28px; }
+        .neo-model-select:hover { background-color: #4f46e5; }
+        .neo-model-select option { background: #18181b; color: white; }
+        .neo-mic-btn { background: #27272a; color: #a1a1aa; }
+        .neo-mic-btn:hover { background: #3f3f46; color: #e4e4e7; }
+        .neo-theme-kbd { padding: 2px 6px; background: #3f3f46; border-radius: 4px; color: #a1a1aa; }
+        .neo-theme-hide-btn { background: #e5e7eb; color: #6b7280; }
+        .neo-user-msg { align-self: flex-end; background: #6366f1; color: white; padding: 10px 14px; border-radius: 16px 16px 4px 16px; max-width: 80%; font-size: 14px; }
+        .neo-assistant-msg { align-self: flex-start; background: #f3f4f6; color: #1f2937; padding: 10px 14px; border-radius: 16px 16px 16px 4px; max-width: 80%; font-size: 14px; line-height: 1.5; }
+        .neo-thinking { align-self: flex-start; display: flex; align-items: center; gap: 8px; color: #6b7280; font-size: 14px; padding: 10px 0; }
+        .neo-thinking::after { content: ''; width: 8px; height: 8px; background: #6366f1; border-radius: 50%; animation: neo-pulse 1s infinite; }
+
+        /* Dark mode overrides */
+        html.dark .neo-modal-backdrop { background: rgba(0,0,0,0.6); }
+        html.dark .neo-modal-container { background: #18181b; border-color: #3f3f46; }
+        html.dark .neo-modal-header { border-color: #3f3f46; }
+        html.dark .neo-modal-footer { border-color: #3f3f46; background: #09090b; }
+        html.dark .neo-theme-panel { background: #18181b; border-color: #3f3f46; }
+        html.dark .neo-theme-text { color: #f4f4f5; }
+        html.dark .neo-theme-muted { color: #71717a; }
+        html.dark .neo-theme-input { background: #27272a; border-color: #3f3f46; color: #f4f4f5; }
+        html.dark .neo-theme-select { background: #27272a; border-color: #3f3f46; color: #e4e4e7; }
+        html.dark .neo-theme-kbd { background: #3f3f46; color: #a1a1aa; }
+        html.dark .neo-theme-hide-btn { background: #3f3f46; color: #a1a1aa; }
+        html.dark .neo-mic-btn { background: #27272a; color: #a1a1aa; }
+        html.dark .neo-mic-btn:hover { background: #3f3f46; color: #e4e4e7; }
+
+        /* Light mode adjustments for mic button */
+        html:not(.dark) .neo-mic-btn { background: #f3f4f6; color: #6b7280; }
+        html:not(.dark) .neo-mic-btn:hover { background: #e5e7eb; color: #374151; }
+        html:not(.dark) .neo-theme-kbd { background: #e5e7eb; color: #6b7280; }
+        html.dark .neo-assistant-msg { background: #27272a; color: #e4e4e7; }
+        html.dark .neo-thinking { color: #71717a; }
+
+        @media (max-width: 640px) {
+            .neo-modal-container { max-width: 100% !important; height: 95vh !important; margin: 2vh auto !important; border-radius: 12px !important; }
+            #feedbackPanel { width: 260px !important; }
+            #neoFloatingBtn { width: 48px !important; height: 48px !important; }
+            #neoFloatingBtn img { width: 28px !important; height: 28px !important; }
+        }
+    </style>
+
+    <script>
+    (function() {
+        const NEO_API_URL = 'https://kdt-ai-landing-page-production.up.railway.app/api';
+        const feedbackToggle = document.getElementById('feedbackToggle');
+        const feedbackPanel = document.getElementById('feedbackPanel');
+        const closeFeedback = document.getElementById('closeFeedback');
+        const feedbackForm = document.getElementById('feedbackForm');
+        const feedbackSuccess = document.getElementById('feedbackSuccess');
+        const feedbackPage = document.getElementById('feedbackPage');
+        const neoFloatingBtn = document.getElementById('neoFloatingBtn');
+        const hideWidgetsBtn = document.getElementById('hideWidgetsBtn');
+        const showWidgetsBtn = document.getElementById('showWidgetsBtn');
+        const widgetExpanded = document.getElementById('widgetExpanded');
+        const widgetCollapsed = document.getElementById('widgetCollapsed');
+        const neoChatModal = document.getElementById('neoChatModal');
+        const neoCloseModal = document.getElementById('neoCloseModal');
+        const neoClearChat = document.getElementById('neoClearChat');
+        const neoChatForm = document.getElementById('neoChatForm');
+        const neoChatInput = document.getElementById('neoChatInput');
+        const neoChatMessages = document.getElementById('neoChatMessages');
+        const neoWelcome = document.getElementById('neoWelcome');
+        const neoModelSelect = document.getElementById('neoModelSelect');
+        let conversationHistory = [];
+
+        feedbackPage.value = window.location.href;
+        if (localStorage.getItem('widgetsHidden') === 'true') { widgetExpanded.style.display = 'none'; widgetCollapsed.style.display = 'block'; }
+        if (localStorage.getItem('neoModel')) { neoModelSelect.value = localStorage.getItem('neoModel'); }
+
+        neoFloatingBtn.addEventListener('click', () => { neoChatModal.style.display = 'block'; neoChatInput.focus(); });
+        neoCloseModal.addEventListener('click', () => { neoChatModal.style.display = 'none'; });
+        neoChatModal.addEventListener('click', (e) => { if (e.target === neoChatModal) neoChatModal.style.display = 'none'; });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && neoChatModal.style.display === 'block') neoChatModal.style.display = 'none'; });
+        neoModelSelect.addEventListener('change', () => { localStorage.setItem('neoModel', neoModelSelect.value); });
+
+        neoClearChat.addEventListener('click', () => {
+            conversationHistory = [];
+            neoChatMessages.innerHTML = '';
+            neoChatMessages.appendChild(neoWelcome);
+            neoWelcome.style.display = 'block';
+        });
+
+        neoChatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = neoChatInput.value.trim();
+            if (!message) return;
+            neoWelcome.style.display = 'none';
+            const userDiv = document.createElement('div');
+            userDiv.className = 'neo-user-msg';
+            userDiv.textContent = message;
+            neoChatMessages.appendChild(userDiv);
+            neoChatInput.value = '';
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'neo-thinking';
+            thinkingDiv.textContent = 'Neo is thinking';
+            neoChatMessages.appendChild(thinkingDiv);
+            neoChatMessages.scrollTop = neoChatMessages.scrollHeight;
+            conversationHistory.push({ role: 'user', content: message });
+
+            try {
+                const response = await fetch(`${NEO_API_URL}/neo-ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: message, model: neoModelSelect.value, conversation_history: conversationHistory.slice(-10) })
+                });
+                const data = await response.json();
+                thinkingDiv.remove();
+                const assistantDiv = document.createElement('div');
+                assistantDiv.className = 'neo-assistant-msg';
+                assistantDiv.innerHTML = data.answer || data.response || 'Sorry, I could not process that request.';
+                neoChatMessages.appendChild(assistantDiv);
+                conversationHistory.push({ role: 'assistant', content: data.answer || data.response || '' });
+            } catch (error) {
+                thinkingDiv.remove();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'neo-assistant-msg';
+                errorDiv.style.color = '#dc2626';
+                errorDiv.textContent = 'Sorry, there was an error connecting to Neo. Please try again.';
+                neoChatMessages.appendChild(errorDiv);
+            }
+            neoChatMessages.scrollTop = neoChatMessages.scrollHeight;
+        });
+
+        hideWidgetsBtn.addEventListener('click', () => { widgetExpanded.style.display = 'none'; widgetCollapsed.style.display = 'block'; feedbackPanel.style.display = 'none'; localStorage.setItem('widgetsHidden', 'true'); });
+        showWidgetsBtn.addEventListener('click', () => { widgetCollapsed.style.display = 'none'; widgetExpanded.style.display = 'flex'; localStorage.setItem('widgetsHidden', 'false'); });
+        feedbackToggle.addEventListener('click', () => { feedbackPanel.style.display = feedbackPanel.style.display === 'none' ? 'block' : 'none'; });
+        closeFeedback.addEventListener('click', () => { feedbackPanel.style.display = 'none'; });
+
+        feedbackForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('feedbackSubmit');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            try {
+                const formData = new FormData(feedbackForm);
+                const response = await fetch(feedbackForm.action, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+                if (response.ok) {
+                    feedbackForm.reset();
+                    feedbackPage.value = window.location.href;
+                    feedbackSuccess.style.display = 'block';
+                    setTimeout(() => { feedbackSuccess.style.display = 'none'; feedbackPanel.style.display = 'none'; }, 2000);
+                } else { alert('Failed to send feedback. Please try again.'); }
+            } catch (error) { alert('Failed to send feedback. Please try again.'); }
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+    })();
     </script>
 </body>
 </html>
